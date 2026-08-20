@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>작업실적 현장입력</title>
+  <style>
+    body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#111}
+    .wrap{max-width:520px;margin:0 auto;padding:14px}
+    h1{font-size:22px;margin:8px 0 14px}
+    .card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    label{display:block;font-weight:700;margin:10px 0 6px}
+    select,input,button{width:100%;box-sizing:border-box;font-size:18px;padding:13px;border-radius:10px;border:1px solid #ccc}
+    button{border:0;background:#1769e0;color:#fff;font-weight:700;margin-top:10px}
+    button.gray{background:#555}
+    .item{padding:12px;border:1px solid #ddd;border-radius:10px;margin:8px 0;background:#fff}
+    .item.active{border:2px solid #1769e0;background:#eef5ff}
+    .no{font-weight:800;font-size:18px}.sub{font-size:14px;color:#555;margin-top:4px}
+    .msg{font-weight:700;margin-top:10px}.ok{color:#087b25}.err{color:#b00020}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>작업실적 현장입력</h1>
+
+  <div class="card">
+    <label>작업일자</label>
+    <input type="date" id="workDate">
+    <label>작업자</label>
+    <select id="worker"></select>
+  </div>
+
+  <div class="card">
+    <label>품목번호 선택</label>
+    <input id="search" placeholder="품번 또는 품명 검색">
+    <div id="items"></div>
+  </div>
+
+  <div class="card">
+    <label>선택 품목</label>
+    <div id="selectedText">선택 없음</div>
+    <label>수량</label>
+    <input type="number" id="qty" min="1" inputmode="numeric" placeholder="수량 입력">
+    <label>비고</label>
+    <input id="memo" placeholder="필요 시 입력">
+    <button onclick="save()">저장</button>
+    <button class="gray" onclick="resetForm()">초기화</button>
+    <div id="msg" class="msg"></div>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
+let masterItems = [];
+let selected = null;
+
+function today(){return new Date().toISOString().slice(0,10)}
+document.getElementById('workDate').value = today();
+
+function jsonp(params, cb){
+  const callback = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+  window[callback] = function(data){ cb(data); delete window[callback]; script.remove(); };
+  const url = GAS_URL + '?' + new URLSearchParams({...params, callback}).toString();
+  const script = document.createElement('script');
+  script.src = url;
+  script.onerror = () => { showMsg('통신 오류', false); delete window[callback]; script.remove(); };
+  document.body.appendChild(script);
+}
+
+function loadMaster(){
+  jsonp({action:'master'}, data => {
+    if(!data.ok){ showMsg(data.message, false); return; }
+    masterItems = data.items || [];
+    const worker = document.getElementById('worker');
+    worker.innerHTML = '<option value="">작업자 선택</option>' + (data.workers||[]).map(w=>`<option>${w}</option>`).join('');
+    renderItems();
+  });
+}
+
+function renderItems(){
+  const w = document.getElementById('worker').value;
+  const q = document.getElementById('search').value.trim();
+  const list = masterItems.filter(x => (!w || x.worker===w) && (!q || (x.itemNo+x.itemName+x.model+x.process).includes(q)));
+  document.getElementById('items').innerHTML = list.map((x,i)=>`
+    <div class="item ${selected && selected.itemNo===x.itemNo && selected.worker===x.worker ? 'active':''}" onclick="selectItem('${x.worker}','${x.itemNo}')">
+      <div class="no">${x.itemNo}</div>
+      <div>${x.itemName}</div>
+      <div class="sub">${x.worker} / ${x.model} / ${x.process}</div>
+    </div>`).join('') || '<div class="sub">표시할 품목이 없습니다.</div>';
+}
+
+function selectItem(worker,itemNo){
+  selected = masterItems.find(x => x.worker===worker && x.itemNo===itemNo);
+  document.getElementById('selectedText').innerHTML = selected ? `<b>${selected.itemNo}</b><br>${selected.itemName}<br>${selected.worker} / ${selected.process}` : '선택 없음';
+  renderItems();
+}
+
+function save(){
+  const qty = document.getElementById('qty').value;
+  if(!selected){ showMsg('품목번호를 선택하세요.', false); return; }
+  if(!qty || Number(qty)<=0){ showMsg('수량을 입력하세요.', false); return; }
+  jsonp({
+    action:'save', workDate:document.getElementById('workDate').value, worker:selected.worker,
+    part:selected.part, itemNo:selected.itemNo, itemName:selected.itemName, model:selected.model,
+    process:selected.process, qty:qty, device:'MOBILE', memo:document.getElementById('memo').value
+  }, data => {
+    if(data.ok){ showMsg('저장 완료', true); document.getElementById('qty').value=''; document.getElementById('memo').value=''; }
+    else showMsg(data.message, false);
+  });
+}
+
+function resetForm(){ selected=null; document.getElementById('qty').value=''; document.getElementById('memo').value=''; document.getElementById('selectedText').textContent='선택 없음'; renderItems(); }
+function showMsg(t, ok){ const m=document.getElementById('msg'); m.textContent=t; m.className='msg '+(ok?'ok':'err'); }
+document.getElementById('worker').addEventListener('change',()=>{selected=null; renderItems();});
+document.getElementById('search').addEventListener('input',renderItems);
+loadMaster();
+</script>
+</body>
+</html>

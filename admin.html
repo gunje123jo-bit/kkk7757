@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>작업실적 조회</title>
+  <style>
+    body{font-family:Arial,'Noto Sans KR',sans-serif;margin:20px;background:#f5f6f8;color:#111}
+    h1{font-size:24px}.box{background:#fff;padding:14px;border-radius:12px;margin-bottom:12px}
+    input,select,button{font-size:15px;padding:9px;margin:4px;border:1px solid #ccc;border-radius:8px}
+    button{background:#1769e0;color:#fff;border:0;font-weight:700}
+    table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}th,td{border:1px solid #ddd;padding:7px;text-align:left}th{background:#eee}
+  </style>
+</head>
+<body>
+<h1>작업실적 조회</h1>
+<div class="box">
+  시작일 <input type="date" id="startDate">
+  종료일 <input type="date" id="endDate">
+  작업자 <select id="worker"><option value="">전체</option></select>
+  <button onclick="loadResults()">조회</button>
+  <button onclick="downloadCsv()">CSV 다운로드</button>
+</div>
+<div id="summary"></div>
+<table id="tbl"></table>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
+let rows = [];
+const headers = ['입력일시','작업일자','작업자','파트명','품목번호','품목명','모델명','공정명','수량','입력기기','비고'];
+function today(){return new Date().toISOString().slice(0,10)}
+document.getElementById('startDate').value=today(); document.getElementById('endDate').value=today();
+function jsonp(params, cb){
+  const callback='cb_'+Date.now(); window[callback]=data=>{cb(data); delete window[callback]; script.remove();};
+  const script=document.createElement('script'); script.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString(); document.body.appendChild(script);
+}
+function loadWorkers(){jsonp({action:'master'}, d=>{if(d.ok){document.getElementById('worker').innerHTML='<option value="">전체</option>'+d.workers.map(w=>`<option>${w}</option>`).join('')}})}
+function loadResults(){
+  jsonp({action:'results',startDate:startDate.value,endDate:endDate.value,worker:worker.value}, d=>{
+    if(!d.ok){alert(d.message);return} rows=d.rows||[]; render();
+  });
+}
+function render(){
+  document.getElementById('summary').innerHTML=`<div class="box">조회 건수: <b>${rows.length}</b>건 / 수량 합계: <b>${rows.reduce((s,r)=>s+Number(r[8]||0),0)}</b></div>`;
+  tbl.innerHTML='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+headers.map((_,i)=>`<td>${r[i]||''}</td>`).join('')+'</tr>').join('');
+}
+function downloadCsv(){
+  const csv=[headers,...rows].map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='작업실적_'+today()+'.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+loadWorkers(); loadResults();
+</script>
+</body>
+</html>
