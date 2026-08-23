@@ -5,51 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>작업실적 조회</title>
   <style>
-    body{font-family:Arial,'Noto Sans KR',sans-serif;margin:20px;background:#f5f6f8;color:#111}
-    h1{font-size:24px}.box{background:#fff;padding:14px;border-radius:12px;margin-bottom:12px}
-    input,select,button{font-size:15px;padding:9px;margin:4px;border:1px solid #ccc;border-radius:8px}
-    button{background:#1769e0;color:#fff;border:0;font-weight:700}
-    table{width:100%;border-collapse:collapse;background:#fff;font-size:13px}th,td{border:1px solid #ddd;padding:7px;text-align:left}th{background:#eee}
+    body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#111}
+    header{background:#111827;color:#fff;padding:16px 18px;font-size:22px;font-weight:800}
+    .wrap{padding:14px}
+    .box{background:#fff;padding:14px;border-radius:12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    button{font-size:15px;padding:10px 14px;margin:4px;border:0;border-radius:9px;background:#1769e0;color:#fff;font-weight:800}
+    .muted{color:#666;font-size:13px;margin-top:6px}
+    table{width:100%;border-collapse:collapse;background:#fff;font-size:14px}
+    th,td{border:1px solid #ddd;padding:8px;text-align:left;white-space:nowrap}
+    th{background:#eee;font-weight:800}
+    td.qty{text-align:right;font-weight:800}
+    .tableWrap{overflow-x:auto;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .summary{font-size:16px;font-weight:800}
   </style>
 </head>
 <body>
-<h1>작업실적 조회</h1>
-<div class="box">
-  시작일 <input type="date" id="startDate">
-  종료일 <input type="date" id="endDate">
-  작업자 <select id="worker"><option value="">전체</option></select>
-  <button onclick="loadResults()">조회</button>
-  <button onclick="downloadCsv()">CSV 다운로드</button>
+<header>작업실적 조회</header>
+<div class="wrap">
+  <div class="box">
+    <button onclick="loadResults()">새로고침</button>
+    <button onclick="downloadCsv()">CSV 다운로드</button>
+    <div class="muted">전체 입력 내역을 최신순으로 표시합니다.</div>
+  </div>
+  <div id="summary" class="box summary">조회 중...</div>
+  <div class="tableWrap">
+    <table id="tbl"></table>
+  </div>
 </div>
-<div id="summary"></div>
-<table id="tbl"></table>
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
 let rows = [];
-const headers = ['입력일시','작업일자','작업자','파트명','품목번호','품목명','모델명','공정명','수량','입력기기','비고'];
+const viewHeaders = ['입력일시','작업자','품명','수량'];
+
 function today(){return new Date().toISOString().slice(0,10)}
-document.getElementById('startDate').value=today(); document.getElementById('endDate').value=today();
+
 function jsonp(params, cb){
-  const callback='cb_'+Date.now(); window[callback]=data=>{cb(data); delete window[callback]; script.remove();};
-  const script=document.createElement('script'); script.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString(); document.body.appendChild(script);
+  const callback='cb_'+Date.now();
+  const script=document.createElement('script');
+  window[callback]=data=>{cb(data); delete window[callback]; script.remove();};
+  script.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();
+  document.body.appendChild(script);
 }
-function loadWorkers(){jsonp({action:'master'}, d=>{if(d.ok){document.getElementById('worker').innerHTML='<option value="">전체</option>'+d.workers.map(w=>`<option>${w}</option>`).join('')}})}
+
 function loadResults(){
-  jsonp({action:'results',startDate:startDate.value,endDate:endDate.value,worker:worker.value}, d=>{
-    if(!d.ok){alert(d.message);return} rows=d.rows||[]; render();
+  document.getElementById('summary').textContent='조회 중...';
+  jsonp({action:'results'}, d=>{
+    if(!d.ok){alert(d.message || '조회 실패');return}
+    rows=(d.rows||[]).slice().reverse();
+    render();
   });
 }
+
+function toViewRow(r){
+  return [
+    r[0] || '',   // 입력일시
+    r[2] || '',   // 작업자
+    r[5] || '',   // 품명
+    r[8] || ''    // 수량
+  ];
+}
+
 function render(){
-  document.getElementById('summary').innerHTML=`<div class="box">조회 건수: <b>${rows.length}</b>건 / 수량 합계: <b>${rows.reduce((s,r)=>s+Number(r[8]||0),0)}</b></div>`;
-  tbl.innerHTML='<tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr>'+rows.map(r=>'<tr>'+headers.map((_,i)=>`<td>${r[i]||''}</td>`).join('')+'</tr>').join('');
+  const total = rows.reduce((s,r)=>s+Number(r[8]||0),0);
+  document.getElementById('summary').innerHTML=`조회 건수: <b>${rows.length}</b>건 / 수량 합계: <b>${total}</b>`;
+  const body = rows.map(r=>{
+    const v=toViewRow(r);
+    return '<tr>'+v.map((x,i)=>`<td class="${i===3?'qty':''}">${escapeHtml(x)}</td>`).join('')+'</tr>';
+  }).join('');
+  document.getElementById('tbl').innerHTML='<tr>'+viewHeaders.map(h=>`<th>${h}</th>`).join('')+'</tr>'+body;
 }
+
+function escapeHtml(v){
+  return String(v ?? '').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
 function downloadCsv(){
-  const csv=[headers,...rows].map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='작업실적_'+today()+'.csv'; a.click(); URL.revokeObjectURL(a.href);
+  const csv=[viewHeaders,...rows.map(toViewRow)].map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='작업실적_조회_'+today()+'.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
-loadWorkers(); loadResults();
+
+loadResults();
 </script>
 </body>
 </html>
