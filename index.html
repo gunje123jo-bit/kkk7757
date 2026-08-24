@@ -7,27 +7,13 @@
   <style>
     body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#111}
     .wrap{max-width:560px;margin:0 auto;padding:14px}
-    h1{font-size:22px;margin:8px 0 14px}
-    .card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-    label{display:block;font-weight:700;margin:10px 0 6px}
-    input,select,button{width:100%;box-sizing:border-box;font-size:18px;padding:13px;border-radius:10px;border:1px solid #ccc;background:#fff}
-    button{border:0;background:#1769e0;color:#fff;font-weight:700;margin-top:10px}
-    button.gray{background:#555}
-    button.red{background:#c62828}
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .item{padding:12px;border:1px solid #ddd;border-radius:10px;margin:8px 0;background:#fff;cursor:pointer}
-    .item.active{border:2px solid #1769e0;background:#eef5ff}
-    .no{font-weight:800;font-size:19px}.sub{font-size:14px;color:#555;margin-top:4px;line-height:1.35}
-    .msg{font-weight:700;margin-top:10px}.ok{color:#087b25}.err{color:#b00020}
-    .doneHead{display:flex;justify-content:space-between;align-items:center;gap:8px}
-    .doneHead h2{font-size:18px;margin:0}
-    .smallBtn{width:auto;font-size:14px;padding:8px 10px;margin:0;background:#555}
-    .doneItem{padding:11px 0;border-bottom:1px solid #eee}
-    .doneItem:last-child{border-bottom:0}
-    .doneTop{display:flex;justify-content:space-between;gap:10px;align-items:center}
-    .doneNo{font-weight:800;font-size:17px}.doneQty{font-weight:800;color:#1769e0;font-size:18px;white-space:nowrap}
-    .deleteBtn{font-size:14px;padding:8px 10px;width:auto;margin-top:8px;background:#c62828}
-    .totalBox{margin-top:8px;padding:10px;border-radius:10px;background:#eef5ff;font-weight:800}
+    h1{font-size:22px;margin:8px 0 14px}.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    label{display:block;font-weight:800;margin:10px 0 6px}input,select,button{width:100%;box-sizing:border-box;font-size:18px;padding:13px;border-radius:10px;border:1px solid #ccc;background:#fff}
+    button{border:0;background:#1769e0;color:#fff;font-weight:800;margin-top:10px}button.gray{background:#555}button.red{background:#c62828}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tab{background:#e5e7eb;color:#111;border:1px solid #cbd5e1}.tab.active{background:#111827;color:#fff}
+    .item{padding:12px;border:1px solid #ddd;border-radius:10px;margin:8px 0;background:#fff;cursor:pointer}.item.active{border:2px solid #1769e0;background:#eef5ff}.no{font-weight:800;font-size:19px}.sub{font-size:14px;color:#555;margin-top:4px;line-height:1.35}
+    .msg{font-weight:800;margin-top:10px}.ok{color:#087b25}.err{color:#b00020}.doneHead{display:flex;justify-content:space-between;align-items:center;gap:8px}.doneHead h2{font-size:18px;margin:0}.smallBtn{width:auto;font-size:14px;padding:8px 10px;margin:0;background:#555}
+    .doneItem{padding:11px 0;border-bottom:1px solid #eee}.doneItem:last-child{border-bottom:0}.doneTop{display:flex;justify-content:space-between;gap:10px;align-items:center}.doneNo{font-weight:800;font-size:17px}.doneQty{font-weight:800;color:#1769e0;font-size:18px;white-space:nowrap}.deleteBtn{font-size:14px;padding:8px 10px;width:auto;margin-top:8px;background:#c62828}.totalBox{margin-top:8px;padding:10px;border-radius:10px;background:#eef5ff;font-weight:800}.hide{display:none}.info{padding:10px;border-radius:10px;background:#f1f5f9;margin-top:8px;font-weight:700;line-height:1.5}.specGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.specBtn{background:#fff;color:#111;border:1px solid #ccc}.specBtn.active{background:#1769e0;color:#fff;border-color:#1769e0}
   </style>
 </head>
 <body>
@@ -35,40 +21,49 @@
   <h1>작업실적 현장입력</h1>
 
   <div class="card">
+    <label>입력 구분</label>
+    <div class="tabs">
+      <button type="button" id="tabFinish" class="tab active" onclick="setMode('finish')">완성파트</button>
+      <button type="button" id="tabJe" class="tab" onclick="setMode('je')">제관파트</button>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="row2">
-      <div>
-        <label>작업일자</label>
-        <input type="date" id="workDate">
-      </div>
-      <div>
-        <label>작업자</label>
-        <select id="worker" onchange="onWorkerChange()">
-          <option value="">작업자 선택</option>
-        </select>
-      </div>
+      <div><label>작업일자</label><input type="date" id="workDate"></div>
+      <div><label>작업자</label><select id="worker"><option value="">작업자 선택</option></select></div>
+    </div>
+    <div class="sub">선택한 작업일자 기준으로 실적이 저장됩니다.</div>
+  </div>
+
+  <div id="finishArea">
+    <div class="card">
+      <label>품목번호</label>
+      <input id="itemNoInput" inputmode="numeric" autocomplete="off" placeholder="품목번호 입력 또는 검색">
+      <div id="items" class="sub">작업자를 먼저 선택하세요.</div>
+    </div>
+    <div class="card">
+      <label>수량</label><input type="number" id="qty" min="1" inputmode="numeric" placeholder="수량 입력">
+      <button onclick="saveFinish()">입력 완료</button><button class="gray" onclick="resetFinish()">입력칸 초기화</button>
+      <div id="selectedText" class="sub">선택 품번: 없음</div><div id="msg" class="msg"></div>
+    </div>
+  </div>
+
+  <div id="jeArea" class="hide">
+    <div class="card">
+      <label>사양</label>
+      <div id="specs" class="specGrid"></div>
+      <div id="jeSelectedText" class="info">선택 사양: 없음</div>
+    </div>
+    <div class="card">
+      <label>수량</label><input type="number" id="jeQty" min="1" inputmode="numeric" placeholder="수량 입력">
+      <button onclick="saveJe()">입력 완료</button><button class="gray" onclick="resetJe()">입력칸 초기화</button>
+      <div id="jeMsg" class="msg"></div>
     </div>
   </div>
 
   <div class="card">
-    <label>품목번호</label>
-    <input id="itemNoInput" inputmode="numeric" autocomplete="off" placeholder="품목번호 입력 또는 검색">
-    <div id="items" class="sub">작업자를 먼저 선택하세요.</div>
-  </div>
-
-  <div class="card">
-    <label>수량</label>
-    <input type="number" id="qty" min="1" inputmode="numeric" placeholder="수량 입력">
-    <button onclick="save()">입력 완료</button>
-    <button class="gray" onclick="resetForm()">입력칸 초기화</button>
-    <div id="selectedText" class="sub">선택 품번: 없음</div>
-    <div id="msg" class="msg"></div>
-  </div>
-
-  <div class="card">
-    <div class="doneHead">
-      <h2>입력 완료 내역</h2>
-      <button class="smallBtn" onclick="loadResults()">새로고침</button>
-    </div>
+    <div class="doneHead"><h2>입력 완료 내역</h2><button class="smallBtn" onclick="loadResults()">새로고침</button></div>
     <div class="sub">선택한 작업일자와 작업자 기준으로 표시됩니다.</div>
     <div id="todayTotal" class="totalBox">합계: 0개</div>
     <div id="todayResults" class="sub">작업자와 날짜를 선택하세요.</div>
@@ -76,179 +71,38 @@
 </div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
-let masterItems = [];
-let selected = null;
+const GAS_URL='https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
+let mode='finish';
+let masterItems=[], jeSpecs=[], finishWorkers=[], jeWorkers=[];
+let selected=null, selectedJe=null;
 
-function localToday(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
+function localToday(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function jsonp(params,cb){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');window[callback]=data=>{cb(data);delete window[callback];s.remove();};s.onerror=()=>{showMsg('통신 오류입니다.',false);delete window[callback];s.remove();};s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);}
+function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function escJs(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
-function jsonp(params, cb){
-  const callback = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
-  const script = document.createElement('script');
-  window[callback] = function(data){ cb(data); delete window[callback]; script.remove(); };
-  const url = GAS_URL + '?' + new URLSearchParams({...params, callback}).toString();
-  script.src = url;
-  script.onerror = () => { showMsg('통신 오류입니다. 인터넷 연결을 확인하세요.', false); delete window[callback]; script.remove(); };
-  document.body.appendChild(script);
-}
+function setMode(m){mode=m;document.getElementById('tabFinish').classList.toggle('active',m==='finish');document.getElementById('tabJe').classList.toggle('active',m==='je');document.getElementById('finishArea').classList.toggle('hide',m!=='finish');document.getElementById('jeArea').classList.toggle('hide',m!=='je');fillWorkers();loadResults();}
+function fillWorkers(){const sel=document.getElementById('worker');const list=mode==='je'?jeWorkers:finishWorkers;sel.innerHTML='<option value="">작업자 선택</option>'+list.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');}
 
-function loadMaster(){
-  document.getElementById('workDate').value = localToday();
-  jsonp({action:'master'}, data => {
-    if(!data.ok){ showMsg(data.message || '품번마스터를 불러오지 못했습니다.', false); return; }
-    masterItems = data.items || [];
-    const sel = document.getElementById('worker');
-    sel.innerHTML = '<option value="">작업자 선택</option>' + (data.workers || []).map(w => `<option value="${escapeHtml(w)}">${escapeHtml(w)}</option>`).join('');
-    renderItems();
-  });
-}
+function loadAll(){document.getElementById('workDate').value=localToday();jsonp({action:'master'},d=>{if(d.ok){masterItems=d.items||[];finishWorkers=d.workers||[];fillWorkers();renderItems();}});jsonp({action:'jeMaster'},d=>{if(d.ok){jeSpecs=d.specs||[];jeWorkers=d.workers||[];renderSpecs();}});}
+function filteredMaster(){const w=document.getElementById('worker').value;return w?masterItems.filter(x=>x.worker===w):[];}
+function renderItems(){selected=null;document.getElementById('selectedText').textContent='선택 품번: 없음';const w=document.getElementById('worker').value;const q=document.getElementById('itemNoInput').value.trim();const box=document.getElementById('items');if(mode!=='finish')return;if(!w){box.innerHTML='작업자를 먼저 선택하세요.';return;}if(!q){box.innerHTML='품목번호를 입력하세요.';return;}const list=filteredMaster().filter(x=>(x.itemNo+' '+x.itemName).includes(q)).slice(0,20);box.innerHTML=list.map(x=>`<div class="item" onclick="selectItem('${escJs(x.worker)}','${escJs(x.itemNo)}')"><div class="no">${esc(x.itemNo)}</div><div class="sub">${esc(x.itemName||'')}</div></div>`).join('')||'<div class="sub">일치하는 품번이 없습니다.</div>';}
+function selectItem(worker,itemNo){selected=masterItems.find(x=>x.worker===worker&&x.itemNo===itemNo)||null;document.getElementById('selectedText').innerHTML=selected?`선택 품번: <b>${esc(selected.itemNo)}</b><br>${esc(selected.itemName||'')}`:'선택 품번: 없음';document.getElementById('items').innerHTML=selected?`<div class="item active"><div class="no">${esc(selected.itemNo)}</div><div class="sub">${esc(selected.itemName||'')}</div></div>`:'';}
+function renderSpecs(){const box=document.getElementById('specs');box.innerHTML=jeSpecs.map(x=>`<button type="button" class="specBtn" data-spec="${esc(x.spec)}" onclick="selectSpec('${escJs(x.spec)}')">${esc(x.spec)}</button>`).join('')||'<div class="sub">제관 사양이 없습니다.</div>';}
+function selectSpec(spec){selectedJe=jeSpecs.find(x=>x.spec===spec)||null;document.querySelectorAll('.specBtn').forEach(b=>b.classList.toggle('active',b.getAttribute('data-spec')===spec));document.getElementById('jeSelectedText').innerHTML=selectedJe?`선택 사양: <b>${esc(selectedJe.spec)}</b><br>ASSY 품번: <b>${esc(selectedJe.assyNo)}</b><br>SUB ASSY 품번: <b>${esc(selectedJe.subAssyNo||'-')}</b>`:'선택 사양: 없음';}
 
-function onWorkerChange(){
-  resetForm(false);
-  renderItems();
-  loadResults();
-}
+function saveFinish(){const workDate=document.getElementById('workDate').value;const worker=document.getElementById('worker').value;const typedNo=document.getElementById('itemNoInput').value.trim();const qty=document.getElementById('qty').value;if(!workDate)return showMsg('작업일자를 선택하세요.',false);if(!worker)return showMsg('작업자를 선택하세요.',false);if(!selected&&typedNo){const exact=masterItems.find(x=>x.worker===worker&&x.itemNo===typedNo);if(exact)selected=exact;}if(!selected)return showMsg('품목번호를 선택하세요.',false);if(!qty||Number(qty)<=0)return showMsg('수량을 입력하세요.',false);jsonp({action:'save',workDate,worker,part:selected.part||'',itemNo:selected.itemNo,itemName:selected.itemName||'',model:selected.model||'',process:selected.process||'',qty,device:'MOBILE',memo:''},d=>{if(d.ok){showMsg('입력 완료',true);resetFinish(false);loadResults();}else showMsg(d.message||'저장 실패',false);});}
+function saveJe(){const workDate=document.getElementById('workDate').value;const worker=document.getElementById('worker').value;const qty=document.getElementById('jeQty').value;if(!workDate)return showJeMsg('작업일자를 선택하세요.',false);if(!worker)return showJeMsg('작업자를 선택하세요.',false);if(!selectedJe)return showJeMsg('사양을 선택하세요.',false);if(!qty||Number(qty)<=0)return showJeMsg('수량을 입력하세요.',false);jsonp({action:'saveJe',workDate,worker,spec:selectedJe.spec,assyNo:selectedJe.assyNo,subAssyNo:selectedJe.subAssyNo||'',qty,device:'MOBILE',memo:''},d=>{if(d.ok){showJeMsg('입력 완료',true);resetJe(false);loadResults();}else showJeMsg(d.message||'저장 실패',false);});}
 
-function filteredMaster(){
-  const worker = document.getElementById('worker').value;
-  if(!worker) return [];
-  return masterItems.filter(x => x.worker === worker);
-}
+function loadResults(){const box=document.getElementById('todayResults'), totalBox=document.getElementById('todayTotal');const workDate=document.getElementById('workDate').value, worker=document.getElementById('worker').value;if(!workDate||!worker){totalBox.textContent='합계: 0개';box.innerHTML='작업자와 날짜를 선택하세요.';return;}box.innerHTML='<div class="sub">불러오는 중...</div>';const action=mode==='je'?'jeResults':'results';jsonp({action,startDate:workDate,endDate:workDate,worker},d=>{if(!d.ok){box.innerHTML='<div class="err">'+esc(d.message||'조회 실패')+'</div>';return;}const rows=d.rows||[];const qidx=mode==='je'?7:8;const total=rows.reduce((s,x)=>s+(Number((x.values||[])[qidx])||0),0);totalBox.textContent='합계: '+total.toLocaleString()+'개 / '+rows.length.toLocaleString()+'건';box.innerHTML=rows.slice().reverse().map(x=>doneHtml(x)).join('')||'<div class="sub">입력 완료 내역이 없습니다.</div>';});}
+function doneHtml(x){const r=x.values||[];const time=(r[0]||'').toString();const timeText=time.length>=16?time.substring(11,16):time;if(mode==='je'){return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4]||'')}</div><div class="sub">ASSY ${esc(r[5]||'')} / SUB ${esc(r[6]||'-')}</div><div class="sub">${esc(r[2]||'')} / ${esc(r[1]||'')} / ${esc(timeText)}</div></div><div class="doneQty">${Number(r[7]||0).toLocaleString()}개</div></div><button class="deleteBtn" onclick="deleteRow(${x.rowNo})">삭제</button></div>`;}return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4]||'')}</div><div class="sub">${esc(r[5]||'')}</div><div class="sub">${esc(r[2]||'')} / ${esc(r[1]||'')} / ${esc(timeText)}</div></div><div class="doneQty">${Number(r[8]||0).toLocaleString()}개</div></div><button class="deleteBtn" onclick="deleteRow(${x.rowNo})">삭제</button></div>`;}
+function deleteRow(rowNo){if(!confirm('이 입력 내역을 삭제할까요?'))return;jsonp({action:'delete',rowNo,sheet:mode==='je'?'je':'finish'},d=>{if(d.ok){mode==='je'?showJeMsg('삭제 완료',true):showMsg('삭제 완료',true);loadResults();}else{mode==='je'?showJeMsg(d.message||'삭제 실패',false):showMsg(d.message||'삭제 실패',false);}});}
 
-function renderItems(){
-  const worker = document.getElementById('worker').value;
-  const q = document.getElementById('itemNoInput').value.trim();
-  const box = document.getElementById('items');
-  selected = null;
-  document.getElementById('selectedText').textContent = '선택 품번: 없음';
-  if(!worker){ box.innerHTML = '작업자를 먼저 선택하세요.'; return; }
-  if(!q){ box.innerHTML = '품목번호를 입력하세요.'; return; }
-  const base = filteredMaster();
-  const list = base.filter(x => (x.itemNo + ' ' + x.itemName).includes(q)).slice(0,20);
-  box.innerHTML = list.map((x,i)=>`
-    <div class="item" onclick="selectItem('${escapeJs(x.worker)}','${escapeJs(x.itemNo)}')">
-      <div class="no">${escapeHtml(x.itemNo)}</div>
-      <div class="sub">${escapeHtml(x.itemName || '')}</div>
-    </div>`).join('') || '<div class="sub">일치하는 품번이 없습니다.</div>';
-}
-
-function selectItem(worker, itemNo){
-  selected = masterItems.find(x => x.worker === worker && x.itemNo === itemNo) || null;
-  document.getElementById('selectedText').innerHTML = selected ? `선택 품번: <b>${escapeHtml(selected.itemNo)}</b>` : '선택 품번: 없음';
-  document.getElementById('items').innerHTML = selected ? `
-    <div class="item active">
-      <div class="no">${escapeHtml(selected.itemNo)}</div>
-      <div class="sub">${escapeHtml(selected.itemName || '')}</div>
-    </div>` : '';
-}
-
-function save(){
-  const workDate = document.getElementById('workDate').value;
-  const worker = document.getElementById('worker').value;
-  const typedNo = document.getElementById('itemNoInput').value.trim();
-  const qty = document.getElementById('qty').value;
-  if(!workDate){ showMsg('작업일자를 선택하세요.', false); return; }
-  if(!worker){ showMsg('작업자를 선택하세요.', false); return; }
-  if(!selected && typedNo){
-    const exact = masterItems.find(x => x.worker === worker && x.itemNo === typedNo);
-    if(exact) selected = exact;
-  }
-  if(!selected){ showMsg('품목번호를 선택하세요.', false); return; }
-  if(!qty || Number(qty)<=0){ showMsg('수량을 입력하세요.', false); return; }
-
-  jsonp({
-    action:'save',
-    workDate:workDate,
-    worker:worker,
-    part:selected.part || '',
-    itemNo:selected.itemNo,
-    itemName:selected.itemName || '',
-    model:selected.model || '',
-    process:selected.process || '',
-    qty:qty,
-    device:'MOBILE',
-    memo:''
-  }, data => {
-    if(data.ok){
-      showMsg('입력 완료', true);
-      document.getElementById('qty').value='';
-      document.getElementById('itemNoInput').value='';
-      selected=null;
-      renderItems();
-      loadResults();
-    } else {
-      showMsg(data.message || '저장 실패', false);
-    }
-  });
-}
-
-function loadResults(){
-  const box = document.getElementById('todayResults');
-  const totalBox = document.getElementById('todayTotal');
-  const workDate = document.getElementById('workDate').value;
-  const worker = document.getElementById('worker').value;
-  if(!workDate || !worker){
-    totalBox.textContent = '합계: 0개';
-    box.innerHTML = '작업자와 날짜를 선택하세요.';
-    return;
-  }
-  box.innerHTML = '<div class="sub">불러오는 중...</div>';
-  jsonp({action:'results', startDate:workDate, endDate:workDate, worker:worker}, data => {
-    if(!data.ok){ box.innerHTML = '<div class="err">'+escapeHtml(data.message || '조회 실패')+'</div>'; return; }
-    const rows = data.rows || [];
-    const total = rows.reduce((sum,x)=>sum + (Number((x.values || [])[8]) || 0), 0);
-    totalBox.textContent = '합계: ' + total.toLocaleString() + '개 / ' + rows.length.toLocaleString() + '건';
-    box.innerHTML = rows.slice().reverse().map(x => {
-      const r = x.values || [];
-      const inputTime = (r[0] || '').toString();
-      const timeText = inputTime.length >= 16 ? inputTime.substring(11,16) : inputTime;
-      return `
-      <div class="doneItem">
-        <div class="doneTop">
-          <div>
-            <div class="doneNo">${escapeHtml(r[4] || '')}</div>
-            <div class="sub">${escapeHtml(r[5] || '')}</div>
-            <div class="sub">${escapeHtml(r[2] || '')} / ${escapeHtml(r[1] || '')} / ${escapeHtml(timeText)}</div>
-          </div>
-          <div class="doneQty">${Number(r[8] || 0).toLocaleString()}개</div>
-        </div>
-        <button class="deleteBtn" onclick="deleteRow(${x.rowNo})">삭제</button>
-      </div>`;
-    }).join('') || '<div class="sub">입력 완료 내역이 없습니다.</div>';
-  });
-}
-
-function deleteRow(rowNo){
-  const workDate = document.getElementById('workDate').value;
-  const worker = document.getElementById('worker').value;
-  if(!confirm('이 입력 내역을 삭제할까요?')) return;
-  jsonp({action:'delete', rowNo:rowNo, workDate:workDate, worker:worker}, data => {
-    if(data.ok){ showMsg('삭제 완료', true); loadResults(); }
-    else showMsg(data.message || '삭제 실패', false);
-  });
-}
-
-function resetForm(clearMsg=true){
-  selected=null;
-  document.getElementById('itemNoInput').value='';
-  document.getElementById('qty').value='';
-  document.getElementById('selectedText').textContent='선택 품번: 없음';
-  document.getElementById('items').innerHTML=document.getElementById('worker').value ? '품목번호를 입력하세요.' : '작업자를 먼저 선택하세요.';
-  if(clearMsg) showMsg('', true);
-}
-function showMsg(t, ok){ const m=document.getElementById('msg'); m.textContent=t; m.className='msg '+(ok?'ok':'err'); }
-function escapeHtml(s){ return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
-function escapeJs(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-
-document.getElementById('itemNoInput').addEventListener('input',renderItems);
-document.getElementById('workDate').addEventListener('change',loadResults);
-loadMaster();
+function resetFinish(clearMsg=true){selected=null;document.getElementById('itemNoInput').value='';document.getElementById('qty').value='';document.getElementById('selectedText').textContent='선택 품번: 없음';document.getElementById('items').innerHTML=document.getElementById('worker').value?'품목번호를 입력하세요.':'작업자를 먼저 선택하세요.';if(clearMsg)showMsg('',true);} 
+function resetJe(clearMsg=true){selectedJe=null;document.getElementById('jeQty').value='';document.querySelectorAll('.specBtn').forEach(b=>b.classList.remove('active'));document.getElementById('jeSelectedText').textContent='선택 사양: 없음';if(clearMsg)showJeMsg('',true);} 
+function showMsg(t,ok){const m=document.getElementById('msg');m.textContent=t;m.className='msg '+(ok?'ok':'err');}
+function showJeMsg(t,ok){const m=document.getElementById('jeMsg');m.textContent=t;m.className='msg '+(ok?'ok':'err');}
+document.getElementById('itemNoInput').addEventListener('input',renderItems);document.getElementById('worker').addEventListener('change',()=>{resetFinish(false);resetJe(false);loadResults();});document.getElementById('workDate').addEventListener('change',loadResults);loadAll();
 </script>
 </body>
 </html>
