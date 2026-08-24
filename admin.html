@@ -12,12 +12,11 @@
     label{font-size:14px;font-weight:800;display:block;margin-bottom:6px}
     input[type=date]{font-size:18px;padding:10px;border:1px solid #bbb;border-radius:10px;width:210px;max-width:100%;box-sizing:border-box}
     button{font-size:16px;padding:11px 14px;margin:4px;border:0;border-radius:9px;background:#1769e0;color:#fff;font-weight:800;cursor:pointer}
-    button.gray{background:#555}
-    button.off{background:#888}
+    button.gray{background:#555} button.off{background:#888}
     .row{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
     .muted{color:#666;font-size:13px;margin-top:8px;line-height:1.45}
     table{width:100%;border-collapse:collapse;background:#fff;font-size:15px}
-    th,td{border:1px solid #ddd;padding:9px;text-align:left;white-space:nowrap}
+    th,td{border:1px solid #ddd;padding:10px;text-align:left;white-space:nowrap}
     th{background:#eee;font-weight:800}
     td.qty{text-align:right;font-weight:800}
     .tableWrap{overflow-x:auto;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -39,18 +38,17 @@
       <button onclick="downloadCsv()">CSV 다운로드</button>
       <button id="notifyBtn" class="off" onclick="toggleNotify()">PC 알림 켜기</button>
     </div>
-    <div class="muted">선택한 작업일자 기준으로 입력일시 / 작업자 / 품명 / 수량만 표시합니다. 알림은 이 PC에서 이 화면을 열어둔 상태에서만 작동합니다.</div>
+    <div class="muted">선택한 날짜 기준으로 <b>입력일시 / 작업자 / 품명 / 수량</b>만 표시합니다.</div>
   </div>
 
   <div id="summary" class="box summary">조회 대기</div>
-  <div class="tableWrap">
-    <table id="tbl"></table>
-  </div>
+  <div class="tableWrap"><table id="tbl"></table></div>
 </div>
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
-let rows = [];
+let rawRows = [];
+let viewRows = [];
 let notifyOn = false;
 let lastKey = '';
 let timer = null;
@@ -84,42 +82,58 @@ function loadResults(silent){
   jsonp({action:'results', startDate:d, endDate:d}, res=>{
     if(!res.ok){alert(res.message || '조회 실패');return}
     const oldKey = lastKey;
-    rows=(res.rows||[]).slice().reverse();
-    lastKey = makeKey(rows);
+    rawRows = (res.rows || []).slice();
+    viewRows = rawRows.map(toViewRow).filter(x => x.inputTime || x.worker || x.itemName || x.qty !== '');
+    viewRows.reverse();
+    lastKey = makeKey(viewRows);
     render();
     if(silent && notifyOn && oldKey && oldKey !== lastKey){
-      const latest = rows[0] || [];
-      showPcNotice('작업실적 입력 확인', `${latest[2] || ''} / ${latest[5] || latest[4] || ''} / ${latest[8] || ''}개`);
+      const latest = viewRows[0] || {};
+      showPcNotice('작업실적 입력 확인', `${latest.worker || ''} / ${latest.itemName || ''} / ${latest.qty || ''}개`);
     }
   });
 }
 
-function makeKey(list){
-  return list.map(r=>[r[0],r[1],r[2],r[4],r[8]].join('|')).join('\n');
+function getValues(row){
+  if(Array.isArray(row)) return row;
+  if(row && Array.isArray(row.values)) return row.values;
+  return null;
 }
 
-function toViewRow(r){
-  return [
-    r[0] || '',   // 입력일시
-    r[2] || '',   // 작업자
-    r[5] || r[4] || '',   // 품명, 없으면 품번
-    r[8] || ''    // 수량
-  ];
+function toViewRow(row){
+  const r = getValues(row);
+  if(r){
+    return {
+      inputTime: r[0] || '',
+      worker: r[2] || '',
+      itemName: r[5] || r[4] || '',
+      qty: r[8] === 0 ? 0 : (r[8] || '')
+    };
+  }
+  row = row || {};
+  return {
+    inputTime: row.inputTime || row['입력일시'] || row.time || row.timestamp || '',
+    worker: row.worker || row['작업자'] || '',
+    itemName: row.itemName || row['품명'] || row['품목명'] || row.itemNo || row['품목번호'] || '',
+    qty: row.qty === 0 ? 0 : (row.qty || row.quantity || row['수량'] || '')
+  };
+}
+
+function makeKey(list){
+  return list.map(r=>[r.inputTime,r.worker,r.itemName,r.qty].join('|')).join('\n');
 }
 
 function render(){
-  const total = rows.reduce((s,r)=>s+Number(r[8]||0),0);
+  const total = viewRows.reduce((s,r)=>s+Number(r.qty||0),0);
   const d = document.getElementById('workDate').value;
-  document.getElementById('summary').innerHTML=`${escapeHtml(d)} 조회 건수: <b>${rows.length}</b>건 / 수량 합계: <b>${total}</b>`;
-  if(!rows.length){
-    document.getElementById('tbl').innerHTML='<tr>'+viewHeaders.map(h=>`<th>${h}</th>`).join('')+'</tr><tr><td colspan="4" class="empty">조회된 입력 실적이 없습니다.</td></tr>';
+  document.getElementById('summary').innerHTML=`${escapeHtml(d)} 조회 건수: <b>${viewRows.length}</b>건 / 수량 합계: <b>${total}</b>`;
+  const head='<tr>'+viewHeaders.map(h=>`<th>${h}</th>`).join('')+'</tr>';
+  if(!viewRows.length){
+    document.getElementById('tbl').innerHTML=head+'<tr><td colspan="4" class="empty">조회된 입력 실적이 없습니다.</td></tr>';
     return;
   }
-  const body = rows.map(r=>{
-    const v=toViewRow(r);
-    return '<tr>'+v.map((x,i)=>`<td class="${i===3?'qty':''}">${escapeHtml(x)}</td>`).join('')+'</tr>';
-  }).join('');
-  document.getElementById('tbl').innerHTML='<tr>'+viewHeaders.map(h=>`<th>${h}</th>`).join('')+'</tr>'+body;
+  const body = viewRows.map(r=>`<tr><td>${escapeHtml(r.inputTime)}</td><td>${escapeHtml(r.worker)}</td><td>${escapeHtml(r.itemName)}</td><td class="qty">${escapeHtml(r.qty)}</td></tr>`).join('');
+  document.getElementById('tbl').innerHTML=head+body;
 }
 
 function escapeHtml(v){
@@ -128,7 +142,7 @@ function escapeHtml(v){
 
 function downloadCsv(){
   const d = document.getElementById('workDate').value || localDateString();
-  const csv=[viewHeaders,...rows.map(toViewRow)].map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const csv=[viewHeaders,...viewRows.map(r=>[r.inputTime,r.worker,r.itemName,r.qty])].map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -139,16 +153,10 @@ function downloadCsv(){
 
 async function toggleNotify(){
   const btn = document.getElementById('notifyBtn');
-  if(!('Notification' in window)){
-    alert('이 브라우저는 PC 알림을 지원하지 않습니다.');
-    return;
-  }
+  if(!('Notification' in window)){ alert('이 브라우저는 PC 알림을 지원하지 않습니다.'); return; }
   if(!notifyOn){
     const perm = await Notification.requestPermission();
-    if(perm !== 'granted'){
-      alert('브라우저 알림 허용이 필요합니다.');
-      return;
-    }
+    if(perm !== 'granted'){ alert('브라우저 알림 허용이 필요합니다.'); return; }
     notifyOn = true;
     btn.textContent = 'PC 알림 켜짐';
     btn.classList.remove('off');
@@ -163,9 +171,7 @@ async function toggleNotify(){
   }
 }
 
-function showPcNotice(title, body){
-  try { new Notification(title, { body }); } catch(e) {}
-}
+function showPcNotice(title, body){ try { new Notification(title, { body }); } catch(e) {} }
 
 document.getElementById('workDate').value = localDateString();
 loadResults(false);
