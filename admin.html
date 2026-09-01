@@ -12,7 +12,7 @@
 <header>작업실적 조회</header>
 <div class="wrap">
   <div class="box"><div class="row"><div><label for="workDate">조회일자</label><input id="workDate" type="date"></div><button type="button" onclick="loadResults(false)">조회</button><button type="button" class="gray" onclick="setTodayAndLoad()">오늘</button><button type="button" onclick="downloadCsv()">CSV 다운로드</button><button type="button" id="notifyBtn" class="off" onclick="toggleNotify()">PC 알림 켜기</button></div><div class="muted">날짜 선택 후 카테고리를 클릭하면 해당 실적만 표시됩니다. 잘못 입력한 건 PC 화면에서도 삭제할 수 있습니다.</div></div>
-  <div class="box"><div class="partTitle">카테고리 <span id="selectedPartLabel" class="pill">전체</span></div><div class="partBox"><button type="button" id="btnAll" class="part active" onclick="selectPart('all')">전체</button><button type="button" id="btnFinish" class="part" onclick="selectPart('finish')">완성파트</button><button type="button" id="btnJe" class="part" onclick="selectPart('je')">제관파트</button><button type="button" id="btnWeld" class="part" onclick="selectPart('weld')">용접파트</button><button type="button" id="btnSc" class="part" onclick="selectPart('sc')">SC파트</button></div></div>
+  <div class="box"><div class="partTitle">카테고리 <span id="selectedPartLabel" class="pill">전체</span></div><div class="partBox"><button type="button" id="btnAll" class="part active" onclick="selectPart('all')">전체</button><button type="button" id="btnFinish" class="part" onclick="selectPart('finish')">완성파트</button><button type="button" id="btnJe" class="part" onclick="selectPart('je')">제관파트</button><button type="button" id="btnWeld" class="part" onclick="selectPart('weld')">용접파트</button><button type="button" id="btnSc" class="part" onclick="selectPart('sc')">SC파트</button><button type="button" id="btnDojang" class="part" onclick="selectPart('dojang')">도장파트</button></div></div>
   <div id="jeSummaryBox" class="box" style="display:none"><div class="partTitle">제관 SUB ASSY별 수량</div><div id="jeSubSummary" class="subBox"></div></div>
   <div id="summary" class="box summary">조회 대기</div>
   <div class="tableWrap"><table id="tbl"></table></div>
@@ -20,7 +20,7 @@
 <div id="copyToast" class="toast">품번 복사 완료</div>
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
-let selectedPart='all', finishRows=[], jeRows=[], weldRows=[], scRows=[], viewRows=[], notifyOn=false, notifyTimer=null, lastCount=0;
+let selectedPart='all', finishRows=[], jeRows=[], weldRows=[], scRows=[], dojangRows=[], viewRows=[], notifyOn=false, notifyTimer=null, lastCount=0;
 function localDateString(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function tomorrowDateString(){const d=new Date();d.setDate(d.getDate()+1);return localDateString(d);}
 function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
@@ -31,18 +31,70 @@ function copyBtn(value){const encoded=encodeURIComponent(String(value||''));retu
 function itemCell(value){return `<span class="itemCell">${copyBtn(value)}${esc(value||'')}</span>`;}
 function jsonp(params,cb){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');window[callback]=data=>{cb(data);delete window[callback];s.remove();};s.onerror=()=>{alert('조회 실패: Apps Script 연결을 확인하세요.');delete window[callback];s.remove();};s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);}
 function setTodayAndLoad(){document.getElementById('workDate').value=localDateString();loadResults(false);}
-function selectPart(p){selectedPart=p;['All','Finish','Je','Weld','Sc'].forEach(k=>document.getElementById('btn'+k).classList.remove('active'));document.getElementById(p==='all'?'btnAll':p==='finish'?'btnFinish':p==='je'?'btnJe':p==='weld'?'btnWeld':'btnSc').classList.add('active');document.getElementById('selectedPartLabel').textContent=p==='all'?'전체':p==='finish'?'완성파트':p==='je'?'제관파트':p==='weld'?'용접파트':'SC파트';buildViewRows();render();}
-function loadResults(silent){const d=document.getElementById('workDate').value||localDateString();document.getElementById('workDate').value=d;if(!silent)document.getElementById('summary').textContent='조회 중...';let done=0;function finishOne(){done++;if(done===4){buildViewRows();render();if(notifyOn)checkNotify();}}jsonp({action:'results',startDate:d,endDate:d},res=>{finishRows=res.ok?(res.rows||[]):[];finishOne();});jsonp({action:'jeResults',startDate:d,endDate:d},res=>{jeRows=res.ok?(res.rows||[]):[];finishOne();});jsonp({action:'weldResults',startDate:d,endDate:d},res=>{weldRows=res.ok?(res.rows||[]):[];finishOne();});jsonp({action:'scResults',startDate:d,endDate:d},res=>{scRows=res.ok?(res.rows||[]):[];finishOne();});}
-function buildViewRows(){const f=finishRows.map(x=>{const r=x.values||[];return{sheet:'finish',rowNo:x.rowNo,kind:'완성파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});const j=jeRows.map(x=>{const r=x.values||[];return{sheet:'je',rowNo:x.rowNo,kind:'제관파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:'제관',hogi:r[4]||'',spec:r[5]||'',assyNo:r[6]||'',subAssyNo:r[7]||'',name:r[5]||'',qty:r[8]||''};});const w=weldRows.map(x=>{const r=x.values||[];return{sheet:'weld',rowNo:x.rowNo,kind:'용접파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});const s=scRows.map(x=>{const r=x.values||[];return{sheet:'sc',rowNo:x.rowNo,kind:'SC파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});let all=[];if(selectedPart==='all')all=f.concat(j,w,s);else if(selectedPart==='finish')all=f;else if(selectedPart==='je')all=j;else if(selectedPart==='weld')all=w;else all=s;viewRows=all.filter(x=>x.inputTime||x.worker||x.name||x.qty).sort((a,b)=>String(a.inputTime).localeCompare(String(b.inputTime)));}
+function selectPart(p){
+  selectedPart=p;
+  ['All','Finish','Je','Weld','Sc','Dojang'].forEach(k=>document.getElementById('btn'+k).classList.remove('active'));
+  const idMap={all:'btnAll',finish:'btnFinish',je:'btnJe',weld:'btnWeld',sc:'btnSc',dojang:'btnDojang'};
+  document.getElementById(idMap[p]).classList.add('active');
+  const labelMap={all:'전체',finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트'};
+  document.getElementById('selectedPartLabel').textContent=labelMap[p];
+  buildViewRows();render();
+}
+function loadResults(silent){
+  const d=document.getElementById('workDate').value||localDateString();
+  document.getElementById('workDate').value=d;
+  if(!silent)document.getElementById('summary').textContent='조회 중...';
+  let done=0;
+  function finishOne(){done++;if(done===5){buildViewRows();render();if(notifyOn)checkNotify();}}
+  jsonp({action:'results',startDate:d,endDate:d},res=>{finishRows=res.ok?(res.rows||[]):[];finishOne();});
+  jsonp({action:'jeResults',startDate:d,endDate:d},res=>{jeRows=res.ok?(res.rows||[]):[];finishOne();});
+  jsonp({action:'weldResults',startDate:d,endDate:d},res=>{weldRows=res.ok?(res.rows||[]):[];finishOne();});
+  jsonp({action:'scResults',startDate:d,endDate:d},res=>{scRows=res.ok?(res.rows||[]):[];finishOne();});
+  jsonp({action:'dojangResults',startDate:d,endDate:d},res=>{dojangRows=res.ok?(res.rows||[]):[];finishOne();});
+}
+function buildViewRows(){
+  const f=finishRows.map(x=>{const r=x.values||[];return{sheet:'finish',rowNo:x.rowNo,kind:'완성파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const j=jeRows.map(x=>{const r=x.values||[];return{sheet:'je',rowNo:x.rowNo,kind:'제관파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:'제관',hogi:r[4]||'',spec:r[5]||'',assyNo:r[6]||'',subAssyNo:r[7]||'',name:r[5]||'',qty:r[8]||''};});
+  const w=weldRows.map(x=>{const r=x.values||[];return{sheet:'weld',rowNo:x.rowNo,kind:'용접파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const s=scRows.map(x=>{const r=x.values||[];return{sheet:'sc',rowNo:x.rowNo,kind:'SC파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const dj=dojangRows.map(x=>{const r=x.values||[];return{sheet:'dojang',rowNo:x.rowNo,kind:'도장파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  let all=[];
+  if(selectedPart==='all')all=f.concat(j,w,s,dj);
+  else if(selectedPart==='finish')all=f;
+  else if(selectedPart==='je')all=j;
+  else if(selectedPart==='weld')all=w;
+  else if(selectedPart==='sc')all=s;
+  else all=dj;
+  viewRows=all.filter(x=>x.inputTime||x.worker||x.name||x.qty).sort((a,b)=>String(a.inputTime).localeCompare(String(b.inputTime)));
+}
 function render(){const date=document.getElementById('workDate').value;const total=viewRows.reduce((s,x)=>s+(Number(x.qty)||0),0);document.getElementById('summary').textContent=`${date} / ${document.getElementById('selectedPartLabel').textContent} 조회 건수: ${viewRows.length.toLocaleString()}건 / 수량 합계: ${total.toLocaleString()}`;renderJeSummary();renderTable();}
 function renderJeSummary(){const box=document.getElementById('jeSummaryBox');if(selectedPart!=='je'){box.style.display='none';return;}box.style.display='block';const m={};viewRows.forEach(r=>{const k=r.subAssyNo||'-';m[k]=(m[k]||0)+(Number(r.qty)||0);});document.getElementById('jeSubSummary').innerHTML=Object.keys(m).map(k=>`<div class="subCard">${esc(k)}<br>${m[k].toLocaleString()}개</div>`).join('')||'<div class="muted">수량 없음</div>';}
 function delBtn(r){return `<button type="button" class="del" onclick="deleteRow('${esc(r.sheet)}',${Number(r.rowNo||0)})">삭제</button>`;}
-function rowHtml(r){if(selectedPart==='je')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${esc(r.hogi)}</td><td>${esc(r.spec)}</td><td>${itemCell(r.assyNo)}</td><td>${itemCell(r.subAssyNo||'-')}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;if(selectedPart==='finish')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;if(selectedPart==='weld'||selectedPart==='sc')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td>${esc(r.model)}</td><td>${esc(r.process)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;const itemOrAssy=r.kind==='제관파트'?r.assyNo:(r.itemNo||'');return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.kind)}</td><td>${esc(r.worker)}</td><td>${esc(r.kind==='제관파트'?r.hogi:'')}</td><td>${itemCell(itemOrAssy)}</td><td>${esc(r.kind==='제관파트'?r.spec:r.name)}</td><td>${esc(r.kind==='제관파트'?'':(r.model||''))}</td><td>${esc(r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''))}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;}
-function renderTable(){let headers;if(selectedPart==='je')headers=['입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량','삭제'];else if(selectedPart==='finish')headers=['입력일시','작업자','품번','품명','수량','삭제'];else if(selectedPart==='weld')headers=['입력일시','작업자','품번','품명','모델명','공정명','수량','삭제'];else if(selectedPart==='sc')headers=['입력일시','작업자','품번','품명','모델명','공정명','수량','삭제'];else headers=['입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량','삭제'];document.getElementById('tbl').innerHTML='<thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+viewRows.map(rowHtml).join('')+'</tbody>';}
+function rowHtml(r){
+  if(selectedPart==='je')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${esc(r.hogi)}</td><td>${esc(r.spec)}</td><td>${itemCell(r.assyNo)}</td><td>${itemCell(r.subAssyNo||'-')}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  if(selectedPart==='finish')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  if(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td>${esc(r.model)}</td><td>${esc(r.process)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  const itemOrAssy=r.kind==='제관파트'?r.assyNo:(r.itemNo||'');
+  return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.kind)}</td><td>${esc(r.worker)}</td><td>${esc(r.kind==='제관파트'?r.hogi:'')}</td><td>${itemCell(itemOrAssy)}</td><td>${esc(r.kind==='제관파트'?r.spec:r.name)}</td><td>${esc(r.kind==='제관파트'?'':(r.model||''))}</td><td>${esc(r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''))}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+}
+function renderTable(){
+  let headers;
+  if(selectedPart==='je')headers=['입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량','삭제'];
+  else if(selectedPart==='finish')headers=['입력일시','작업자','품번','품명','수량','삭제'];
+  else if(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')headers=['입력일시','작업자','품번','품명','모델명','공정명','수량','삭제'];
+  else headers=['입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량','삭제'];
+  document.getElementById('tbl').innerHTML='<thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+viewRows.map(rowHtml).join('')+'</tbody>';
+}
 function deleteRow(sheet,rowNo){if(!rowNo){alert('삭제할 행 정보를 찾지 못했습니다.');return;}if(!confirm('선택한 실적을 삭제 처리할까요?'))return;jsonp({action:'delete',sheet,rowNo},res=>{if(!res.ok){alert(res.message||'삭제 실패');return;}loadResults(false);});}
-function downloadCsv(){const headers=selectedPart==='je'?['입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량']:selectedPart==='finish'?['입력일시','작업자','품번','품명','수량']:(selectedPart==='weld'||selectedPart==='sc')?['입력일시','작업자','품번','품명','모델명','공정명','수량']:['입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량'];const rows=viewRows.map(r=>selectedPart==='je'?[r.inputTime,r.worker,r.hogi,r.spec,r.assyNo,r.subAssyNo,r.qty]:selectedPart==='finish'?[r.inputTime,r.worker,r.itemNo||'',r.name,r.qty]:(selectedPart==='weld'||selectedPart==='sc')?[r.inputTime,r.worker,r.itemNo||'',r.name,r.model,r.process,r.qty]:[r.inputTime,r.kind,r.worker,r.kind==='제관파트'?r.hogi:'',r.kind==='제관파트'?r.assyNo:(r.itemNo||''),r.kind==='제관파트'?r.spec:r.name,r.kind==='제관파트'?'':(r.model||''),r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''),r.qty]);const csv=[headers,...rows].map(row=>row.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='작업실적_'+(document.getElementById('workDate').value||localDateString())+'_'+document.getElementById('selectedPartLabel').textContent+'.csv';a.click();URL.revokeObjectURL(a.href);}
-function toggleNotify(){if(!('Notification' in window)){alert('이 브라우저는 알림을 지원하지 않습니다.');return;}if(!notifyOn){Notification.requestPermission().then(p=>{if(p!=='granted'){alert('브라우저 알림이 허용되지 않았습니다.');return;}notifyOn=true;lastCount=finishRows.length+jeRows.length+weldRows.length+scRows.length;document.getElementById('notifyBtn').textContent='PC 알림 끄기';document.getElementById('notifyBtn').classList.remove('off');notifyTimer=setInterval(()=>loadResults(true),30000);});}else{notifyOn=false;clearInterval(notifyTimer);document.getElementById('notifyBtn').textContent='PC 알림 켜기';document.getElementById('notifyBtn').classList.add('off');}}
-function checkNotify(){const c=finishRows.length+jeRows.length+weldRows.length+scRows.length;if(c>lastCount&&lastCount>0)new Notification('작업실적 신규 입력',{body:'새 작업실적이 입력되었습니다.'});lastCount=c;}
+function downloadCsv(){
+  const headers=selectedPart==='je'?['입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량']:selectedPart==='finish'?['입력일시','작업자','품번','품명','수량']:(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')?['입력일시','작업자','품번','품명','모델명','공정명','수량']:['입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량'];
+  const rows=viewRows.map(r=>selectedPart==='je'?[r.inputTime,r.worker,r.hogi,r.spec,r.assyNo,r.subAssyNo,r.qty]:selectedPart==='finish'?[r.inputTime,r.worker,r.itemNo||'',r.name,r.qty]:(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')?[r.inputTime,r.worker,r.itemNo||'',r.name,r.model,r.process,r.qty]:[r.inputTime,r.kind,r.worker,r.kind==='제관파트'?r.hogi:'',r.kind==='제관파트'?r.assyNo:(r.itemNo||''),r.kind==='제관파트'?r.spec:r.name,r.kind==='제관파트'?'':(r.model||''),r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''),r.qty]);
+  const csv=[headers,...rows].map(row=>row.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='작업실적_'+(document.getElementById('workDate').value||localDateString())+'_'+document.getElementById('selectedPartLabel').textContent+'.csv';a.click();URL.revokeObjectURL(a.href);
+}
+function toggleNotify(){if(!('Notification' in window)){alert('이 브라우저는 알림을 지원하지 않습니다.');return;}if(!notifyOn){Notification.requestPermission().then(p=>{if(p!=='granted'){alert('브라우저 알림이 허용되지 않았습니다.');return;}notifyOn=true;lastCount=finishRows.length+jeRows.length+weldRows.length+scRows.length+dojangRows.length;document.getElementById('notifyBtn').textContent='PC 알림 끄기';document.getElementById('notifyBtn').classList.remove('off');notifyTimer=setInterval(()=>loadResults(true),30000);});}else{notifyOn=false;clearInterval(notifyTimer);document.getElementById('notifyBtn').textContent='PC 알림 켜기';document.getElementById('notifyBtn').classList.add('off');}}
+function checkNotify(){const c=finishRows.length+jeRows.length+weldRows.length+scRows.length+dojangRows.length;if(c>lastCount&&lastCount>0)new Notification('작업실적 신규 입력',{body:'새 작업실적이 입력되었습니다.'});lastCount=c;}
 document.getElementById('workDate').value=tomorrowDateString();loadResults(false);
 </script>
 </body>
