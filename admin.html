@@ -5,13 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>작업실적 조회</title>
   <style>
-    body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#111}header{background:#111827;color:#fff;padding:12px 16px;font-size:22px;font-weight:900}.wrap{max-width:1180px;margin:0 auto;padding:14px}.box{background:#fff;border-radius:12px;margin-bottom:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.08)}label{font-weight:800;display:block;margin-bottom:5px}input,button{font-size:16px;padding:10px;border-radius:8px;border:1px solid #ccc}button{border:0;background:#1769e0;color:white;font-weight:800;margin-right:6px;cursor:pointer}button.gray{background:#666}.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.muted{color:#555;font-size:13px;margin-top:8px}.partBox{display:flex;gap:10px;flex-wrap:wrap}.part{background:#e5e7eb;color:#111;border:1px solid #cbd5e1}.part.active{background:#111827;color:#fff}.pill{display:inline-block;background:#eef5ff;border:1px solid #bfdbfe;color:#0b5ed7;border-radius:999px;padding:4px 10px;font-weight:900;margin-left:6px}.summary{font-weight:900;font-size:18px}.tableWrap{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.08)}table{border-collapse:collapse;width:100%;min-width:980px}th,td{border:1px solid #ddd;padding:10px;text-align:left;white-space:nowrap}th{background:#eee;font-weight:900}.qty{text-align:right;font-weight:900}.del{background:#e11d2e;color:#fff;border-radius:8px;padding:8px 10px}.subBox{display:flex;gap:8px;flex-wrap:wrap}.subCard{padding:8px 12px;background:#f1f5f9;border:1px solid #dbe3ee;border-radius:8px;font-weight:900}.off{background:#888}.copyBtn{background:#0f766e;color:#fff;border-radius:7px;padding:6px 8px;font-size:13px;font-weight:900;margin-right:8px}.copyBtn.done{background:#16a34a}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:14px 18px;border-radius:10px;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999;display:none}.itemCell{font-weight:900}
+    body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#111}header{background:#111827;color:#fff;padding:12px 16px;font-size:22px;font-weight:900}.wrap{max-width:1180px;margin:0 auto;padding:14px}.box{background:#fff;border-radius:12px;margin-bottom:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.08)}label{font-weight:800;display:block;margin-bottom:5px}input,button{font-size:16px;padding:10px;border-radius:8px;border:1px solid #ccc}button{border:0;background:#1769e0;color:white;font-weight:800;margin-right:6px;cursor:pointer}button.gray{background:#666}.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.muted{color:#555;font-size:13px;margin-top:8px}.partBox{display:flex;gap:10px;flex-wrap:wrap}.part{background:#e5e7eb;color:#111;border:1px solid #cbd5e1}.part.active{background:#111827;color:#fff}.pill{display:inline-block;background:#eef5ff;border:1px solid #bfdbfe;color:#0b5ed7;border-radius:999px;padding:4px 10px;font-weight:900;margin-left:6px}.summary{font-weight:900;font-size:18px}.tableWrap{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.08)}table{border-collapse:collapse;width:100%;min-width:980px}th,td{border:1px solid #ddd;padding:10px;text-align:left;white-space:nowrap}th{background:#eee;font-weight:900}.qty{text-align:right;font-weight:900}.del{background:#e11d2e;color:#fff;border-radius:8px;padding:8px 10px}.subBox{display:flex;gap:8px;flex-wrap:wrap}.subCard{padding:8px 12px;background:#f1f5f9;border:1px solid #dbe3ee;border-radius:8px;font-weight:900}.off{background:#888}.copyBtn{background:#0f766e;color:#fff;border-radius:7px;padding:6px 8px;font-size:13px;font-weight:900;margin-right:8px}.copyBtn.done{background:#16a34a}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:14px 18px;border-radius:10px;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999;display:none}.itemCell{font-weight:900}.hide{display:none}
   </style>
 </head>
 <body>
 <header>작업실적 조회</header>
 <div class="wrap">
   <div class="box"><div class="row"><div><label for="workDate">조회일자</label><input id="workDate" type="date"></div><button type="button" onclick="loadResults(false)">조회</button><button type="button" class="gray" onclick="setTodayAndLoad()">오늘</button><button type="button" onclick="downloadCsv()">CSV 다운로드</button><button type="button" id="notifyBtn" class="off" onclick="toggleNotify()">PC 알림 켜기</button></div><div class="muted">날짜 선택 후 카테고리를 클릭하면 해당 실적만 표시됩니다. 잘못 입력한 건 PC 화면에서도 삭제할 수 있습니다.</div></div>
+  <div class="box"><div class="row" style="justify-content:space-between"><div class="partTitle">실적 입력</div><button type="button" class="gray" onclick="toggleInputPanel()">펼치기/접기</button></div>
+    <div id="inputPanel" class="hide">
+      <div class="partBox" style="margin:10px 0"><button type="button" id="inBtnFinish" class="part active" onclick="selectInputPart('finish')">완성파트</button><button type="button" id="inBtnJe" class="part" onclick="selectInputPart('je')">제관파트</button><button type="button" id="inBtnWeld" class="part" onclick="selectInputPart('weld')">용접파트</button><button type="button" id="inBtnSc" class="part" onclick="selectInputPart('sc')">SC파트</button><button type="button" id="inBtnDojang" class="part" onclick="selectInputPart('dojang')">도장파트</button></div>
+      <div class="row"><div><label>작업일자</label><input id="inWorkDate" type="date"></div><div><label>작업자</label><select id="inWorker"><option value="">작업자 선택</option></select></div></div>
+      <div id="inFinishForm" class="row" style="margin-top:8px">
+        <div style="flex:1;min-width:220px"><label>품번 검색</label><input id="inFinishItem" list="inFinishList" placeholder="품번 입력 또는 목록에서 선택" autocomplete="off"><datalist id="inFinishList"></datalist></div>
+        <div><label>수량</label><input id="inFinishQty" type="number" min="1" style="width:100px"></div>
+        <div><button type="button" onclick="saveAdminFinish()">저장</button></div>
+      </div>
+      <div id="inJeForm" class="row hide" style="margin-top:8px">
+        <div style="min-width:220px"><label>사양</label><select id="inJeSpec"></select></div>
+        <div><label>호기수(4자리)</label><input id="inJeHogi" maxlength="4" style="width:110px"></div>
+        <div><label>수량</label><input id="inJeQty" type="number" min="1" value="1" style="width:80px"></div>
+        <div><button type="button" onclick="saveAdminJe()">저장</button></div>
+      </div>
+      <div id="inProcForm" class="row hide" style="margin-top:8px">
+        <div style="flex:1;min-width:260px"><label>품번/공정 검색</label><input id="inProcItem" list="inProcList" placeholder="목록에서 품번/공정을 선택하세요" autocomplete="off"><datalist id="inProcList"></datalist></div>
+        <div><label>수량</label><input id="inProcQty" type="number" min="1" style="width:100px"></div>
+        <div><button type="button" onclick="saveAdminProc()">저장</button></div>
+      </div>
+      <div id="inMsg" class="muted"></div>
+    </div>
+  </div>
   <div class="box"><div class="partTitle">카테고리 <span id="selectedPartLabel" class="pill">전체</span></div><div class="partBox"><button type="button" id="btnAll" class="part active" onclick="selectPart('all')">전체</button><button type="button" id="btnFinish" class="part" onclick="selectPart('finish')">완성파트</button><button type="button" id="btnJe" class="part" onclick="selectPart('je')">제관파트</button><button type="button" id="btnWeld" class="part" onclick="selectPart('weld')">용접파트</button><button type="button" id="btnSc" class="part" onclick="selectPart('sc')">SC파트</button><button type="button" id="btnDojang" class="part" onclick="selectPart('dojang')">도장파트</button></div></div>
   <div id="jeSummaryBox" class="box" style="display:none"><div class="partTitle">제관 SUB ASSY별 수량</div><div id="jeSubSummary" class="subBox"></div></div>
   <div id="summary" class="box summary">조회 대기</div>
@@ -70,31 +93,110 @@ function buildViewRows(){
 function render(){const date=document.getElementById('workDate').value;const total=viewRows.reduce((s,x)=>s+(Number(x.qty)||0),0);document.getElementById('summary').textContent=`${date} / ${document.getElementById('selectedPartLabel').textContent} 조회 건수: ${viewRows.length.toLocaleString()}건 / 수량 합계: ${total.toLocaleString()}`;renderJeSummary();renderTable();}
 function renderJeSummary(){const box=document.getElementById('jeSummaryBox');if(selectedPart!=='je'){box.style.display='none';return;}box.style.display='block';const m={};viewRows.forEach(r=>{const k=r.subAssyNo||'-';m[k]=(m[k]||0)+(Number(r.qty)||0);});document.getElementById('jeSubSummary').innerHTML=Object.keys(m).map(k=>`<div class="subCard">${esc(k)}<br>${m[k].toLocaleString()}개</div>`).join('')||'<div class="muted">수량 없음</div>';}
 function delBtn(r){return `<button type="button" class="del" onclick="deleteRow('${esc(r.sheet)}',${Number(r.rowNo||0)})">삭제</button>`;}
-function rowHtml(r){
-  if(selectedPart==='je')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${esc(r.hogi)}</td><td>${esc(r.spec)}</td><td>${itemCell(r.assyNo)}</td><td>${itemCell(r.subAssyNo||'-')}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
-  if(selectedPart==='finish')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
-  if(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td>${esc(r.model)}</td><td>${esc(r.process)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+function rowHtml(r,idx){
+  if(selectedPart==='je')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${esc(r.hogi)}</td><td>${esc(r.spec)}</td><td>${itemCell(r.assyNo)}</td><td>${itemCell(r.subAssyNo||'-')}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  if(selectedPart==='finish')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  if(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td>${esc(r.model)}</td><td>${esc(r.process)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
   const itemOrAssy=r.kind==='제관파트'?r.assyNo:(r.itemNo||'');
-  return `<tr><td>${esc(r.inputTime)}</td><td>${esc(r.kind)}</td><td>${esc(r.worker)}</td><td>${esc(r.kind==='제관파트'?r.hogi:'')}</td><td>${itemCell(itemOrAssy)}</td><td>${esc(r.kind==='제관파트'?r.spec:r.name)}</td><td>${esc(r.kind==='제관파트'?'':(r.model||''))}</td><td>${esc(r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''))}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.kind)}</td><td>${esc(r.worker)}</td><td>${esc(r.kind==='제관파트'?r.hogi:'')}</td><td>${itemCell(itemOrAssy)}</td><td>${esc(r.kind==='제관파트'?r.spec:r.name)}</td><td>${esc(r.kind==='제관파트'?'':(r.model||''))}</td><td>${esc(r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''))}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
 }
 function renderTable(){
   let headers;
-  if(selectedPart==='je')headers=['입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량','삭제'];
-  else if(selectedPart==='finish')headers=['입력일시','작업자','품번','품명','수량','삭제'];
-  else if(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')headers=['입력일시','작업자','품번','품명','모델명','공정명','수량','삭제'];
-  else headers=['입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량','삭제'];
-  document.getElementById('tbl').innerHTML='<thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+viewRows.map(rowHtml).join('')+'</tbody>';
+  if(selectedPart==='je')headers=['순번','입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량','삭제'];
+  else if(selectedPart==='finish')headers=['순번','입력일시','작업자','품번','품명','수량','삭제'];
+  else if(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')headers=['순번','입력일시','작업자','품번','품명','모델명','공정명','수량','삭제'];
+  else headers=['순번','입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량','삭제'];
+  document.getElementById('tbl').innerHTML='<thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+viewRows.map((r,i)=>rowHtml(r,i+1)).join('')+'</tbody>';
 }
 function deleteRow(sheet,rowNo){if(!rowNo){alert('삭제할 행 정보를 찾지 못했습니다.');return;}if(!confirm('선택한 실적을 삭제 처리할까요?'))return;jsonp({action:'delete',sheet,rowNo},res=>{if(!res.ok){alert(res.message||'삭제 실패');return;}loadResults(false);});}
 function downloadCsv(){
-  const headers=selectedPart==='je'?['입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량']:selectedPart==='finish'?['입력일시','작업자','품번','품명','수량']:(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')?['입력일시','작업자','품번','품명','모델명','공정명','수량']:['입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량'];
-  const rows=viewRows.map(r=>selectedPart==='je'?[r.inputTime,r.worker,r.hogi,r.spec,r.assyNo,r.subAssyNo,r.qty]:selectedPart==='finish'?[r.inputTime,r.worker,r.itemNo||'',r.name,r.qty]:(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')?[r.inputTime,r.worker,r.itemNo||'',r.name,r.model,r.process,r.qty]:[r.inputTime,r.kind,r.worker,r.kind==='제관파트'?r.hogi:'',r.kind==='제관파트'?r.assyNo:(r.itemNo||''),r.kind==='제관파트'?r.spec:r.name,r.kind==='제관파트'?'':(r.model||''),r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''),r.qty]);
+  const headers=selectedPart==='je'?['순번','입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량']:selectedPart==='finish'?['순번','입력일시','작업자','품번','품명','수량']:(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')?['순번','입력일시','작업자','품번','품명','모델명','공정명','수량']:['순번','입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량'];
+  const rows=viewRows.map((r,i)=>selectedPart==='je'?[i+1,r.inputTime,r.worker,r.hogi,r.spec,r.assyNo,r.subAssyNo,r.qty]:selectedPart==='finish'?[i+1,r.inputTime,r.worker,r.itemNo||'',r.name,r.qty]:(selectedPart==='weld'||selectedPart==='sc'||selectedPart==='dojang')?[i+1,r.inputTime,r.worker,r.itemNo||'',r.name,r.model,r.process,r.qty]:[i+1,r.inputTime,r.kind,r.worker,r.kind==='제관파트'?r.hogi:'',r.kind==='제관파트'?r.assyNo:(r.itemNo||''),r.kind==='제관파트'?r.spec:r.name,r.kind==='제관파트'?'':(r.model||''),r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''),r.qty]);
   const csv=[headers,...rows].map(row=>row.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='작업실적_'+(document.getElementById('workDate').value||localDateString())+'_'+document.getElementById('selectedPartLabel').textContent+'.csv';a.click();URL.revokeObjectURL(a.href);
 }
 function toggleNotify(){if(!('Notification' in window)){alert('이 브라우저는 알림을 지원하지 않습니다.');return;}if(!notifyOn){Notification.requestPermission().then(p=>{if(p!=='granted'){alert('브라우저 알림이 허용되지 않았습니다.');return;}notifyOn=true;lastCount=finishRows.length+jeRows.length+weldRows.length+scRows.length+dojangRows.length;document.getElementById('notifyBtn').textContent='PC 알림 끄기';document.getElementById('notifyBtn').classList.remove('off');notifyTimer=setInterval(()=>loadResults(true),30000);});}else{notifyOn=false;clearInterval(notifyTimer);document.getElementById('notifyBtn').textContent='PC 알림 켜기';document.getElementById('notifyBtn').classList.add('off');}}
 function checkNotify(){const c=finishRows.length+jeRows.length+weldRows.length+scRows.length+dojangRows.length;if(c>lastCount&&lastCount>0)new Notification('작업실적 신규 입력',{body:'새 작업실적이 입력되었습니다.'});lastCount=c;}
+let inputPart='finish';
+let adminMaster={finish:{items:[],workers:[]},je:{specs:[],workers:[]},weld:{items:[],workers:[]},sc:{items:[],workers:[]},dojang:{items:[],workers:[]}};
+let adminLoaded={finish:false,je:false,weld:false,sc:false,dojang:false};
+function toggleInputPanel(){const p=document.getElementById('inputPanel');const show=p.classList.contains('hide');p.classList.toggle('hide',!show);if(show)ensureAdminMaster(inputPart);}
+function selectInputPart(k){
+  inputPart=k;
+  ['Finish','Je','Weld','Sc','Dojang'].forEach(x=>document.getElementById('inBtn'+x).classList.remove('active'));
+  const idMap={finish:'inBtnFinish',je:'inBtnJe',weld:'inBtnWeld',sc:'inBtnSc',dojang:'inBtnDojang'};
+  document.getElementById(idMap[k]).classList.add('active');
+  document.getElementById('inFinishForm').classList.toggle('hide',k!=='finish');
+  document.getElementById('inJeForm').classList.toggle('hide',k!=='je');
+  document.getElementById('inProcForm').classList.toggle('hide',!(k==='weld'||k==='sc'||k==='dojang'));
+  document.getElementById('inMsg').textContent='';
+  ensureAdminMaster(k);
+}
+function ensureAdminMaster(kind){
+  if(adminLoaded[kind]){fillAdminWorkers(kind);fillAdminDatalist(kind);return;}
+  const actions={finish:'master',je:'jeMaster',weld:'weldMaster',sc:'scMaster',dojang:'dojangMaster'};
+  jsonp({action:actions[kind]},d=>{
+    if(!d.ok){document.getElementById('inMsg').textContent=d.message||'마스터 조회 실패';return;}
+    if(kind==='finish'){adminMaster.finish.items=d.items||[];adminMaster.finish.workers=d.workers||[];}
+    else if(kind==='je'){adminMaster.je.specs=d.specs||[];adminMaster.je.workers=d.workers||[];}
+    else {adminMaster[kind].items=d.items||[];adminMaster[kind].workers=d.workers||[];}
+    adminLoaded[kind]=true;
+    fillAdminWorkers(kind);
+    fillAdminDatalist(kind);
+  });
+}
+function fillAdminWorkers(kind){const sel=document.getElementById('inWorker');const old=sel.value;const list=[...new Set(adminMaster[kind].workers||[])].sort();sel.innerHTML='<option value="">작업자 선택</option>'+list.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');if(list.includes(old))sel.value=old;}
+function fillAdminDatalist(kind){
+  if(kind==='finish'){
+    document.getElementById('inFinishList').innerHTML=(adminMaster.finish.items||[]).map(x=>`<option value="${esc(x.itemNo)}">${esc(x.itemName)} / ${esc(x.model)}</option>`).join('');
+  }else if(kind==='je'){
+    document.getElementById('inJeSpec').innerHTML=(adminMaster.je.specs||[]).map(x=>`<option value="${esc(x.spec)}">${esc(x.spec)} (ASSY ${esc(x.assyNo)})</option>`).join('');
+  }else{
+    document.getElementById('inProcList').innerHTML=(adminMaster[kind].items||[]).map(x=>`<option value="${esc(x.displayName)}">${esc(x.itemName)} / ${esc(x.model)}</option>`).join('');
+  }
+}
+function saveAdminFinish(){
+  const workDate=document.getElementById('inWorkDate').value,worker=document.getElementById('inWorker').value;
+  const typed=document.getElementById('inFinishItem').value.trim();
+  const qty=document.getElementById('inFinishQty').value;
+  const msg=document.getElementById('inMsg');
+  if(!workDate||!worker||!typed||!qty||Number(qty)<=0){msg.textContent='작업일자/작업자/품번/수량을 모두 입력하세요.';return;}
+  const obj=(adminMaster.finish.items||[]).find(x=>x.itemNo===typed);
+  jsonp({action:'save',workDate,worker,part:obj?(obj.part||'완성파트'):'완성파트',itemNo:obj?obj.itemNo:typed,itemName:obj?obj.itemName:'',model:obj?obj.model:'',process:obj?obj.process:'',qty,device:'PC',memo:''},d=>{
+    msg.textContent=d.ok?'저장 완료':(d.message||'저장 실패');
+    if(d.ok){document.getElementById('inFinishItem').value='';document.getElementById('inFinishQty').value='';loadResults(false);}
+  });
+}
+function saveAdminJe(){
+  const workDate=document.getElementById('inWorkDate').value,worker=document.getElementById('inWorker').value;
+  const spec=document.getElementById('inJeSpec').value;
+  const hogi=document.getElementById('inJeHogi').value.trim();
+  const qty=document.getElementById('inJeQty').value||1;
+  const msg=document.getElementById('inMsg');
+  if(!workDate||!worker||!spec||!/^\d{4}$/.test(hogi)){msg.textContent='작업일자/작업자/사양/호기수(4자리)를 확인하세요.';return;}
+  const specObj=(adminMaster.je.specs||[]).find(x=>x.spec===spec);
+  jsonp({action:'saveJe',workDate,worker,hogi,spec,assyNo:specObj?specObj.assyNo:'',subAssyNo:specObj?specObj.subAssyNo:'',qty,device:'PC',memo:''},d=>{
+    msg.textContent=d.ok?'저장 완료':(d.message||'저장 실패');
+    if(d.ok){document.getElementById('inJeHogi').value='';loadResults(false);}
+  });
+}
+function saveAdminProc(){
+  const cfgAction={weld:'saveWeld',sc:'saveSc',dojang:'saveDojang'}[inputPart];
+  const defaultPart={weld:'용접파트',sc:'SC파트',dojang:'도장파트'}[inputPart];
+  const workDate=document.getElementById('inWorkDate').value,worker=document.getElementById('inWorker').value;
+  const typed=document.getElementById('inProcItem').value.trim();
+  const qty=document.getElementById('inProcQty').value;
+  const msg=document.getElementById('inMsg');
+  if(!workDate||!worker||!typed||!qty||Number(qty)<=0){msg.textContent='작업일자/작업자/품번(공정)/수량을 모두 입력하세요.';return;}
+  const obj=(adminMaster[inputPart].items||[]).find(x=>x.displayName===typed);
+  if(!obj){msg.textContent='목록(datalist)에서 정확한 품번/공정을 선택하세요.';return;}
+  jsonp({action:cfgAction,workDate,worker,part:obj.part||defaultPart,itemNo:obj.itemNo,itemName:obj.itemName,model:obj.model,process:obj.process,qty,device:'PC',memo:''},d=>{
+    msg.textContent=d.ok?'저장 완료':(d.message||'저장 실패');
+    if(d.ok){document.getElementById('inProcItem').value='';document.getElementById('inProcQty').value='';loadResults(false);}
+  });
+}
+document.getElementById('inWorkDate').value=localDateString();
 document.getElementById('workDate').value=tomorrowDateString();loadResults(false);
 </script>
 </body>
