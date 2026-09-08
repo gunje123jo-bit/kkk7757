@@ -21,12 +21,12 @@
       <button type="button" id="tabJe" class="tab" onclick="setMode('je')">제관파트</button>
       <button type="button" id="tabWeld" class="tab" onclick="setMode('weld')">용접파트</button>
       <button type="button" id="tabSc" class="tab" onclick="setMode('sc')">SC파트</button>
-      <button type="button" id="tabDojang" class="tab" onclick="setMode('dojang')">도장파트</button>
+      <button type="button" id="tabDojang" class="tab" onclick="setMode('dojang')">도장파트</button><button type="button" id="tabSm" class="tab" onclick="setMode('sm')">SM파트</button>
     </div>
     <div class="sub">파트를 누를 때 해당 파트 마스터만 불러옵니다. SC 이후 대기시간을 줄이기 위한 방식입니다.</div>
   </div>
 
-  <div class="card"><div class="row2"><div><label>작업일자</label><input type="date" id="workDate"></div><div><label>작업자</label><select id="worker"><option value="">작업자 선택</option></select></div></div><div class="sub">선택한 작업일자 기준으로 실적이 저장됩니다.</div></div>
+  <div class="card"><div class="row2"><div><label>작업일자</label><input type="date" id="workDate"></div><div><label>작업자</label><div id="smSupportWrap" class="hide"><label><input type="checkbox" id="smSupport" style="width:auto" onchange="fillWorkers();loadResults()"> 지원 (SM2)</label></div><select id="worker"><option value="">작업자 선택</option></select></div></div><div class="sub">선택한 작업일자 기준으로 실적이 저장됩니다.</div></div>
 
   <div id="finishArea"><div class="card"><label>품목번호</label><input id="itemNoInput" autocomplete="off" placeholder="품번 또는 품명 검색"><div id="items" class="sub">품번 또는 품명을 입력하세요.</div></div><div class="card"><label>수량</label><input type="number" id="qty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveFinishBtn" onclick="saveFinish()">입력</button><button class="gray" onclick="resetFinish()">입력칸 초기화</button><div id="selectedText" class="sub">입력 대기: 품번을 검색하세요.</div><div id="msg" class="msg ready">입력 대기</div></div></div>
 
@@ -37,18 +37,31 @@
   <div id="scArea" class="hide"><div class="card"><label>SC 품번 / 공정명</label><input id="scSearch" autocomplete="off" placeholder="품번, 품명 또는 공정명 검색"><div id="scItems" class="sub">SC파트를 불러오는 중입니다.</div></div><div class="card"><label>SC 선택 공정별 수량</label><div id="scSelectedText" class="sub">입력 대기: SC 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="scQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveScBtn" onclick="saveSc()">입력</button><button class="gray" onclick="resetSc()">입력칸 초기화</button><div id="scMsg" class="msg ready">입력 대기</div></div></div>
 
   <div id="dojangArea" class="hide"><div class="card"><label>도장 품번 / 공정명</label><input id="dojangSearch" autocomplete="off" placeholder="품번, 품명 또는 공정명 검색"><div id="dojangItems" class="sub">도장파트를 불러오는 중입니다.</div></div><div class="card"><label>도장 선택 공정별 수량</label><div id="dojangSelectedText" class="sub">입력 대기: 도장 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="dojangQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveDojangBtn" onclick="saveDojang()">입력</button><button class="gray" onclick="resetDojang()">입력칸 초기화</button><div id="dojangMsg" class="msg ready">입력 대기</div></div></div>
+  <div id="smArea" class="hide"><div class="card"><label>SM 관리번호 / 품번</label><div style="display:flex;gap:6px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab active" onclick="setSmPrefix('')">숫자</button><button type="button" id="smTypeFP" style="width:auto" class="tab" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab" onclick="setSmPrefix('FB')">FB</button></div><input id="smSearch" inputmode="numeric" autocomplete="off" placeholder="관리번호 숫자 입력 (예: 22)"><div id="smItems" class="sub">SM파트를 불러오는 중입니다.</div></div><div class="card"><label>SM 선택 공정별 수량</label><div id="smSelectedText" class="sub">입력 대기: SM 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="smQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSmBtn" onclick="saveSm()">입력</button><button class="gray" onclick="resetSm()">입력칸 초기화</button><div id="smMsg" class="msg ready">입력 대기</div></div></div>
 
   <div class="card"><div class="doneHead"><h2>입력 완료 내역</h2><button class="smallBtn" onclick="loadResults()">새로고침</button></div><div class="sub">선택한 작업일자와 작업자 기준으로 표시됩니다.</div><div id="todayTotal" class="totalBox">합계: 0개</div><div id="todayResults" class="sub">작업자와 날짜를 선택하세요.</div></div>
   <div class="card"><button type="button" id="closePartBtn" class="closeBtn" onclick="closePartAlert()">완성파트 작업지시 입력완료</button><div class="sub">해당 파트의 오늘 작업을 모두 마쳤을 때 한 번만 눌러주세요. PC로 완료 알림이 갑니다.</div></div>
 </div>
 <script>
+
+let smPrefix='';
+function smMatches(item,q){
+ const n=String(q||'').trim();if(!/^\d+$/.test(n))return false;
+ const code=String(item.managementNo||'').toUpperCase().replace(/[\s-]/g,'');
+ const m=code.match(/^(FP|FB)?(\d+)$/);
+ return !!m&&(m[1]||'')===smPrefix&&Number(m[2])===Number(n);
+}
+
+const SM_WORKERS=["박정필", "송왕섭", "정효섭", "조귀범", "유성주", "김기환", "임형훈", "김진우", "김갑인", "문영균"];
+const SM_SUPPORT_WORKERS=["박건우", "진성호", "조민호", "유기태", "길성현", "석동일", "이정훈", "리만훙", "이반뚱", "탄반뚜엔"];
+
 const GAS_URL='https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
 let mode='finish';
 let masterItems=[],jeSpecs=[];
 let finishWorkers=[],jeWorkers=[];
 let selectedItem=null;
-let loaded={finish:false,je:false,weld:false,sc:false,dojang:false};
-let loading={finish:false,je:false,weld:false,sc:false,dojang:false};
+let loaded={finish:false,je:false,weld:false,sc:false,dojang:false,sm:false};
+let loading={finish:false,je:false,weld:false,sc:false,dojang:false,sm:false};
 const JE_FALLBACK_WORKERS=['김동안','배인환','박창수','이상민'];
 const JE_FALLBACK_SPECS=[];
 
@@ -56,9 +69,9 @@ const JE_FALLBACK_SPECS=[];
 const PROC_CFG={
   weld:{label:'용접',part:'용접파트',search:'weldSearch',box:'weldItems',selectedText:'weldSelectedText',msg:'weldMsg',btn:'saveWeldBtn',qtyPrefix:'weld',masterAction:'weldMaster',saveAction:'saveWeld'},
   sc:{label:'SC',part:'SC파트',search:'scSearch',box:'scItems',selectedText:'scSelectedText',msg:'scMsg',btn:'saveScBtn',qtyPrefix:'sc',masterAction:'scMaster',saveAction:'saveSc'},
-  dojang:{label:'도장',part:'도장파트',search:'dojangSearch',box:'dojangItems',selectedText:'dojangSelectedText',msg:'dojangMsg',btn:'saveDojangBtn',qtyPrefix:'dojang',masterAction:'dojangMaster',saveAction:'saveDojang'}
+  dojang:{label:'도장',part:'도장파트',search:'dojangSearch',box:'dojangItems',selectedText:'dojangSelectedText',msg:'dojangMsg',btn:'saveDojangBtn',qtyPrefix:'dojang',masterAction:'dojangMaster',saveAction:'saveDojang'},sm:{label:'SM',part:'SM파트',search:'smSearch',box:'smItems',selectedText:'smSelectedText',msg:'smMsg',btn:'saveSmBtn',qtyPrefix:'sm',masterAction:'smMaster',saveAction:'saveSm'}
 };
-let procData={weld:{items:[],workers:[],selected:null},sc:{items:[],workers:[],selected:null},dojang:{items:[],workers:[],selected:null}};
+let procData={weld:{items:[],workers:[],selected:null},sc:{items:[],workers:[],selected:null},dojang:{items:[],workers:[],selected:null},sm:{items:[],workers:[],selected:null}};
 
 function localToday(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function localTomorrow(){const d=new Date();d.setDate(d.getDate()+1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -70,19 +83,21 @@ function show(elId,msg,ok){const el=document.getElementById(elId);el.textContent
 function showJeSmall(msg,ok){const el=document.getElementById('jeMsg');if(!el)return;el.textContent=msg||'';el.className='jeMsgSmall '+(ok===false?'err':'ready');}
 function showActiveMsg(msg,ok){if(mode==='finish')show('msg',msg,ok);else if(mode==='je')showJeSmall(msg,ok);else if(PROC_CFG[mode])show(PROC_CFG[mode].msg,msg,ok);}
 function applyJeFallback(){if(!jeSpecs||jeSpecs.length===0)jeSpecs=JE_FALLBACK_SPECS;if(!jeWorkers||jeWorkers.length===0)jeWorkers=JE_FALLBACK_WORKERS;}
-function currentWorkers(){if(mode==='finish')return finishWorkers;if(mode==='je')return jeWorkers;if(PROC_CFG[mode])return procData[mode].workers;return[]}
+function currentWorkers(){if(mode==='sm')return document.getElementById('smSupport').checked?SM_SUPPORT_WORKERS:SM_WORKERS;if(mode==='finish')return finishWorkers;if(mode==='je')return jeWorkers;if(PROC_CFG[mode])return procData[mode].workers;return[]}
 function fillWorkers(){const sel=document.getElementById('worker');const old=sel.value;let workers=currentWorkers().filter(Boolean);workers=[...new Set(workers)].sort();sel.innerHTML='<option value="">작업자 선택</option>'+workers.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');if(workers.includes(old))sel.value=old;}
 function setMode(m){
   mode=m;
-  ['Finish','Je','Weld','Sc','Dojang'].forEach(k=>document.getElementById('tab'+k).classList.remove('active'));
-  const tabIdMap={finish:'tabFinish',je:'tabJe',weld:'tabWeld',sc:'tabSc',dojang:'tabDojang'};
+  ['Finish','Je','Weld','Sc','Dojang','Sm'].forEach(k=>document.getElementById('tab'+k).classList.remove('active'));
+  const tabIdMap={finish:'tabFinish',je:'tabJe',weld:'tabWeld',sc:'tabSc',dojang:'tabDojang',sm:'tabSm'};
   document.getElementById(tabIdMap[m]).classList.add('active');
   document.getElementById('finishArea').classList.toggle('hide',m!=='finish');
   document.getElementById('jeArea').classList.toggle('hide',m!=='je');
   document.getElementById('weldArea').classList.toggle('hide',m!=='weld');
   document.getElementById('scArea').classList.toggle('hide',m!=='sc');
   document.getElementById('dojangArea').classList.toggle('hide',m!=='dojang');
-  const partLabelMap={finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트'};
+  document.getElementById('smArea').classList.toggle('hide',m!=='sm');
+  document.getElementById('smSupportWrap').classList.toggle('hide',m!=='sm');
+  const partLabelMap={finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트',sm:'SM파트'};
   document.getElementById('closePartBtn').textContent=partLabelMap[m]+' 작업지시 입력완료';
   ensureMaster(m,()=>{
     fillWorkers();
@@ -93,7 +108,7 @@ function setMode(m){
   });
 }
 function closePartAlert(){
-  const partLabelMap={finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트'};
+  const partLabelMap={finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트',sm:'SM파트'};
   const part=partLabelMap[mode];
   if(!confirm(part+' 작업을 오늘 다 마치셨나요? PC로 완료 알림을 보냅니다.'))return;
   const btn=document.getElementById('closePartBtn');
@@ -108,8 +123,8 @@ function ensureMaster(kind,done){
   if(loaded[kind]){done&&done();return;}
   if(loading[kind]){setTimeout(()=>ensureMaster(kind,done),150);return;}
   loading[kind]=true;
-  const actions={finish:'master',je:'jeMaster',weld:'weldMaster',sc:'scMaster',dojang:'dojangMaster'};
-  const boxId={finish:'items',je:'specs',weld:'weldItems',sc:'scItems',dojang:'dojangItems'}[kind];
+  const actions={finish:'master',je:'jeMaster',weld:'weldMaster',sc:'scMaster',dojang:'dojangMaster',sm:'smMaster'};
+  const boxId={finish:'items',je:'specs',weld:'weldItems',sc:'scItems',dojang:'dojangItems',sm:'smItems'}[kind];
   if(boxId)document.getElementById(boxId).innerHTML='마스터 불러오는 중...';
   jsonp({action:actions[kind]},d=>{
     loading[kind]=false;
@@ -186,17 +201,17 @@ function renderProcessItems(kind){
   if(!loaded[kind]){box.innerHTML=cfg.label+'파트 마스터 불러오는 중...';return;}
   const q=searchEl.value.trim();
   const nq=normalizeSearch(q);
-  if(!q){box.innerHTML='품번, 품명 또는 공정명을 입력하세요.';return;}
-  const list=(source||[]).filter(x=>{const raw=(x.itemNo+' '+x.itemName+' '+x.model+' '+x.process+' '+x.displayName+' '+x.inputKey);return raw.includes(q)||normalizeSearch(raw).includes(nq);}).slice(0,120);
+  if(!q){box.innerHTML=kind==='sm'?'관리번호 또는 품번을 입력하세요.':'품번, 품명 또는 공정명을 입력하세요.';return;}
+  const list=(source||[]).filter(x=>{if(kind==='sm')return smMatches(x,q);const raw=(x.itemNo+' '+x.itemName+' '+x.model+' '+x.process+' '+x.displayName+' '+x.inputKey);return raw.includes(q)||normalizeSearch(raw).includes(nq);}).slice(0,120);
   const selectedKeys=selectedProcessKeys(kind);
   const groups=groupProcessList(list);
   box.innerHTML=groups.map((g,gi)=>{
     const hasSel=g.rows.some(r=>selectedKeys.includes(String(r.inputKey)));
     const chips=g.rows.map(r=>{
       const sel=selectedKeys.includes(String(r.inputKey));
-      return `<button type="button" class="chip ${sel?'selected':''}" data-kind="${kind}" data-key="${esc(r.inputKey)}" onclick="toggleProcessItem('${kind}','${escJs(r.inputKey)}')">${esc(processLabel(r.process))}</button>`;
+      return `<button type="button" class="chip ${sel?'selected':''}" data-kind="${kind}" data-key="${esc(r.inputKey)}" onclick="toggleProcessItem('${kind}','${escJs(r.inputKey)}')">${esc(kind==='sm'&&!r.process?'선택':processLabel(r.process))}</button>`;
     }).join('');
-    return `<div class="processGroup ${hasSel?'hasSelected':''}" data-kind="${kind}" data-group="${gi}"><div class="processTitle">${esc(g.itemNo)} / ${esc(g.itemName||'')}</div><div class="processMeta">${esc(g.model||'')}</div><div class="chips">${chips}</div><div class="processHelp">공정 선택 후 아래 [입력 완료]를 누르세요.</div></div>`;
+    return `<div class="processGroup ${hasSel?'hasSelected':''}" data-kind="${kind}" data-group="${gi}"><div class="processTitle">${kind==='sm'?esc(g.rows.map(r=>r.managementNo).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', '))+' / ':''}${esc(g.itemNo)} / ${esc(g.itemName||'')}</div><div class="processMeta">${kind==='sm'?'모델: ':''}${esc(g.model||'')}</div><div class="chips">${chips}</div><div class="processHelp">공정 선택 후 아래 [입력 완료]를 누르세요.</div></div>`;
   }).join('')||`<div class="sub">일치하는 ${cfg.label} 품번/공정이 없습니다.</div>`;
   updateProcessVisuals(kind,false);
 }
@@ -258,7 +273,7 @@ function saveProcess(kind){
   const arr=procData[kind].items;
   if(!workDate)return show(cfg.msg,'작업일자를 선택하세요.',false);
   if(!worker)return show(cfg.msg,'작업자를 선택하세요.',false);
-  if(!obj&&typed){
+  if(!obj&&typed&&kind!=='sm'){
     const nt=normalizeSearch(typed);
     const one=(arr||[]).find(x=>x.itemNo===typed||x.displayName===typed||x.inputKey===typed||normalizeSearch(x.itemNo)===nt||normalizeSearch(x.displayName)===nt||normalizeSearch(x.inputKey)===nt);
     if(one)obj={multi:true,rows:[one],itemNo:one.itemNo,itemName:one.itemName,model:one.model,process:processLabel(one.process)};
@@ -288,6 +303,7 @@ function saveProcess(kind){
 function saveWeld(){saveProcess('weld')}
 function saveSc(){saveProcess('sc')}
 function saveDojang(){saveProcess('dojang')}
+function saveSm(){saveProcess('sm')}
 function setSaving(id,on){const b=document.getElementById(id);if(!b)return;b.disabled=on;b.classList.toggle('saving',on);b.textContent=on?'저장 중...':'입력';}
 function resetFinish(clear=true){selectedItem=null;document.getElementById('itemNoInput').value='';document.getElementById('qty').value='';document.getElementById('selectedText').innerHTML='<div class="inputWaiting">입력 대기: 품번을 검색하세요.</div>';document.getElementById('items').innerHTML='품번 또는 품명을 입력하세요.';if(clear)show('msg','입력 대기',true);}
 function resetProcess(kind,clear=true){
@@ -301,9 +317,13 @@ function resetProcess(kind,clear=true){
 function resetWeld(clear=true){resetProcess('weld',clear)}
 function resetSc(clear=true){resetProcess('sc',clear)}
 function resetDojang(clear=true){resetProcess('dojang',clear)}
-function loadResults(){const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;if(!workDate||!worker){document.getElementById('todayTotal').textContent='합계: 0개';document.getElementById('todayResults').textContent='작업자와 날짜를 선택하세요.';return;}const action={finish:'results',je:'jeResults',weld:'weldResults',sc:'scResults',dojang:'dojangResults'}[mode];jsonp({action,startDate:workDate,endDate:workDate,worker},d=>{if(!d.ok){document.getElementById('todayResults').textContent=d.message||'조회 실패';return;}const rows=(d.rows||[]).map(x=>({rowNo:x.rowNo,values:x.values||[]})).sort((a,b)=>String(a.values[0]||'').localeCompare(String(b.values[0]||'')));let total=0;const html=rows.map(x=>{const r=x.values;const qty=Number(mode==='je'?r[8]:r[8])||0;total+=qty;if(mode==='je')return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[5])}</div><div class="sub">${esc(r[0])} / ASSY ${esc(r[6])}</div></div><div class="doneQty">${qty}</div></div><button class="deleteBtn" onclick="deleteRow('je',${x.rowNo})">삭제</button></div>`;return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[7]||r[5])}</div><div class="sub">${esc(r[0])} / ${esc(r[5])}</div></div><div class="doneQty">${qty}</div></div><button class="deleteBtn" onclick="deleteRow('${mode==='finish'?'finish':mode}',${x.rowNo})">삭제</button></div>`;}).join('');document.getElementById('todayTotal').textContent='합계: '+total.toLocaleString()+'개';document.getElementById('todayResults').innerHTML=html||'입력 완료 내역이 없습니다.';});}
+function resetSm(clear=true){resetProcess('sm',clear)}
+function loadResults(){const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;if(!workDate||!worker){document.getElementById('todayTotal').textContent='합계: 0개';document.getElementById('todayResults').textContent='작업자와 날짜를 선택하세요.';return;}const action={finish:'results',je:'jeResults',weld:'weldResults',sc:'scResults',dojang:'dojangResults',sm:'smResults'}[mode];jsonp({action,startDate:workDate,endDate:workDate,worker},d=>{if(!d.ok){document.getElementById('todayResults').textContent=d.message||'조회 실패';return;}const rows=(d.rows||[]).map(x=>({rowNo:x.rowNo,values:x.values||[]})).sort((a,b)=>String(a.values[0]||'').localeCompare(String(b.values[0]||'')));let total=0;const html=rows.map(x=>{const r=x.values;const qty=Number(mode==='je'?r[8]:r[8])||0;total+=qty;if(mode==='je')return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[5])}</div><div class="sub">${esc(r[0])} / ASSY ${esc(r[6])}</div></div><div class="doneQty">${qty}</div></div><button class="deleteBtn" onclick="deleteRow('je',${x.rowNo})">삭제</button></div>`;return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[7]||r[5])}</div><div class="sub">${esc(r[0])} / ${esc(r[5])}</div></div><div class="doneQty">${qty}</div></div><button class="deleteBtn" onclick="deleteRow('${mode==='finish'?'finish':mode}',${x.rowNo})">삭제</button></div>`;}).join('');document.getElementById('todayTotal').textContent='합계: '+total.toLocaleString()+'개';document.getElementById('todayResults').innerHTML=html||'입력 완료 내역이 없습니다.';});}
 function deleteRow(sheet,rowNo){if(!confirm('삭제 처리할까요?'))return;jsonp({action:'delete',sheet,rowNo},d=>{if(d.ok)loadResults();else alert(d.message||'삭제 실패');});}
-document.getElementById('workDate').value=localTomorrow();document.getElementById('worker').addEventListener('change',loadResults);document.getElementById('workDate').addEventListener('change',loadResults);document.getElementById('itemNoInput').addEventListener('input',debounce(renderItems));document.getElementById('weldSearch').addEventListener('input',debounce(()=>{clearProcessSelection('weld');renderProcessItems('weld');}));document.getElementById('scSearch').addEventListener('input',debounce(()=>{clearProcessSelection('sc');renderProcessItems('sc');}));document.getElementById('dojangSearch').addEventListener('input',debounce(()=>{clearProcessSelection('dojang');renderProcessItems('dojang');}));ensureMaster('finish',()=>{fillWorkers();renderItems();loadResults();});
+document.getElementById('workDate').value=localTomorrow();document.getElementById('worker').addEventListener('change',loadResults);document.getElementById('workDate').addEventListener('change',loadResults);document.getElementById('itemNoInput').addEventListener('input',debounce(renderItems));document.getElementById('weldSearch').addEventListener('input',debounce(()=>{clearProcessSelection('weld');renderProcessItems('weld');}));document.getElementById('scSearch').addEventListener('input',debounce(()=>{clearProcessSelection('sc');renderProcessItems('sc');}));document.getElementById('dojangSearch').addEventListener('input',debounce(()=>{clearProcessSelection('dojang');renderProcessItems('dojang');}));document.getElementById('smSearch').addEventListener('input',debounce(()=>{clearProcessSelection('sm');renderProcessItems('sm');}));ensureMaster('finish',()=>{fillWorkers();renderItems();loadResults();});
+
+function setSmPrefix(prefix){smPrefix=prefix;['','FP','FB'].forEach(v=>document.getElementById('smType'+(v||'Num')).classList.toggle('active',v===prefix));clearProcessSelection('sm');renderProcessItems('sm');}
+
 </script>
 </body>
 </html>
