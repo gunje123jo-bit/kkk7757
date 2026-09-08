@@ -28,7 +28,7 @@
         <div><button type="button" onclick="saveAdminJe()">저장</button></div>
       </div>
       <div id="inProcForm" class="row hide" style="margin-top:8px">
-        <div style="flex:1;min-width:260px"><label>품번/공정 검색</label><div id="smAdminSearch" class="hide"><div style="display:flex;gap:6px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab active" onclick="setSmPrefix('')">숫자</button><button type="button" id="smTypeFP" style="width:auto" class="tab" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab" onclick="setSmPrefix('FB')">FB</button></div><input id="smAdminNumber" inputmode="numeric" placeholder="관리번호 숫자 입력 (예: 22)" oninput="renderSmAdminSearch()"><div><select id="smAdminChoice" onchange="selectSmAdminChoice()" style="max-width:100%;padding:10px;margin-top:8px"><option value="">관리번호를 입력하세요.</option></select></div></div><input id="inProcItem" list="inProcList" placeholder="목록에서 품번/공정을 선택하세요" autocomplete="off"><datalist id="inProcList"></datalist></div>
+        <div style="flex:1;min-width:260px"><label>품번/공정 검색</label><div id="smAdminSearch" class="hide"><div style="display:flex;gap:6px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab active" onclick="setSmPrefix('')">숫자</button><button type="button" id="smTypeFP" style="width:auto" class="tab" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab" onclick="setSmPrefix('FB')">FB</button></div><label>관리번호 검색</label><input id="smAdminNumber" inputmode="numeric" placeholder="관리번호 숫자 입력 (예: 22)" oninput="renderSmAdminSearch()"><div><select id="smAdminChoice" onchange="selectSmAdminChoice()" style="max-width:100%;padding:10px;margin-top:8px"><option value="">관리번호 또는 품번을 입력하세요.</option></select></div><label>품번 검색</label><input id="smAdminPartNumber" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderSmAdminPartSearch()"><div><select id="smAdminPartChoice" onchange="selectSmAdminPartChoice()" style="max-width:100%;padding:10px;margin-top:8px"><option value="">품번을 입력하세요.</option></select></div></div><input id="inProcItem" list="inProcList" placeholder="목록에서 품번/공정을 선택하세요" autocomplete="off"><datalist id="inProcList"></datalist></div>
         <div><label>수량</label><input id="inProcQty" type="number" min="1" style="width:100px"></div>
         <div><button type="button" onclick="saveAdminProc()">저장</button></div>
       </div>
@@ -167,7 +167,7 @@ function ensureAdminMaster(kind){
 }
 function fillAdminWorkers(kind){const sel=document.getElementById('inWorker');const old=sel.value;const list=[...new Set((kind==='sm'?(document.getElementById('smSupport').checked?SM_SUPPORT_WORKERS:SM_WORKERS):adminMaster[kind].workers)||[])].sort();sel.innerHTML='<option value="">작업자 선택</option>'+list.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');if(list.includes(old))sel.value=old;}
 function fillAdminDatalist(kind){
-  if(kind==='sm'){renderSmAdminSearch();return;}
+  if(kind==='sm'){renderSmAdminSearch();renderSmAdminPartSearch();return;}
   if(kind==='finish'){
     document.getElementById('inFinishList').innerHTML=(adminMaster.finish.items||[]).map(x=>`<option value="${esc(x.itemNo)}">${esc(x.itemName)} / ${esc(x.model)}</option>`).join('');
   }else if(kind==='je'){
@@ -222,13 +222,23 @@ document.getElementById('workDate').value=tomorrowDateString();loadResults(false
 function setSmPrefix(prefix){smPrefix=prefix;['','FP','FB'].forEach(v=>document.getElementById('smType'+(v||'Num')).classList.toggle('active',v===prefix));renderSmAdminSearch();}
 let smAdminMatches=[];
 function renderSmAdminSearch(){
+ document.getElementById('smAdminPartChoice').value='';
  document.getElementById('inProcItem').value='';
  const q=document.getElementById('smAdminNumber').value;
  smAdminMatches=(adminMaster.sm.items||[]).filter(x=>smMatches(x,q));
- document.getElementById('smAdminChoice').innerHTML='<option value="">'+(q?(smAdminMatches.length?'모델과 품번을 확인하고 선택하세요.':'일치하는 관리번호가 없습니다.'):'관리번호를 입력하세요.')+'</option>'+smAdminMatches.map((x,i)=>`<option value="${i}">모델: ${esc(x.model||'')} / ${esc(x.itemNo)} / ${esc(x.itemName||'')} / ${esc(x.process||'')}</option>`).join('');
+ document.getElementById('smAdminChoice').innerHTML='<option value="">'+(q?(smAdminMatches.length?'모델과 품번을 확인하고 선택하세요.':'일치하는 품목이 없습니다.'):'관리번호 또는 품번을 입력하세요.')+'</option>'+smAdminMatches.map((x,i)=>`<option value="${i}">모델: ${esc(x.model||'')} / ${esc(x.itemNo)} / ${esc(x.itemName||'')} / ${esc(x.process||'')}</option>`).join('');
 }
-function selectSmAdminChoice(){const v=document.getElementById('smAdminChoice').value;document.getElementById('inProcItem').value=v!==''&&smAdminMatches[Number(v)]?smAdminMatches[Number(v)].displayName:'';}
+function selectSmAdminChoice(){document.getElementById('smAdminPartChoice').value='';const v=document.getElementById('smAdminChoice').value;document.getElementById('inProcItem').value=v!==''&&smAdminMatches[Number(v)]?smAdminMatches[Number(v)].displayName:'';}
 
+
+let smAdminPartMatches=[];
+function renderSmAdminPartSearch(){
+ document.getElementById('inProcItem').value='';document.getElementById('smAdminChoice').value='';
+ const q=document.getElementById('smAdminPartNumber').value.trim();
+ smAdminPartMatches=q?(adminMaster.sm.items||[]).filter(x=>String(x.itemNo||'').toUpperCase().includes(q.toUpperCase())):[];
+ document.getElementById('smAdminPartChoice').innerHTML='<option value="">'+(q?'모델과 품번을 확인하고 선택하세요.':'품번을 입력하세요.')+'</option>'+smAdminPartMatches.map((x,i)=>`<option value="${i}">모델: ${esc(x.model||'')} / ${esc(x.itemNo)} / ${esc(x.itemName||'')} / ${esc(x.process||'')}</option>`).join('');
+}
+function selectSmAdminPartChoice(){document.getElementById('smAdminChoice').value='';const v=document.getElementById('smAdminPartChoice').value;document.getElementById('inProcItem').value=v!==''&&smAdminPartMatches[Number(v)]?smAdminPartMatches[Number(v)].displayName:'';}
 </script>
 </body>
 </html>
