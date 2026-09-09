@@ -59,11 +59,24 @@ let selectedPart='all', finishRows=[], jeRows=[], weldRows=[], scRows=[], dojang
 function localDateString(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function tomorrowDateString(){const d=new Date();d.setDate(d.getDate()+1);return localDateString(d);}
 function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-function copyText(text,btn){const value=String(text||'').trim();if(!value){alert('복사할 품번이 없습니다.');return;}const done=()=>{if(btn){const oldText=btn.textContent;btn.textContent='완료';btn.classList.add('done');setTimeout(()=>{btn.textContent=oldText;btn.classList.remove('done');},900);}showToast('품번 복사 완료: '+value);};if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(value).then(done).catch(()=>fallbackCopy(value,done));}else fallbackCopy(value,done);}
-function fallbackCopy(value,done){const ta=document.createElement('textarea');ta.value=value;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');done();}catch(e){alert('복사 실패: 품번을 직접 복사하세요.');}ta.remove();}
+const COPY_STORE='workResults.copyCounts.v1';
+let copyMemory={};
+function copyRecord(key){try{const data=JSON.parse(localStorage.getItem(COPY_STORE)||'{}');return data[key]||copyMemory[key]||{count:0,until:0};}catch(e){return copyMemory[key]||{count:0,until:0};}}
+function saveCopyRecord(key,record){copyMemory[key]=record;try{const data=JSON.parse(localStorage.getItem(COPY_STORE)||'{}');data[key]=record;localStorage.setItem(COPY_STORE,JSON.stringify(data));}catch(e){showToast('복사 완료. 브라우저 저장 불가로 횟수는 현재 창에서만 유지됩니다.');}}
+function updateCopyButton(btn){if(btn.dataset.copyPending==='1')return;const r=copyRecord(btn.dataset.copyKey);const waiting=r.until>Date.now();btn.disabled=waiting;btn.textContent=waiting?'복사됨':(r.count?r.count+'회 복사':'복사');btn.classList.toggle('done',r.count>0);}
+setInterval(()=>document.querySelectorAll('.copyBtn[data-copy-key]').forEach(updateCopyButton),250);
+async function copyText(text,btn){if(btn&&(btn.disabled||copyRecord(btn.dataset.copyKey).until>Date.now()))return;const raw=String(text||'').trim();const value=raw==='1111'?'지원작업':raw;if(!value){alert('복사할 품번이 없습니다.');return;}
+ if(btn){btn.disabled=true;btn.dataset.copyPending='1';}
+ try{if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(value);}catch(e){fallbackCopy(value);}}else fallbackCopy(value);
+ showToast('품번 복사 완료: '+value);
+ if(btn){const key=btn.dataset.copyKey,r=copyRecord(key);saveCopyRecord(key,{count:Number(r.count||0)+1,until:Date.now()+15000});}
+ }catch(e){alert('복사 실패: 품번을 직접 복사하세요.');}
+ finally{if(btn){delete btn.dataset.copyPending;updateCopyButton(btn);}}
+}
+function fallbackCopy(value){const ta=document.createElement('textarea');ta.value=value;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.focus();ta.select();try{if(!document.execCommand('copy'))throw new Error('copy failed');}finally{ta.remove();}}
 function showToast(msg){const t=document.getElementById('copyToast');t.textContent=msg;t.style.display='block';clearTimeout(window.__copyToastTimer);window.__copyToastTimer=setTimeout(()=>{t.style.display='none';},1300);}
-function copyBtn(value){const encoded=encodeURIComponent(String(value||''));return `<button type="button" class="copyBtn" onclick="copyText(decodeURIComponent('${encoded}'),this)">복사</button>`;}
-function itemCell(value){return `<span class="itemCell">${copyBtn(value)}${esc(value||'')}</span>`;}
+function copyBtn(value,row,field){const encoded=encodeURIComponent(String(value||''));const key=encodeURIComponent(JSON.stringify([GAS_URL,row.sheet,row.rowNo,row.inputTime,row.workDate,row.worker,field,String(value||'')]));const r=copyRecord(key),waiting=r.until>Date.now();return `<button type="button" class="copyBtn${r.count?' done':''}" data-copy-key="${key}" ${waiting?'disabled':''} onclick="copyText(decodeURIComponent('${encoded}'),this)">${waiting?'복사됨':(r.count?r.count+'회 복사':'복사')}</button>`;}
+function itemCell(value,row,field='item'){return `<span class="itemCell">${copyBtn(value,row,field)}${esc(value||'')}</span>`;}
 function jsonp(params,cb){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');window[callback]=data=>{cb(data);delete window[callback];s.remove();};s.onerror=()=>{alert('조회 실패: Apps Script 연결을 확인하세요.');delete window[callback];s.remove();};s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);}
 function setTodayAndLoad(){document.getElementById('workDate').value=localDateString();loadResults(false);}
 function selectPart(p){
@@ -106,17 +119,17 @@ function buildViewRows(){
   else if(selectedPart==='sm')all=sm;
   else if(selectedPart==='press')all=pr;
   else all=dj;
-  viewRows=all.filter(x=>x.inputTime||x.worker||x.name||x.qty).sort((a,b)=>String(a.inputTime).localeCompare(String(b.inputTime)));
+  viewRows=all.filter(x=>x.inputTime||x.worker||x.name||x.qty).sort((a,b)=>String(a.worker||'').localeCompare(String(b.worker||''),'ko')||String(a.inputTime).localeCompare(String(b.inputTime)));
 }
 function render(){const date=document.getElementById('workDate').value;const total=viewRows.reduce((s,x)=>s+(Number(x.qty)||0),0);document.getElementById('summary').textContent=`${date} / ${document.getElementById('selectedPartLabel').textContent} 조회 건수: ${viewRows.length.toLocaleString()}건 / 수량 합계: ${total.toLocaleString()}`;renderJeSummary();renderTable();}
 function renderJeSummary(){const box=document.getElementById('jeSummaryBox');if(selectedPart!=='je'){box.style.display='none';return;}box.style.display='block';const m={};viewRows.forEach(r=>{const k=r.subAssyNo||'-';m[k]=(m[k]||0)+(Number(r.qty)||0);});document.getElementById('jeSubSummary').innerHTML=Object.keys(m).map(k=>`<div class="subCard">${esc(k)}<br>${m[k].toLocaleString()}개</div>`).join('')||'<div class="muted">수량 없음</div>';}
 function delBtn(r){return `<button type="button" class="del" onclick="deleteRow('${esc(r.sheet)}',${Number(r.rowNo||0)})">삭제</button>`;}
 function rowHtml(r,idx){
-  if(selectedPart==='je')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${esc(r.hogi)}</td><td>${esc(r.spec)}</td><td>${itemCell(r.assyNo)}</td><td>${itemCell(r.subAssyNo||'-')}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
-  if(selectedPart==='finish')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
-  if(selectedPart==='weld'||selectedPart==='sc'||(selectedPart==='dojang'||selectedPart==='sm'||selectedPart==='press'))return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'')}</td><td>${esc(r.name)}</td><td>${esc(r.model)}</td><td>${esc(r.process)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  if(selectedPart==='je')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${esc(r.hogi)}</td><td>${esc(r.spec)}</td><td>${itemCell(r.assyNo,r,'item')}</td><td>${itemCell(r.subAssyNo||'-',r,'sub')}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  if(selectedPart==='finish')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'',r)}</td><td>${esc(r.name)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  if(selectedPart==='weld'||selectedPart==='sc'||(selectedPart==='dojang'||selectedPart==='sm'||selectedPart==='press'))return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'',r)}</td><td>${esc(r.name)}</td><td>${esc(r.model)}</td><td>${esc(r.process)}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
   const itemOrAssy=r.kind==='제관파트'?r.assyNo:(r.itemNo||'');
-  return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.kind)}</td><td>${esc(r.worker)}</td><td>${esc(r.kind==='제관파트'?r.hogi:'')}</td><td>${itemCell(itemOrAssy)}</td><td>${esc(r.kind==='제관파트'?r.spec:r.name)}</td><td>${esc(r.kind==='제관파트'?'':(r.model||''))}</td><td>${esc(r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''))}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
+  return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.kind)}</td><td>${esc(r.worker)}</td><td>${esc(r.kind==='제관파트'?r.hogi:'')}</td><td>${itemCell(itemOrAssy,r)}</td><td>${esc(r.kind==='제관파트'?r.spec:r.name)}</td><td>${esc(r.kind==='제관파트'?'':(r.model||''))}</td><td>${esc(r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''))}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
 }
 function renderTable(){
   let headers;
