@@ -88,7 +88,27 @@ function selectPart(p){
   document.getElementById('selectedPartLabel').textContent=labelMap[p];
   buildViewRows();render();
 }
+let smViewMaster = [];
+let smViewMasterState = 'loading';
+let smViewMasterRequest = 0;
+function loadSmViewMaster(){
+  const request = ++smViewMasterRequest;
+  smViewMasterState = 'loading';
+  jsonp({action:'smMaster'},res=>{
+    if(request!==smViewMasterRequest)return;
+    smViewMasterState=res.ok?'ready':'error';
+    smViewMaster=res.ok?(res.items||[]):[];
+    if(selectedPart==='sm')renderTable();
+  });
+}
+function smManagementLabel(r){
+  if(smViewMasterState!=='ready')return smViewMasterState==='error'?'조회 실패':'조회 중';
+  const norm=v=>String(v==null?'':v).trim().toUpperCase();
+  const matches=smViewMaster.filter(x=>norm(x.itemNo)===norm(r.itemNo)&&(!norm(r.model)||norm(x.model)===norm(r.model))&&(!norm(r.process)||norm(x.process)===norm(r.process)));
+  return [...new Set(matches.map(x=>String(x.managementNo||'').trim()).filter(Boolean))].join(' / ');
+}
 function loadResults(silent){
+  loadSmViewMaster();
   const d=document.getElementById('workDate').value||localDateString();
   document.getElementById('workDate').value=d;
   if(!silent)document.getElementById('summary').textContent='조회 중...';
@@ -127,7 +147,7 @@ function delBtn(r){return `<button type="button" class="del" onclick="deleteRow(
 function rowHtml(r,idx){
   if(selectedPart==='je')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${esc(r.hogi)}</td><td>${esc(r.spec)}</td><td>${itemCell(r.assyNo,r,'item')}</td><td>${itemCell(r.subAssyNo||'-',r,'sub')}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
   if(selectedPart==='finish')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'',r)}</td><td class="qty">${esc(r.qty)}</td><td>${esc(r.name)}</td><td>${delBtn(r)}</td></tr>`;
-  if(selectedPart==='weld'||selectedPart==='sc'||(selectedPart==='dojang'||selectedPart==='sm'||selectedPart==='press'))return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'',r)}</td><td class="qty">${esc(r.qty)}</td><td>${esc(r.process)}</td><td>${esc(r.name)}</td><td>${esc(r.model)}</td><td>${delBtn(r)}</td></tr>`;
+  if(selectedPart==='weld'||selectedPart==='sc'||(selectedPart==='dojang'||selectedPart==='sm'||selectedPart==='press'))return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td>${selectedPart==='sm'?'<td>'+esc(smManagementLabel(r))+'</td>':''}<td>${itemCell(r.itemNo||'',r)}</td><td class="qty">${esc(r.qty)}</td><td>${esc(r.process)}</td><td>${esc(r.name)}</td><td>${esc(r.model)}</td><td>${delBtn(r)}</td></tr>`;
   const itemOrAssy=r.kind==='제관파트'?r.assyNo:(r.itemNo||'');
   return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.kind)}</td><td>${esc(r.worker)}</td><td>${esc(r.kind==='제관파트'?r.hogi:'')}</td><td>${itemCell(itemOrAssy,r)}</td><td class="qty">${esc(r.qty)}</td><td>${esc(r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''))}</td><td>${esc(r.kind==='제관파트'?r.spec:r.name)}</td><td>${esc(r.kind==='제관파트'?'':(r.model||''))}</td><td>${delBtn(r)}</td></tr>`;
 }
@@ -137,6 +157,7 @@ function renderTable(){
   else if(selectedPart==='finish')headers=['순번','입력일시','작업자','품번','수량','품명','삭제'];
   else if(selectedPart==='weld'||selectedPart==='sc'||(selectedPart==='dojang'||selectedPart==='sm'||selectedPart==='press'))headers=['순번','입력일시','작업자','품번','수량','공정명','품명','모델명','삭제'];
   else headers=['순번','입력일시','구분','작업자','호기수','품번/ASSY','수량','공정명/SUB','품명/사양','모델명','삭제'];
+  if(selectedPart==='sm')headers.splice(headers.indexOf('품번'),0,'관리번호');
   document.getElementById('tbl').innerHTML='<thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+viewRows.map((r,i)=>rowHtml(r,i+1)).join('')+'</tbody>';
 }
 function deleteRow(sheet,rowNo){if(!rowNo){alert('삭제할 행 정보를 찾지 못했습니다.');return;}if(!confirm('선택한 실적을 삭제 처리할까요?'))return;jsonp({action:'delete',sheet,rowNo},res=>{if(!res.ok){alert(res.message||'삭제 실패');return;}loadResults(false);});}
