@@ -86,6 +86,7 @@ function selectPart(p){
   document.getElementById(idMap[p]).classList.add('active');
   const labelMap={all:'전체',finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트',press:'프레스파트',sm:'SM파트'};
   document.getElementById('selectedPartLabel').textContent=labelMap[p];
+  if(p==='sm'&&smViewMasterState!=='ready')loadSmViewMaster();
   buildViewRows();render();
 }
 let smViewMaster = [];
@@ -108,19 +109,15 @@ function smManagementLabel(r){
   return [...new Set(matches.map(x=>String(x.managementNo||'').trim()).filter(Boolean))].join(' / ');
 }
 function loadResults(silent){
-  loadSmViewMaster();
   const d=document.getElementById('workDate').value||localDateString();
   document.getElementById('workDate').value=d;
   if(!silent)document.getElementById('summary').textContent='조회 중...';
-  let done=0;
-  function finishOne(){done++;if(done===7){buildViewRows();render();if(notifyOn)checkNotify();}}
-  jsonp({action:'results',startDate:d,endDate:d},res=>{finishRows=res.ok?(res.rows||[]):[];finishOne();});
-  jsonp({action:'jeResults',startDate:d,endDate:d},res=>{jeRows=res.ok?(res.rows||[]):[];finishOne();});
-  jsonp({action:'weldResults',startDate:d,endDate:d},res=>{weldRows=res.ok?(res.rows||[]):[];finishOne();});
-  jsonp({action:'scResults',startDate:d,endDate:d},res=>{scRows=res.ok?(res.rows||[]):[];finishOne();});
-  jsonp({action:'dojangResults',startDate:d,endDate:d},res=>{dojangRows=res.ok?(res.rows||[]):[];finishOne();});
-  jsonp({action:'pressResults',startDate:d,endDate:d},res=>{pressRows=res.ok?(res.rows||[]):[];finishOne();});
-  jsonp({action:'smResults',startDate:d,endDate:d},res=>{smRows=res.ok?(res.rows||[]):[];finishOne();});
+  jsonp({action:'allResults',startDate:d,endDate:d},res=>{
+    if(!res.ok){document.getElementById('summary').textContent=res.message||'조회 실패';return;}
+    finishRows=res.finish||[];jeRows=res.je||[];weldRows=res.weld||[];scRows=res.sc||[];
+    dojangRows=res.dojang||[];pressRows=res.press||[];smRows=res.sm||[];
+    buildViewRows();render();if(notifyOn)checkNotify();
+  });
 }
 function buildViewRows(){
   const f=finishRows.map(x=>{const r=x.values||[];return{sheet:'finish',rowNo:x.rowNo,kind:'완성파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
