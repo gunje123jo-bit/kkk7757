@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>작업실적 조회</title>
   <style>
-    body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#111}header{background:#111827;color:#fff;padding:12px 16px;font-size:22px;font-weight:900}.wrap{max-width:1180px;margin:0 auto;padding:14px}.box{background:#fff;border-radius:12px;margin-bottom:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.08)}label{font-weight:800;display:block;margin-bottom:5px}input,button{font-size:16px;padding:10px;border-radius:8px;border:1px solid #ccc}button{border:0;background:#1769e0;color:white;font-weight:800;margin-right:6px;cursor:pointer}button.gray{background:#666}.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.muted{color:#555;font-size:13px;margin-top:8px}.partBox{display:flex;gap:10px;flex-wrap:wrap}.part{background:#e5e7eb;color:#111;border:1px solid #cbd5e1}.part.active{background:#111827;color:#fff}.smTypeBtn{background:#e5e7eb!important;color:#111!important;border:2px solid #cbd5e1!important}.smTypeBtn.active{background:#1769e0!important;color:#fff!important;border-color:#0b5ed7!important;box-shadow:0 0 0 3px rgba(23,105,224,.22)}.pill{display:inline-block;background:#eef5ff;border:1px solid #bfdbfe;color:#0b5ed7;border-radius:999px;padding:4px 10px;font-weight:900;margin-left:6px}.summary{font-weight:900;font-size:18px}.tableWrap{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.08)}table{border-collapse:collapse;width:100%;min-width:980px}th,td{border:1px solid #ddd;padding:10px;text-align:left;white-space:nowrap}th{background:#eee;font-weight:900}.qty{text-align:right;font-weight:900}.del{background:#e11d2e;color:#fff;border-radius:8px;padding:8px 10px}.subBox{display:flex;gap:8px;flex-wrap:wrap}.subCard{padding:8px 12px;background:#f1f5f9;border:1px solid #dbe3ee;border-radius:8px;font-weight:900}.off{background:#888}.copyBtn{background:#0f766e;color:#fff;border-radius:7px;padding:6px 8px;font-size:13px;font-weight:900;margin-right:8px}.copyBtn.done{background:#16a34a}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:14px 18px;border-radius:10px;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999;display:none}.itemCell{font-weight:900}.hide{display:none}
+    body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#111}header{background:#111827;color:#fff;padding:12px 16px;font-size:22px;font-weight:900}.wrap{max-width:1180px;margin:0 auto;padding:14px}.box{background:#fff;border-radius:12px;margin-bottom:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.08)}label{font-weight:800;display:block;margin-bottom:5px}input,button{font-size:16px;padding:10px;border-radius:8px;border:1px solid #ccc}button{border:0;background:#1769e0;color:white;font-weight:800;margin-right:6px;cursor:pointer}button.gray{background:#666}.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.muted{color:#555;font-size:13px;margin-top:8px}.partBox{display:flex;gap:10px;flex-wrap:wrap}.part{background:#e5e7eb;color:#111;border:1px solid #cbd5e1}.part.active{background:#111827;color:#fff}.smTypeBtn{background:#e5e7eb!important;color:#111!important;border:2px solid #cbd5e1!important}.smTypeBtn.active{background:#1769e0!important;color:#fff!important;border-color:#0b5ed7!important;box-shadow:0 0 0 3px rgba(23,105,224,.22)}.saveToast{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%) scale(.94);z-index:10000;background:#087b25;color:#fff;border-radius:16px;padding:22px 36px;font-size:26px;font-weight:900;box-shadow:0 12px 36px rgba(0,0,0,.35);opacity:0;visibility:hidden;transition:opacity .18s ease,transform .18s ease}.saveToast.show{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}.pill{display:inline-block;background:#eef5ff;border:1px solid #bfdbfe;color:#0b5ed7;border-radius:999px;padding:4px 10px;font-weight:900;margin-left:6px}.summary{font-weight:900;font-size:18px}.tableWrap{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.08)}table{border-collapse:collapse;width:100%;min-width:980px}th,td{border:1px solid #ddd;padding:10px;text-align:left;white-space:nowrap}th{background:#eee;font-weight:900}.qty{text-align:right;font-weight:900}.del{background:#e11d2e;color:#fff;border-radius:8px;padding:8px 10px}.subBox{display:flex;gap:8px;flex-wrap:wrap}.subCard{padding:8px 12px;background:#f1f5f9;border:1px solid #dbe3ee;border-radius:8px;font-weight:900}.off{background:#888}.copyBtn{background:#0f766e;color:#fff;border-radius:7px;padding:6px 8px;font-size:13px;font-weight:900;margin-right:8px}.copyBtn.done{background:#16a34a}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:14px 18px;border-radius:10px;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999;display:none}.itemCell{font-weight:900}.hide{display:none}
   </style>
 </head>
 <body>
 <header>작업실적 조회</header>
 <div class="wrap">
   <div class="box"><div class="row"><div><label for="workDate">조회일자</label><input id="workDate" type="date"></div><button type="button" onclick="loadResults(false)">조회</button><button type="button" class="gray" onclick="setTodayAndLoad()">오늘</button><button type="button" onclick="downloadCsv()">CSV 다운로드</button><button type="button" id="notifyBtn" class="off" onclick="toggleNotify()">PC 알림 켜기</button></div><div class="muted">날짜 선택 후 카테고리를 클릭하면 해당 실적만 표시됩니다. 잘못 입력한 건 PC 화면에서도 삭제할 수 있습니다.</div></div>
-  <div class="box"><div class="row" style="justify-content:space-between"><div class="partTitle">실적 입력</div><button type="button" class="gray" onclick="toggleInputPanel()">펼치기/접기</button></div>
+  <div class="box"><div class="row" style="justify-content:space-between"><div class="partTitle">실적 입력</div><button type="button" id="pcInputBtn" onclick="toggleInputPanel()">PC 입력</button></div>
     <div id="inputPanel" class="hide">
       <div class="partBox" style="margin:10px 0"><button type="button" id="inBtnFinish" class="part active" onclick="selectInputPart('finish')">완성파트</button><button type="button" id="inBtnJe" class="part" onclick="selectInputPart('je')">제관파트</button><button type="button" id="inBtnWeld" class="part" onclick="selectInputPart('weld')">용접파트</button><button type="button" id="inBtnSc" class="part" onclick="selectInputPart('sc')">SC파트</button><button type="button" id="inBtnDojang" class="part" onclick="selectInputPart('dojang')">도장파트</button><button type="button" id="inBtnPress" class="part" onclick="selectInputPart('press')">프레스파트</button><button type="button" id="inBtnSm" class="part" onclick="selectInputPart('sm')">SM파트</button></div>
       <div class="row"><div><label>작업일자</label><input id="inWorkDate" type="date"></div><div><label>작업자</label><span id="smSupportWrap" class="hide"><label><input type="checkbox" id="smSupport" onchange="fillAdminWorkers(inputPart)"> 지원 (SM2)</label></span><select id="inWorker"><option value="">작업자 선택</option></select></div></div>
@@ -41,6 +41,7 @@
   <div class="tableWrap"><table id="tbl"></table></div>
 </div>
 <div id="copyToast" class="toast">품번 복사 완료</div>
+<div id="adminSaveToast" class="saveToast" role="status" aria-live="polite">입력되었습니다</div>
 <script>
 
 let smPrefix='';
@@ -170,9 +171,11 @@ function checkNotify(){const c=finishRows.length+jeRows.length+weldRows.length+s
 let inputPart='finish';
 let adminMaster={finish:{items:[],workers:[]},je:{specs:[],workers:[]},weld:{items:[],workers:[]},sc:{items:[],workers:[]},dojang:{items:[],workers:[]},press:{items:[],workers:[]},sm:{items:[],workers:[]}};
 let adminLoaded={finish:false,je:false,weld:false,sc:false,dojang:false,press:false,sm:false};
-function toggleInputPanel(){const p=document.getElementById('inputPanel');const show=p.classList.contains('hide');p.classList.toggle('hide',!show);if(show)ensureAdminMaster(inputPart);}
+function toggleInputPanel(){const p=document.getElementById('inputPanel');const show=p.classList.contains('hide');p.classList.toggle('hide',!show);const b=document.getElementById('pcInputBtn');b.classList.toggle('gray',show);if(show){selectPart(inputPart);ensureAdminMaster(inputPart);}}
+function showAdminSaveToast(){const el=document.getElementById('adminSaveToast');el.classList.add('show');clearTimeout(window.__adminSaveToastTimer);window.__adminSaveToastTimer=setTimeout(()=>el.classList.remove('show'),2000);}
 function selectInputPart(k){
   inputPart=k;
+  selectPart(k);
   document.getElementById('smAdminSearch').classList.toggle('hide',k!=='sm');
   document.getElementById('inProcItem').classList.toggle('hide',k==='sm');
   document.getElementById('inProcItem').value='';
@@ -219,7 +222,7 @@ function saveAdminFinish(){
   const obj=(adminMaster.finish.items||[]).find(x=>x.itemNo===typed);
   jsonp({action:'save',workDate,worker,part:obj?(obj.part||'완성파트'):'완성파트',itemNo:obj?obj.itemNo:typed,itemName:obj?obj.itemName:'',model:obj?obj.model:'',process:obj?obj.process:'',qty,device:'PC',memo:''},d=>{
     msg.textContent=d.ok?'저장 완료':(d.message||'저장 실패');
-    if(d.ok){document.getElementById('inFinishItem').value='';document.getElementById('inFinishQty').value='';loadResults(false);}
+    if(d.ok){showAdminSaveToast();document.getElementById('inFinishItem').value='';document.getElementById('inFinishQty').value='';loadResults(false);}
   });
 }
 function saveAdminJe(){
@@ -232,7 +235,7 @@ function saveAdminJe(){
   const specObj=(adminMaster.je.specs||[]).find(x=>x.spec===spec);
   jsonp({action:'saveJe',workDate,worker,hogi,spec,assyNo:specObj?specObj.assyNo:'',subAssyNo:specObj?specObj.subAssyNo:'',qty,device:'PC',memo:''},d=>{
     msg.textContent=d.ok?'저장 완료':(d.message||'저장 실패');
-    if(d.ok){document.getElementById('inJeHogi').value='';loadResults(false);}
+    if(d.ok){showAdminSaveToast();document.getElementById('inJeHogi').value='';loadResults(false);}
   });
 }
 function saveAdminProc(){
@@ -247,7 +250,7 @@ function saveAdminProc(){
   if(!obj){msg.textContent='목록(datalist)에서 정확한 품번/공정을 선택하세요.';return;}
   jsonp({action:cfgAction,workDate,worker,part:obj.part||defaultPart,itemNo:obj.itemNo,itemName:obj.itemName,model:obj.model,process:obj.process,qty,device:'PC',memo:''},d=>{
     msg.textContent=d.ok?'저장 완료':(d.message||'저장 실패');
-    if(d.ok){document.getElementById('inProcItem').value='';document.getElementById('inProcQty').value='';loadResults(false);}
+    if(d.ok){showAdminSaveToast();document.getElementById('inProcItem').value='';document.getElementById('inProcQty').value='';loadResults(false);}
   });
 }
 document.getElementById('inWorkDate').value=localDateString();
