@@ -121,13 +121,13 @@ function loadResults(silent){
   });
 }
 function buildViewRows(){
-  const f=finishRows.map(x=>{const r=x.values||[];return{sheet:'finish',rowNo:x.rowNo,kind:'완성파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
-  const j=jeRows.map(x=>{const r=x.values||[];return{sheet:'je',rowNo:x.rowNo,kind:'제관파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:'제관',hogi:r[4]||'',spec:r[5]||'',assyNo:r[6]||'',subAssyNo:r[7]||'',name:r[5]||'',qty:r[8]||''};});
-  const w=weldRows.map(x=>{const r=x.values||[];return{sheet:'weld',rowNo:x.rowNo,kind:'용접파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
-  const s=scRows.map(x=>{const r=x.values||[];return{sheet:'sc',rowNo:x.rowNo,kind:'SC파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
-  const dj=dojangRows.map(x=>{const r=x.values||[];return{sheet:'dojang',rowNo:x.rowNo,kind:'도장파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
-  const pr=pressRows.map(x=>{const r=x.values||[];return{sheet:'press',rowNo:x.rowNo,kind:'프레스파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
-  const sm=smRows.map(x=>{const r=x.values||[];return{sheet:'sm',rowNo:x.rowNo,kind:'SM파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const f=finishRows.map(x=>{const r=x.values||[];return{sheet:'finish',rowNo:x.rowNo,rid:(x.values||[])[12]||'',kind:'완성파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const j=jeRows.map(x=>{const r=x.values||[];return{sheet:'je',rowNo:x.rowNo,rid:(x.values||[])[12]||'',kind:'제관파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:'제관',hogi:r[4]||'',spec:r[5]||'',assyNo:r[6]||'',subAssyNo:r[7]||'',name:r[5]||'',qty:r[8]||''};});
+  const w=weldRows.map(x=>{const r=x.values||[];return{sheet:'weld',rowNo:x.rowNo,rid:(x.values||[])[12]||'',kind:'용접파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const s=scRows.map(x=>{const r=x.values||[];return{sheet:'sc',rowNo:x.rowNo,rid:(x.values||[])[12]||'',kind:'SC파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const dj=dojangRows.map(x=>{const r=x.values||[];return{sheet:'dojang',rowNo:x.rowNo,rid:(x.values||[])[12]||'',kind:'도장파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const pr=pressRows.map(x=>{const r=x.values||[];return{sheet:'press',rowNo:x.rowNo,rid:(x.values||[])[12]||'',kind:'프레스파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||r[4]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
+  const sm=smRows.map(x=>{const r=x.values||[];return{sheet:'sm',rowNo:x.rowNo,rid:(x.values||[])[12]||'',kind:'SM파트',inputTime:r[0]||'',workDate:r[1]||'',worker:r[2]||'',part:r[3]||'',itemNo:r[4]||'',name:r[5]||'',model:r[6]||'',process:r[7]||'',qty:r[8]||''};});
   let all=[];
   if(selectedPart==='all')all=f.concat(j,w,s,dj,sm,pr);
   else if(selectedPart==='finish')all=f;
@@ -141,7 +141,7 @@ function buildViewRows(){
 }
 function render(){const date=document.getElementById('workDate').value;const total=viewRows.reduce((s,x)=>s+(Number(x.qty)||0),0);document.getElementById('summary').textContent=`${date} / ${document.getElementById('selectedPartLabel').textContent} 조회 건수: ${viewRows.length.toLocaleString()}건 / 수량 합계: ${total.toLocaleString()}`;renderJeSummary();renderTable();}
 function renderJeSummary(){const box=document.getElementById('jeSummaryBox');if(selectedPart!=='je'){box.style.display='none';return;}box.style.display='block';const m={};viewRows.forEach(r=>{const k=r.subAssyNo||'-';m[k]=(m[k]||0)+(Number(r.qty)||0);});document.getElementById('jeSubSummary').innerHTML=Object.keys(m).map(k=>`<div class="subCard">${esc(k)}<br>${m[k].toLocaleString()}개</div>`).join('')||'<div class="muted">수량 없음</div>';}
-function delBtn(r){return `<button type="button" class="del" onclick="deleteRow('${esc(r.sheet)}',${Number(r.rowNo||0)})">삭제</button>`;}
+function delBtn(r){return `<button type="button" class="del" onclick="deleteRow('${esc(r.sheet)}',${Number(r.rowNo||0)},'${esc(r.rid||'')}')">삭제</button>`;}
 function rowHtml(r,idx){
   if(selectedPart==='je')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${esc(r.hogi)}</td><td>${esc(r.spec)}</td><td>${itemCell(r.assyNo,r,'item')}</td><td>${itemCell(r.subAssyNo||'-',r,'sub')}</td><td class="qty">${esc(r.qty)}</td><td>${delBtn(r)}</td></tr>`;
   if(selectedPart==='finish')return `<tr><td>${idx}</td><td>${esc(r.inputTime)}</td><td>${esc(r.worker)}</td><td>${itemCell(r.itemNo||'',r)}</td><td class="qty">${esc(r.qty)}</td><td>${esc(r.name)}</td><td>${delBtn(r)}</td></tr>`;
@@ -158,7 +158,7 @@ function renderTable(){
   if(selectedPart==='sm')headers.splice(headers.indexOf('품번'),0,'관리번호');
   document.getElementById('tbl').innerHTML='<thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+viewRows.map((r,i)=>rowHtml(r,i+1)).join('')+'</tbody>';
 }
-function deleteRow(sheet,rowNo){if(!rowNo){alert('삭제할 행 정보를 찾지 못했습니다.');return;}if(!confirm('선택한 실적을 삭제 처리할까요?'))return;jsonp({action:'delete',sheet,rowNo},res=>{if(!res.ok){alert(res.message||'삭제 실패');return;}loadResults(false);});}
+function deleteRow(sheet,rowNo,rid){if(!rowNo){alert('삭제할 행 정보를 찾지 못했습니다.');return;}if(!confirm('선택한 실적을 삭제 처리할까요?'))return;jsonp({action:'delete',sheet,rowNo,rid:rid||''},res=>{if(!res.ok){alert(res.message||'삭제 실패');return;}loadResults(false);});}
 function downloadCsv(){
   const headers=selectedPart==='je'?['순번','입력일시','작업자','호기수','사양','ASSY 품번','SUB ASSY 품번','수량']:selectedPart==='finish'?['순번','입력일시','작업자','품번','품명','수량']:(selectedPart==='weld'||selectedPart==='sc'||(selectedPart==='dojang'||selectedPart==='sm'||selectedPart==='press'))?['순번','입력일시','작업자','품번','품명','모델명','공정명','수량']:['순번','입력일시','구분','작업자','호기수','품번/ASSY','품명/사양','모델명','공정명/SUB','수량'];
   const rows=viewRows.map((r,i)=>selectedPart==='je'?[i+1,r.inputTime,r.worker,r.hogi,r.spec,r.assyNo,r.subAssyNo,r.qty]:selectedPart==='finish'?[i+1,r.inputTime,r.worker,r.itemNo||'',r.name,r.qty]:(selectedPart==='weld'||selectedPart==='sc'||(selectedPart==='dojang'||selectedPart==='sm'||selectedPart==='press'))?[i+1,r.inputTime,r.worker,r.itemNo||'',r.name,r.model,r.process,r.qty]:[i+1,r.inputTime,r.kind,r.worker,r.kind==='제관파트'?r.hogi:'',r.kind==='제관파트'?r.assyNo:(r.itemNo||''),r.kind==='제관파트'?r.spec:r.name,r.kind==='제관파트'?'':(r.model||''),r.kind==='제관파트'?(r.subAssyNo||''):(r.process||''),r.qty]);

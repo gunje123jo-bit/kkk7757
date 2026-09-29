@@ -9,6 +9,8 @@
   
     .msg{font-weight:900;margin-top:10px;font-size:24px;text-align:center;padding:16px;border-radius:14px;border:3px solid transparent;line-height:1.25}.msg.ok{color:#064e3b;background:#bbf7d0;border-color:#16a34a}.msg.err{color:#7f1d1d;background:#fecaca;border-color:#dc2626}.msg.ready{color:#1e3a8a;background:#dbeafe;border-color:#2563eb}.msg.wait{color:#713f12;background:#fef3c7;border-color:#f59e0b}.item.active,.processGroup.active,.specRow.active{border:4px solid #16a34a!important;background:#dcfce7!important;box-shadow:0 0 0 4px rgba(22,163,74,.15)}.selectedBig{font-size:22px;font-weight:900;text-align:center;color:#064e3b;background:#dcfce7;border:3px solid #16a34a;border-radius:14px;padding:14px;margin-top:10px}.inputWaiting{font-size:22px;font-weight:900;text-align:center;color:#1e3a8a;background:#dbeafe;border:3px solid #2563eb;border-radius:14px;padding:14px;margin-top:10px}.jeBulkBar{background:#fff;padding:8px 0 0;margin:12px 0 0}.jeBulkBtn{font-size:22px;padding:16px;background:#111827}.jeMsgSmall{font-size:13px;font-weight:700;color:#6b7280;text-align:right;margin-top:6px;line-height:1.35}.jeMsgSmall.err{color:#b00020}.jeMsgSmall.ready{color:#6b7280}.checkLine{display:flex;gap:10px;align-items:center;margin-bottom:8px}.jeCheck{width:34px;height:34px;accent-color:#16a34a}.checkText{font-size:22px;font-weight:900}.qtySelect{height:50px}.qtyBtn{height:50px}.saving{opacity:.75;pointer-events:none;background:#f59e0b!important;color:#111!important}.disabledArea{opacity:.65;pointer-events:none}.bigHint{font-size:18px;font-weight:900;color:#111827;background:#fef3c7;border:2px solid #f59e0b;padding:10px;border-radius:12px;margin-top:8px}
 .chip.selected{background:#16a34a!important;color:#fff!important;border-color:#15803d!important;box-shadow:0 0 0 4px rgba(22,163,74,.18)}.processGroup.hasSelected{border:4px solid #16a34a!important;background:#dcfce7!important}.processHelp{font-size:12px;font-weight:600;color:#6b7280;background:transparent;border:0;padding:0;margin-top:6px;text-align:right;line-height:1.3}.chip{font-size:18px!important;font-weight:900!important;padding:12px 16px!important}.selectedRows{display:flex;flex-direction:column;gap:10px;margin-top:10px}.selectedRow{background:#fff;border:2px solid #16a34a;border-radius:12px;padding:10px;text-align:left}.selectedRowTitle{font-size:17px;font-weight:900;color:#064e3b;line-height:1.25}.selectedRowMeta{font-size:13px;font-weight:700;color:#4b5563;margin-top:3px;line-height:1.25}.selectedQtyInput{margin-top:8px;font-size:22px!important;font-weight:900;text-align:center;border:3px solid #16a34a!important;background:#fff}.selectedRemove{width:auto;background:#6b7280;color:#fff;font-size:13px!important;padding:7px 10px!important;margin-top:7px}.qtyHidden{display:none!important}.closeBtn{background:#ea580c!important;font-size:19px!important;padding:16px!important;font-weight:900}
+
+.pendBadge{background:#111827;color:#fff;border-radius:999px;padding:5px 12px;font-weight:900;font-size:15px;white-space:nowrap}.pendItem{padding:11px 0;border-bottom:1px solid #eee}.pendTop{display:flex;justify-content:space-between;gap:10px;align-items:center}.pendQty{width:96px!important;flex:none;font-size:22px!important;font-weight:900;text-align:center;padding:9px!important;border:3px solid #1769e0!important}.sendAllBtn{background:#087b25!important;font-size:24px!important;padding:20px!important;font-weight:900;margin-top:14px}.sendAllBtn:disabled{background:#9ca3af!important}.dlgBack{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}.dlgBack.hide{display:none}.dlgBox{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;max-height:85vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.4)}.dlgTitle{font-size:22px;font-weight:900;color:#b45309;margin-bottom:10px}.dlgBody{font-size:16px;line-height:1.45}.dupRow{background:#fff7ed;border:2px solid #fb923c;border-radius:10px;padding:9px;margin:8px 0;font-size:15px}.dlgBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.dlgBtns button{margin-top:0}
 </style>
 </head>
 <body>
@@ -28,21 +30,24 @@
 
   <div class="card"><div class="row2"><div><label>작업일자</label><input type="date" id="workDate"></div><div><label>작업자</label><div id="smSupportWrap" class="hide"><label><input type="checkbox" id="smSupport" style="width:auto" onchange="fillWorkers();loadResults()"> 지원 (SM2)</label></div><select id="worker"><option value="">작업자 선택</option></select></div></div><div class="sub">선택한 작업일자 기준으로 실적이 저장됩니다.</div></div>
 
-  <div id="finishArea"><div class="card"><label>품목번호</label><input id="itemNoInput" autocomplete="off" placeholder="품번 또는 품명 검색"><div id="items" class="sub">품번 또는 품명을 입력하세요.</div></div><div class="card"><label>수량</label><input type="number" id="qty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveFinishBtn" onclick="saveFinish()">입력</button><button class="gray" onclick="resetFinish()">입력칸 초기화</button><div id="selectedText" class="sub">입력 대기: 품번을 검색하세요.</div><div id="msg" class="msg ready">입력 대기</div></div></div>
+  <div id="finishArea"><div class="card"><label>품목번호</label><input id="itemNoInput" autocomplete="off" placeholder="품번 또는 품명 검색"><div id="items" class="sub">품번 또는 품명을 입력하세요.</div></div><div class="card"><label>수량</label><input type="number" id="qty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveFinishBtn" onclick="saveFinish()">입력 담기</button><button class="gray" onclick="resetFinish()">입력칸 초기화</button><div id="selectedText" class="sub">입력 대기: 품번을 검색하세요.</div><div id="msg" class="msg ready">입력 대기</div></div></div>
 
-  <div id="jeArea" class="hide"><div class="card"><label>제관 사양 입력</label><div class="notice">여러 사양을 동시에 선택할 수 있습니다. 예: 15T 수량 3, 25T 수량 1 선택 후 한 번에 저장.</div><div id="specs" class="specList"></div><div class="jeBulkBar"><div id="jeSelectedText" class="inputWaiting">입력 대기: 사양을 선택하세요.</div><button id="saveJeSelectedBtn" class="jeBulkBtn" type="button" onclick="saveJeSelected()">선택 사양 입력</button><div id="jeMsg" class="jeMsgSmall ready">입력 대기</div></div></div></div>
+  <div id="jeArea" class="hide"><div class="card"><label>제관 사양 입력</label><div class="notice">여러 사양을 동시에 선택할 수 있습니다. 예: 15T 수량 3, 25T 수량 1 선택 후 한 번에 담기.</div><div id="specs" class="specList"></div><div class="jeBulkBar"><div id="jeSelectedText" class="inputWaiting">입력 대기: 사양을 선택하세요.</div><button id="saveJeSelectedBtn" class="jeBulkBtn" type="button" onclick="saveJeSelected()">선택 사양 담기</button><div id="jeMsg" class="jeMsgSmall ready">입력 대기</div></div></div></div>
 
-  <div id="weldArea" class="hide"><div class="card"><label>용접 품번 검색</label><input id="weldSearch" autocomplete="off" placeholder="품번 입력"><div id="weldItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>선택 공정별 수량</label><div id="weldSelectedText" class="sub">입력 대기: 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="weldQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveWeldBtn" onclick="saveWeld()">입력</button><button class="gray" onclick="resetWeld()">입력칸 초기화</button><div id="weldMsg" class="msg ready">입력 대기</div></div></div>
+  <div id="weldArea" class="hide"><div class="card"><label>용접 품번 검색</label><input id="weldSearch" autocomplete="off" placeholder="품번 입력"><div id="weldItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>선택 공정별 수량</label><div id="weldSelectedText" class="sub">입력 대기: 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="weldQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveWeldBtn" onclick="saveWeld()">입력 담기</button><button class="gray" onclick="resetWeld()">입력칸 초기화</button><div id="weldMsg" class="msg ready">입력 대기</div></div></div>
 
-  <div id="scArea" class="hide"><div class="card"><label>SC 품번 검색</label><input id="scSearch" autocomplete="off" placeholder="품번 입력"><div id="scItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SC 선택 공정별 수량</label><div id="scSelectedText" class="sub">입력 대기: SC 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="scQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveScBtn" onclick="saveSc()">입력</button><button class="gray" onclick="resetSc()">입력칸 초기화</button><div id="scMsg" class="msg ready">입력 대기</div></div></div>
+  <div id="scArea" class="hide"><div class="card"><label>SC 품번 검색</label><input id="scSearch" autocomplete="off" placeholder="품번 입력"><div id="scItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SC 선택 공정별 수량</label><div id="scSelectedText" class="sub">입력 대기: SC 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="scQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveScBtn" onclick="saveSc()">입력 담기</button><button class="gray" onclick="resetSc()">입력칸 초기화</button><div id="scMsg" class="msg ready">입력 대기</div></div></div>
 
-  <div id="dojangArea" class="hide"><div class="card"><label>도장 품번 검색</label><input id="dojangSearch" autocomplete="off" placeholder="품번 입력"><div id="dojangItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>도장 선택 공정별 수량</label><div id="dojangSelectedText" class="sub">입력 대기: 도장 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="dojangQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveDojangBtn" onclick="saveDojang()">입력</button><button class="gray" onclick="resetDojang()">입력칸 초기화</button><div id="dojangMsg" class="msg ready">입력 대기</div></div></div>
-  <div id="pressArea" class="hide"><div class="card"><label>프레스 품번 검색</label><input id="pressSearch" autocomplete="off" placeholder="품번 입력"><div id="pressItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>프레스 선택 공정별 수량</label><div id="pressSelectedText" class="sub">입력 대기: 프레스 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="pressQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="savePressBtn" onclick="savePress()">입력</button><button class="gray" onclick="resetPress()">입력칸 초기화</button><div id="pressMsg" class="msg ready">입력 대기</div></div></div>
-  <div id="smArea" class="hide"><div class="card"><label>SM 관리번호 검색</label><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><input id="smSearch" inputmode="numeric" autocomplete="off" placeholder="관리번호 숫자 입력 (예: 22)"><div id="smItems" class="sub">SM파트를 불러오는 중입니다.</div><label>SM 품번 검색</label><input id="smPartSearch" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderProcessItems('sm')"><div id="smPartItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SM 선택 공정별 수량</label><div id="smSelectedText" class="sub">입력 대기: SM 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="smQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSmBtn" onclick="saveSm()">입력</button><button class="gray" onclick="resetSm()">입력칸 초기화</button><div id="smMsg" class="msg ready">입력 대기</div></div></div>
+  <div id="dojangArea" class="hide"><div class="card"><label>도장 품번 검색</label><input id="dojangSearch" autocomplete="off" placeholder="품번 입력"><div id="dojangItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>도장 선택 공정별 수량</label><div id="dojangSelectedText" class="sub">입력 대기: 도장 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="dojangQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveDojangBtn" onclick="saveDojang()">입력 담기</button><button class="gray" onclick="resetDojang()">입력칸 초기화</button><div id="dojangMsg" class="msg ready">입력 대기</div></div></div>
+  <div id="pressArea" class="hide"><div class="card"><label>프레스 품번 검색</label><input id="pressSearch" autocomplete="off" placeholder="품번 입력"><div id="pressItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>프레스 선택 공정별 수량</label><div id="pressSelectedText" class="sub">입력 대기: 프레스 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="pressQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="savePressBtn" onclick="savePress()">입력 담기</button><button class="gray" onclick="resetPress()">입력칸 초기화</button><div id="pressMsg" class="msg ready">입력 대기</div></div></div>
+  <div id="smArea" class="hide"><div class="card"><label>SM 관리번호 검색</label><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><input id="smSearch" inputmode="numeric" autocomplete="off" placeholder="관리번호 숫자 입력 (예: 22)"><div id="smItems" class="sub">SM파트를 불러오는 중입니다.</div><label>SM 품번 검색</label><input id="smPartSearch" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderProcessItems('sm')"><div id="smPartItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SM 선택 공정별 수량</label><div id="smSelectedText" class="sub">입력 대기: SM 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="smQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSmBtn" onclick="saveSm()">입력 담기</button><button class="gray" onclick="resetSm()">입력칸 초기화</button><div id="smMsg" class="msg ready">입력 대기</div></div></div>
 
-  <div class="card"><div class="doneHead"><h2>입력 완료 내역</h2><button class="smallBtn" onclick="loadResults()">새로고침</button></div><div class="sub">선택한 작업일자와 작업자 기준으로 표시됩니다.</div><div id="todayTotal" class="totalBox">합계: 0개</div><div id="todayResults" class="sub">작업자와 날짜를 선택하세요.</div></div>
+  <div class="card" id="pendingCard"><div class="doneHead"><h2>입력 대기 목록</h2><span id="pendingCount" class="pendBadge">0건</span></div><div class="sub">입력한 내용은 여기에 담기기만 하고, 아래 [전체 입력 완료]를 눌러야 한 번에 전송됩니다.</div><div id="pendingList" class="sub">대기 중인 입력이 없습니다.</div><div id="pendingOther" class="notice hide"></div><button type="button" id="sendAllBtn" class="sendAllBtn" onclick="sendAllPending()">전체 입력 완료</button><div id="sendMsg" class="msg ready">전송 대기</div></div>
+
+  <div class="card"><div class="doneHead"><h2>입력 완료 내역 (전송된 것)</h2><button class="smallBtn" onclick="loadResults()">새로고침</button></div><div class="sub">선택한 작업일자와 작업자 기준으로 표시됩니다.</div><div id="todayTotal" class="totalBox">합계: 0개</div><div id="todayResults" class="sub">작업자와 날짜를 선택하세요.</div></div>
   <div class="card"><button type="button" id="closePartBtn" class="closeBtn" onclick="closePartAlert()">완성파트 작업지시 입력완료</button><div class="sub">해당 파트의 오늘 작업을 모두 마쳤을 때 한 번만 눌러주세요. PC로 완료 알림이 갑니다.</div></div>
 </div>
+<div id="dlg" class="dlgBack hide"><div class="dlgBox"><div id="dlgTitle" class="dlgTitle"></div><div id="dlgBody" class="dlgBody"></div><div class="dlgBtns"><button type="button" id="dlgNo" class="gray"></button><button type="button" id="dlgYes"></button></div></div></div>
 <div id="saveToast" class="saveToast" role="status" aria-live="polite">저장 완료</div>
 <script>
 
@@ -94,7 +99,7 @@ function localTomorrow(){const d=new Date();d.setDate(d.getDate()+1);return `${d
 function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function escJs(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');}
 function normalizeSearch(s){return String(s||'').toUpperCase().replace(/[^0-9A-Z가-힣]/g,'');}
-function jsonp(params,cb,attempt=0){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');let ended=false,timer=null;const readOnly=/^(master|jeMaster|weldMaster|scMaster|dojangMaster|pressMaster|smMaster|processSearch|results|jeResults|weldResults|scResults|dojangResults|pressResults|smResults|allResults)$/.test(params.action||'');const cleanup=()=>{clearTimeout(timer);s.remove();};const fail=()=>{if(ended)return;ended=true;cleanup();window[callback]=()=>{};setTimeout(()=>{try{delete window[callback]}catch(e){}},30000);if(readOnly&&attempt<1){setTimeout(()=>jsonp(params,cb,attempt+1),500);return;}const error={ok:false,message:'통신 오류입니다. 잠시 후 다시 검색해 주세요.'};if(typeof cb==='function')cb(error);else showActiveMsg(error.message,false);};window[callback]=data=>{if(ended)return;ended=true;cleanup();delete window[callback];cb(data);};s.onerror=fail;s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);timer=setTimeout(fail,45000);}
+function jsonp(params,cb,attempt=0){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');let ended=false,timer=null;const readOnly=/^(master|jeMaster|weldMaster|scMaster|dojangMaster|pressMaster|smMaster|processSearch|results|jeResults|weldResults|scResults|dojangResults|pressResults|smResults|allResults)$/.test(params.action||'');const cleanup=()=>{clearTimeout(timer);s.remove();};const fail=()=>{if(ended)return;ended=true;cleanup();window[callback]=()=>{};setTimeout(()=>{try{delete window[callback]}catch(e){}},30000);if(readOnly&&attempt<1){setTimeout(()=>jsonp(params,cb,attempt+1),500);return;}const error={ok:false,comm:true,message:'통신 오류입니다. 잠시 후 다시 시도해 주세요.'};if(typeof cb==='function')cb(error);else showActiveMsg(error.message,false);};window[callback]=data=>{if(ended)return;ended=true;cleanup();delete window[callback];cb(data);};s.onerror=fail;s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);timer=setTimeout(fail,45000);}
 function show(elId,msg,ok){const el=document.getElementById(elId);el.textContent=msg||'';let cls='err';if(ok===true)cls='ok';else if(ok==='wait')cls='wait';else if(msg==='입력 대기'||String(msg||'').includes('입력 대기'))cls='ready';el.className='msg '+cls;}
 function showJeSmall(msg,ok){const el=document.getElementById('jeMsg');if(!el)return;el.textContent=msg||'';el.className='jeMsgSmall '+(ok===false?'err':'ready');}
 function showActiveMsg(msg,ok){if(mode==='finish')show('msg',msg,ok);else if(mode==='je')showJeSmall(msg,ok);else if(PROC_CFG[mode])show(PROC_CFG[mode].msg,msg,ok);}
@@ -118,6 +123,7 @@ function setMode(m){
   const partLabelMap={finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트',press:'프레스파트',sm:'SM파트'};
   document.getElementById('closePartBtn').textContent=partLabelMap[m]+' 작업지시 입력완료';
   fillWorkers();
+  renderPending();
   if(REMOTE_PART_SEARCH[m]){
     loaded[m]=true;
     procData[m].items=[];
@@ -151,6 +157,7 @@ function searchProcessRemote(kind){
 function closePartAlert(){
   const partLabelMap={finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트',press:'프레스파트',sm:'SM파트'};
   const part=partLabelMap[mode];
+  if(pending.some(e=>e.kind===mode)){alert('아직 전송하지 않은 입력 대기 건이 있습니다. 먼저 [전체 입력 완료]를 눌러 전송해 주세요.');return;}
   if(!confirm(part+' 작업을 오늘 다 마치셨나요? PC로 완료 알림을 보냅니다.'))return;
   const btn=document.getElementById('closePartBtn');
   btn.disabled=true;btn.textContent='전송 중...';
@@ -160,16 +167,25 @@ function closePartAlert(){
     alert(d.ok?'완료 알림을 보냈습니다.':(d.message||'전송 실패'));
   });
 }
+const MASTER_ACTIONS={finish:'master',je:'jeMaster',weld:'weldMaster',sc:'scMaster',dojang:'dojangMaster',press:'pressMaster',sm:'smMaster'};
+const MASTER_STALE_MAX_MS=12*60*60*1000;
+function refreshMasterQuiet(kind){
+  // 저장된 마스터를 먼저 보여준 뒤, 뒤에서 조용히 새 마스터를 받아 저장해 둡니다. (제관은 입력 중 목록이 바뀌면 안 되므로 다음 진입 때 반영)
+  jsonp({action:MASTER_ACTIONS[kind]},d=>{
+    if(!d||!d.ok)return;
+    writeMasterCache(kind,d);
+    if(kind!=='je')applyMasterData(kind,d);
+  });
+}
 function ensureMaster(kind,done){
   if(loaded[kind]){done&&done();return;}
   if(loading[kind]){setTimeout(()=>ensureMaster(kind,done),150);return;}
   const cached=readMasterCache(kind);
-  if(cached){applyMasterData(kind,cached);loaded[kind]=true;done&&done();return;}
+  if(cached){applyMasterData(kind,cached.data);loaded[kind]=true;done&&done();if(!cached.fresh)refreshMasterQuiet(kind);return;}
   loading[kind]=true;
-  const actions={finish:'master',je:'jeMaster',weld:'weldMaster',sc:'scMaster',dojang:'dojangMaster',press:'pressMaster',sm:'smMaster'};
   const boxId={finish:'items',je:'specs',weld:'weldItems',sc:'scItems',dojang:'dojangItems',press:'pressItems',sm:'smItems'}[kind];
   if(boxId)document.getElementById(boxId).innerHTML='마스터 불러오는 중...';
-  jsonp({action:actions[kind]},d=>{
+  jsonp({action:MASTER_ACTIONS[kind]},d=>{
     loading[kind]=false;
     if(d.ok){
       applyMasterData(kind,d);
@@ -188,7 +204,7 @@ function applyMasterData(kind,d){
   if(PROC_CFG[kind]){procData[kind].items=d.items||[];procData[kind].workers=(d.workers&&d.workers.length?d.workers:(FAST_WORKERS[kind]||[]));}
 }
 function readMasterCache(kind){
-  try{const v=JSON.parse(localStorage.getItem('workResults.master.'+kind+'.v1')||'null');return v&&Date.now()-Number(v.savedAt||0)<MASTER_CACHE_MS?v.data:null;}catch(e){return null;}
+  try{const v=JSON.parse(localStorage.getItem('workResults.master.'+kind+'.v1')||'null');if(!v||!v.data)return null;const age=Date.now()-Number(v.savedAt||0);if(age>MASTER_STALE_MAX_MS)return null;return{data:v.data,fresh:age<MASTER_CACHE_MS};}catch(e){return null;}
 }
 function writeMasterCache(kind,data){
   try{localStorage.setItem('workResults.master.'+kind+'.v1',JSON.stringify({savedAt:Date.now(),data}));}catch(e){}
@@ -265,7 +281,7 @@ function renderProcessItems(kind){
       const sel=selectedKeys.includes(String(r.inputKey));
       return `<button type="button" class="chip ${sel?'selected':''}" data-kind="${kind}" data-key="${esc(r.inputKey)}" onclick="toggleProcessItem('${kind}','${escJs(r.inputKey)}')">${esc(kind==='sm'&&!r.process?'선택':processLabel(r.process))}</button>`;
     }).join('');
-    return `<div class="processGroup ${hasSel?'hasSelected':''}" data-kind="${kind}" data-group="${gi}"><div class="processTitle">${kind==='sm'?esc(g.rows.map(r=>r.managementNo).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', '))+' / ':''}${esc(g.itemNo)} / ${esc(g.itemName||'')}</div><div class="processMeta">${kind==='sm'?'모델: ':''}${esc(g.model||'')}</div><div class="chips">${chips}</div><div class="processHelp">공정 선택 후 아래 [입력 완료]를 누르세요.</div></div>`;
+    return `<div class="processGroup ${hasSel?'hasSelected':''}" data-kind="${kind}" data-group="${gi}"><div class="processTitle">${kind==='sm'?esc(g.rows.map(r=>r.managementNo).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', '))+' / ':''}${esc(g.itemNo)} / ${esc(g.itemName||'')}</div><div class="processMeta">${kind==='sm'?'모델: ':''}${esc(g.model||'')}</div><div class="chips">${chips}</div><div class="processHelp">공정 선택 후 아래 [입력 담기]를 누르세요.</div></div>`;
   }).join('')||`<div class="sub">일치하는 ${cfg.label} 품번/공정이 없습니다.</div>`;
   updateProcessVisuals(kind,false);
 }
@@ -303,7 +319,7 @@ function updateProcessVisuals(kind,withMsg=true){
     return `<div class="selectedRow"><div class="selectedRowTitle">${esc(r.itemNo)} / ${esc(processLabel(r.process))}</div><div class="selectedRowMeta">${esc(r.itemName||'')} / ${esc(r.model||'')}</div><input class="selectedQtyInput" id="${id}" type="number" min="1" inputmode="numeric" placeholder="수량" value="${esc(existing)}"><button type="button" class="selectedRemove" onclick="removeSelectedProcess('${kind}','${escJs(r.inputKey)}')">선택 해제</button></div>`;
   }).join('');
   selectedText.innerHTML=`<div class="selectedBig">선택 완료: ${obj.rows.length}개 공정<div class="selectedRows">${rowsHtml}</div></div>`;
-  if(withMsg)show(cfg.msg,'공정별 수량 입력 후 [입력 완료]',true);
+  if(withMsg)show(cfg.msg,'공정별 수량 입력 후 [입력 담기]',true);
 }
 function selectProcessItem(kind,inputKey){toggleProcessItem(kind,inputKey);}
 function selectProcessMulti(kind,key1,key2){
@@ -315,10 +331,45 @@ function renderSpecs(){applyJeFallback();const box=document.getElementById('spec
 function renderJeHogiInputs(i){const wrap=document.getElementById('hogiWrap_'+i);if(!wrap)return;const qty=Number(document.getElementById('jeQty_'+i)?.value||1);const old=[...wrap.querySelectorAll('input')].map(x=>x.value);wrap.innerHTML=Array.from({length:qty},(_,n)=>`<input class="hogiInput hogiMulti" id="hogi_${i}_${n}" maxlength="4" inputmode="numeric" placeholder="${n+1}호기" value="${esc(old[n]||'')}" onfocus="document.getElementById('jeCheck_${i}').checked=true;updateJeSelection();" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);document.getElementById('jeCheck_${i}').checked=true;updateJeSelection();">`).join('');}
 function getJeHogis(i){const qty=Number(document.getElementById('jeQty_'+i)?.value||1);const arr=[];for(let n=0;n<qty;n++){arr.push((document.getElementById(`hogi_${i}_${n}`)?.value||'').trim());}return arr;}
 function updateJeSelection(){let count=0;let total=0;let summary=[];(jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);const row=document.getElementById('jeRow_'+i);if(c&&c.checked){count++;row&&row.classList.add('active');const qty=Number(document.getElementById('jeQty_'+i)?.value||'1');total+=qty;summary.push(`${x.spec} ${qty}대`);}else{row&&row.classList.remove('active');}});const t=document.getElementById('jeSelectedText');if(!t)return;if(count){t.className='selectedBig';t.innerHTML=`선택 완료: ${count}개 사양 / 총 ${total}대<br>${esc(summary.join(' / '))}`;showJeSmall('선택 후 아래 버튼을 누르세요.', true);}else{t.className='inputWaiting';t.textContent='입력 대기: 사양을 선택하세요.';showJeSmall('입력 대기', true);}}
-function saveJeSelected(){const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;if(!workDate)return showJeSmall('작업일자를 선택하세요.', false);if(!worker)return showJeSmall('작업자를 선택하세요.', false);const targets=[];(jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);if(c&&c.checked){const qty=Number(document.getElementById('jeQty_'+i).value||1);const hogis=getJeHogis(i);hogis.forEach((hogi,n)=>targets.push({x,i,hogi,qty:1,unitNo:n+1,selectedQty:qty}));}});if(!targets.length)return showJeSmall('저장할 사양을 선택하세요.', false);for(const t of targets){if(!/^\d{4}$/.test(t.hogi))return showJeSmall(`${t.x.spec} ${t.unitNo}번째 호기수는 숫자 4자리로 입력하세요. 예: 0001`, false);}setJeSaving(true);showJeSmall('입력 중...', true);let done=0;function saveNext(){const t=targets[done],x=t.x;jsonp({action:'saveJe',workDate,worker,hogi:t.hogi,spec:x.spec,assyNo:x.assyNo,subAssyNo:x.subAssyNo||'',qty:t.qty,device:'MOBILE',memo:targets.length>1?'제관 복수호기 동시입력':''},d=>{if(!d.ok){setJeSaving(false);return showJeSmall(d.message||'저장 실패', false);}done++;showJeSmall(`입력 중... ${done}/${targets.length}`, true);if(done<targets.length)return saveNext();setJeSaving(false);showJeSmall(`저장 완료 - ${targets.length}건 입력됨`, true);showSaveToast(`저장 완료 · ${targets.length}건`);document.getElementById('jeSelectedText').className='selectedBig';const group={};targets.forEach(t=>{group[t.x.spec]=(group[t.x.spec]||0)+1;});document.getElementById('jeSelectedText').innerHTML=`저장 완료<br>${esc(Object.entries(group).map(([k,v])=>k+' '+v+'대').join(' / '))}`;targets.forEach(t=>{for(let n=0;n<t.selectedQty;n++){const inp=document.getElementById(`hogi_${t.i}_${n}`);if(inp)inp.value='';}const chk=document.getElementById('jeCheck_'+t.i);if(chk)chk.checked=false;});updateJeSelection();loadResults();});}saveNext();}
+function saveJeSelected(){
+  const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;
+  if(!workDate)return showJeSmall('작업일자를 선택하세요.', false);
+  if(!worker)return showJeSmall('작업자를 선택하세요.', false);
+  const targets=[];
+  (jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);if(c&&c.checked){const qty=Number(document.getElementById('jeQty_'+i).value||1);const hogis=getJeHogis(i);hogis.forEach((hogi,n)=>targets.push({x,i,hogi,unitNo:n+1,selectedQty:qty}));}});
+  if(!targets.length)return showJeSmall('담을 사양을 선택하세요.', false);
+  for(const t of targets){if(!/^\d{4}$/.test(t.hogi))return showJeSmall(`${t.x.spec} ${t.unitNo}번째 호기수는 숫자 4자리로 입력하세요. 예: 0001`, false);}
+  const entries=targets.map(t=>({uid:newUid(),kind:'je',workDate,worker,part:'제관파트',hogi:t.hogi,spec:String(t.x.spec||'').trim(),assyNo:String(t.x.assyNo||'').trim(),subAssyNo:String(t.x.subAssyNo||'').trim(),qty:1,memo:targets.length>1?'제관 복수호기 동시입력':'',addedAt:Date.now()}));
+  queueEntries(entries).then(ok=>{
+    if(!ok)return showJeSmall('취소했습니다.', false);
+    showJeSmall(`대기 목록에 담김 - ${entries.length}건 (마지막에 [전체 입력 완료])`, true);
+    showSaveToast(`대기에 담김 · ${entries.length}건`);
+    const group={};entries.forEach(e=>{group[e.spec]=(group[e.spec]||0)+1;});
+    targets.forEach(t=>{for(let n=0;n<t.selectedQty;n++){const inp=document.getElementById(`hogi_${t.i}_${n}`);if(inp)inp.value='';}const chk=document.getElementById('jeCheck_'+t.i);if(chk)chk.checked=false;});
+    updateJeSelection();
+    document.getElementById('jeSelectedText').className='selectedBig';
+    document.getElementById('jeSelectedText').innerHTML=`대기에 담김<br>${esc(Object.entries(group).map(([k,v])=>k+' '+v+'대').join(' / '))}`;
+  });
+}
 function setJeSaving(on){const btn=document.getElementById('saveJeSelectedBtn');if(btn){btn.disabled=on;btn.classList.toggle('saving',on);btn.textContent=on?'입력 중...':'선택 사양 입력 완료';}document.getElementById('specs')?.classList.toggle('disabledArea',on);}
 function saveJe(i){const c=document.getElementById('jeCheck_'+i);if(c)c.checked=true;updateJeSelection();saveJeSelected();}
-function saveFinish(){const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value,qty=document.getElementById('qty').value;const typed=document.getElementById('itemNoInput').value.trim();let obj=selectedItem;if(!obj&&typed){const nt=normalizeSearch(typed);obj=(masterItems||[]).find(x=>x.itemNo===typed||normalizeSearch(x.itemNo)===nt);}if(!workDate)return show('msg','작업일자를 선택하세요.',false);if(!worker)return show('msg','작업자를 선택하세요.',false);if(!obj)return show('msg','품번을 선택하세요.',false);if(!qty||Number(qty)<=0)return show('msg','수량을 입력하세요.',false);setSaving('saveFinishBtn',true);show('msg','입력 중...','wait');jsonp({action:'save',workDate,worker,part:obj.part||'완성파트',itemNo:obj.itemNo,itemName:obj.itemName||'',model:obj.model||'',process:obj.process||'',qty,device:'MOBILE',memo:''},d=>{setSaving('saveFinishBtn',false);if(d.ok){show('msg','저장 완료 - 입력 대기',true);showSaveToast();resetFinish(false);loadResults();}else show('msg',d.message||'저장 실패',false);});}
+function saveFinish(){
+  const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value,qty=document.getElementById('qty').value;
+  const typed=document.getElementById('itemNoInput').value.trim();
+  let obj=selectedItem;
+  if(!obj&&typed){const nt=normalizeSearch(typed);obj=(masterItems||[]).find(x=>x.itemNo===typed||normalizeSearch(x.itemNo)===nt);}
+  if(!workDate)return show('msg','작업일자를 선택하세요.',false);
+  if(!worker)return show('msg','작업자를 선택하세요.',false);
+  if(!obj)return show('msg','품번을 선택하세요.',false);
+  if(!qty||Number(qty)<=0)return show('msg','수량을 입력하세요.',false);
+  const entry={uid:newUid(),kind:'finish',workDate,worker,part:obj.part||'완성파트',itemNo:String(obj.itemNo||'').trim(),itemName:obj.itemName||'',model:obj.model||'',process:obj.process||'',qty:Number(qty),memo:'',addedAt:Date.now()};
+  queueEntries([entry]).then(ok=>{
+    if(!ok){show('msg','취소했습니다.',false);return;}
+    show('msg','대기 목록에 담김 - 마지막에 [전체 입력 완료]',true);
+    showSaveToast('대기에 담김');
+    resetFinish(false);
+  });
+}
 function saveProcess(kind){
   const cfg=PROC_CFG[kind];
   const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;
@@ -337,30 +388,187 @@ function saveProcess(kind){
   for(const r of rows){
     if(!r.saveQty||Number(r.saveQty)<=0)return show(cfg.msg,`${r.itemNo} / ${processLabel(r.process)} 수량을 입력하세요.`,false);
   }
-  setSaving(cfg.btn,true);
-  show(cfg.msg,'입력 중...','wait');
-  let done=0;
-  function saveNext(){
-    const r=rows[done];
-    jsonp({action:cfg.saveAction,workDate,worker,part:r.part||cfg.part,itemNo:r.itemNo,itemName:r.itemName||'',model:r.model||'',process:r.process||'',qty:r.saveQty,device:'MOBILE',memo:rows.length>1?'공정별 수량 동시입력':''},d=>{
-      if(!d.ok){setSaving(cfg.btn,false);return show(cfg.msg,d.message||'저장 실패',false);}
-      done++;
-      if(done<rows.length){show(cfg.msg,`입력 중... ${done}/${rows.length}`,'wait');return saveNext();}
-      setSaving(cfg.btn,false);
-      show(cfg.msg,rows.length>1?`저장 완료 - ${rows.length}개 공정 입력됨`:'저장 완료 - 입력 대기',true);
-      showSaveToast(rows.length>1?`저장 완료 · ${rows.length}건`:'저장 완료');
-      resetProcess(kind,false);
-      loadResults();
-    });
-  }
-  saveNext();
+  const entries=rows.map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:r.model||'',process:r.process||'',qty:Number(r.saveQty),memo:rows.length>1?'공정별 수량 동시입력':'',addedAt:Date.now()}));
+  queueEntries(entries).then(ok=>{
+    if(!ok){show(cfg.msg,'취소했습니다.',false);return;}
+    show(cfg.msg,rows.length>1?`대기 목록에 담김 - ${rows.length}개 공정`:'대기 목록에 담김 - 마지막에 [전체 입력 완료]',true);
+    showSaveToast(rows.length>1?`대기에 담김 · ${rows.length}건`:'대기에 담김');
+    resetProcess(kind,false);
+  });
 }
+
+/* ================= 입력 대기 목록 / 전체 입력 완료 / 중복 확인 ================= */
+const PEND_KEY='workResults.pending.v2',BATCH_KEY='workResults.batch.v2';
+const KIND_LABEL={finish:'완성',je:'제관',weld:'용접',sc:'SC',dojang:'도장',press:'프레스',sm:'SM'};
+const TAB_BASE={finish:['tabFinish','완성파트'],je:['tabJe','제관파트'],weld:['tabWeld','용접파트'],sc:['tabSc','SC파트'],dojang:['tabDojang','도장파트'],press:['tabPress','프레스파트'],sm:['tabSm','SM파트']};
+let pending=[],sending=false,resultStore={},batchMem=null;
+function newUid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function loadPending(){try{const v=JSON.parse(localStorage.getItem(PEND_KEY)||'[]');pending=Array.isArray(v)?v.filter(e=>e&&e.uid&&e.kind):[];}catch(e){pending=[];}}
+function savePending(){try{localStorage.setItem(PEND_KEY,JSON.stringify(pending));}catch(e){}}
+function normDate(v){const m=String(v==null?'':v).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);return m?m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'):String(v==null?'':v).trim();}
+function normHogi(v){const s=String(v==null?'':v).trim().replace(/^0+/,'');return s||'0';}
+function entryKey(e){return e.kind==='je'?[e.workDate,e.worker,normHogi(e.hogi),e.spec].join('|'):[e.workDate,e.worker,e.itemNo,e.process||''].join('|');}
+function rowKey(kind,v){const s=x=>String(x==null?'':x).trim();return kind==='je'?[normDate(v[1]),s(v[2]),normHogi(v[4]),s(v[5])].join('|'):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|');}
+function entryLabel(e){return e.kind==='je'?`${e.hogi} 호기 / ${e.spec}`:`${e.itemNo}${e.process?' / '+processLabel(e.process):''}`;}
+function updateTabBadges(){Object.keys(TAB_BASE).forEach(k=>{const el=document.getElementById(TAB_BASE[k][0]);if(!el)return;const c=pending.filter(e=>e.kind===k).length;el.textContent=TAB_BASE[k][1]+(c?' ('+c+')':'');});}
+
+function confirmDlg(title,bodyHtml,yesText,noText){
+  return new Promise(res=>{
+    const back=document.getElementById('dlg'),y=document.getElementById('dlgYes'),n=document.getElementById('dlgNo');
+    document.getElementById('dlgTitle').textContent=title;
+    document.getElementById('dlgBody').innerHTML=bodyHtml;
+    y.textContent=yesText||'확인';n.textContent=noText||'취소';
+    const done=v=>{back.classList.add('hide');y.onclick=null;n.onclick=null;res(v);};
+    y.onclick=()=>done(true);n.onclick=()=>done(false);
+    back.classList.remove('hide');
+  });
+}
+function dupHtml(items){return '<div>'+items.map(x=>`<div class="dupRow"><b>${esc(entryLabel(x.e))}</b> <span class="sub">(${esc(x.e.worker)} / ${esc(x.e.workDate)})</span><br>${esc(x.why)} → 이번 ${Number(x.e.qty).toLocaleString()}개</div>`).join('')+'</div>';}
+
+// 담기 전에 대기 목록·이미 전송된 내역과 비교해서 같은 실적이 있으면 알려줍니다.
+function findDupes(list){
+  const out=[],seen={},pendKeys={};
+  pending.filter(p=>p.kind===list[0].kind).forEach(p=>{pendKeys[entryKey(p)]=true;});
+  list.forEach(e=>{
+    const k=entryKey(e),why=[];
+    if(pendKeys[k]||seen[k])why.push('대기 목록에 같은 입력이 있습니다');
+    const st=resultStore[e.kind];
+    if(st&&st.date===e.workDate&&st.worker===e.worker){
+      const hit=st.rows.filter(x=>rowKey(e.kind,x.values)===k);
+      if(hit.length)why.push('이미 입력됨 '+hit.reduce((s,x)=>s+(Number(x.values[8])||0),0).toLocaleString()+'개');
+    }
+    seen[k]=true;
+    if(why.length)out.push({e,why:why.join(' / ')});
+  });
+  return out;
+}
+async function queueEntries(list){
+  const dups=findDupes(list);
+  if(dups.length){
+    const yes=await confirmDlg('⚠ 중복 입력 확인','<div>같은 날짜·작업자·품번·공정의 실적이 이미 있습니다.</div>'+dupHtml(dups)+'<div>그래도 대기 목록에 담을까요?</div>','그래도 담기','취소');
+    if(!yes)return false;
+  }
+  list.forEach(e=>pending.push(e));
+  savePending();renderPending();
+  return true;
+}
+function renderPending(){
+  const box=document.getElementById('pendingList');if(!box)return;
+  const mine=pending.filter(e=>e.kind===mode);
+  document.getElementById('pendingCount').textContent=mine.length+'건';
+  const total=mine.reduce((s,e)=>s+(Number(e.qty)||0),0);
+  box.innerHTML=mine.length?mine.map(e=>`<div class="pendItem"><div class="pendTop"><div><div class="doneNo">${esc(entryLabel(e))}</div><div class="sub">${esc(e.worker)} / ${esc(e.workDate)}${e.itemName?' / '+esc(e.itemName):''}</div></div><input class="pendQty" type="number" min="1" inputmode="numeric" value="${esc(e.qty)}" onchange="editPendQty('${escJs(e.uid)}',this)"></div><button type="button" class="deleteBtn" onclick="removePending('${escJs(e.uid)}')">빼기</button></div>`).join('')+`<div class="totalBox">대기 ${mine.length}건 / 수량 합계 ${total.toLocaleString()}</div>`:'대기 중인 입력이 없습니다.';
+  const others={};pending.forEach(e=>{if(e.kind!==mode)others[e.kind]=(others[e.kind]||0)+1;});
+  const ks=Object.keys(others),ob=document.getElementById('pendingOther');
+  ob.classList.toggle('hide',!ks.length);
+  ob.textContent=ks.length?'다른 파트에 아직 전송하지 않은 입력이 있습니다: '+ks.map(k=>KIND_LABEL[k]+' '+others[k]+'건').join(', ')+' (해당 파트 탭에서 [전체 입력 완료]를 눌러야 전송됩니다)':'';
+  document.getElementById('sendAllBtn').disabled=sending||!mine.length;
+  updateTabBadges();
+}
+function editPendQty(uid,inp){
+  const e=pending.find(x=>x.uid===uid);if(!e)return;
+  const v=Number(inp.value);
+  if(!(v>0)){inp.value=e.qty;return;}
+  e.qty=v;savePending();renderPending();
+}
+function removePending(uid){pending=pending.filter(e=>e.uid!==uid);savePending();renderPending();}
+
+function batchIdFor(list){
+  const sig=list.map(e=>e.uid+':'+e.qty).join(',');
+  if(!batchMem){try{batchMem=JSON.parse(localStorage.getItem(BATCH_KEY)||'null');}catch(e){batchMem=null;}}
+  if(!batchMem||batchMem.sig!==sig){batchMem={sig,id:'b'+newUid()+newUid()};try{localStorage.setItem(BATCH_KEY,JSON.stringify(batchMem));}catch(e){}}
+  return batchMem.id;
+}
+function jsonpAsync(params){return new Promise(res=>jsonp(params,res));}
+async function postBatch(payload){
+  const ctl=typeof AbortController!=='undefined'?new AbortController():null;
+  const timer=setTimeout(()=>{if(ctl)ctl.abort();},60000);
+  try{
+    const r=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:ctl?ctl.signal:undefined});
+    return JSON.parse(await r.text());
+  }finally{clearTimeout(timer);}
+}
+// 서버가 저장을 끝낸 항목은 대기 목록에서 빼고, 화면의 전송 완료 내역에 바로 추가합니다. (재조회 없음)
+function applySaved(d){
+  const rows=d.rows||[],done={};
+  rows.forEach(r=>{if(r.uid)done[r.uid]=true;});
+  pending=pending.filter(e=>!done[e.uid]);savePending();
+  rows.forEach(r=>{
+    const st=resultStore[r.kind],v=(r.values||[]).map(x=>String(x==null?'':x));
+    if(st&&st.date===normDate(v[1])&&st.worker===v[2].trim()&&!st.rows.some(x=>x.rowNo===r.rowNo))st.rows.push({rowNo:r.rowNo,values:v});
+  });
+  renderPending();paintResults();
+}
+// 주소창 길이 제한 때문에 잘라 보내는 예비 경로 (POST 가 막힌 환경용)
+async function sendChunks(list,force,batchId){
+  const chunks=[];let cur=[];
+  const sizeOf=arr=>encodeURIComponent(JSON.stringify(arr)).length;
+  list.forEach(e=>{if(cur.length&&sizeOf(cur.concat([e]))>5500){chunks.push(cur);cur=[];}cur.push(e);});
+  if(cur.length)chunks.push(cur);
+  let saved=0;
+  for(let i=0;i<chunks.length;i++){
+    const payload={batchId:chunks.length>1?batchId+'#'+i:batchId,force,device:'MOBILE',entries:chunks[i]};
+    const params={action:'saveBatch',payload:JSON.stringify(payload)};
+    let d=await jsonpAsync(params);
+    if(d&&d.comm)d=await jsonpAsync(params);
+    if(!d||!d.ok){
+      if(d&&d.needConfirm)return d;
+      return {ok:false,message:(d&&d.message)||'전송 실패',saved};
+    }
+    applySaved(d);saved+=d.saved||0;
+  }
+  return {ok:true,saved};
+}
+async function transmit(list,force){
+  const batchId=batchIdFor(list);
+  const payload={action:'saveBatch',batchId,force,device:'MOBILE',entries:list};
+  let d=null;
+  try{d=await postBatch(payload);}catch(e){d=null;}
+  if(d&&(d.ok||d.needConfirm||(d.message&&d.message!=='unknown action'))){
+    if(d.ok)applySaved(d);
+    return d;
+  }
+  return await sendChunks(list,force,batchId);
+}
+async function sendAllPending(){
+  if(sending)return;
+  const list=pending.filter(e=>e.kind===mode);
+  if(!list.length){show('sendMsg','전송할 대기 입력이 없습니다.',false);return;}
+  sending=true;renderPending();
+  const btn=document.getElementById('sendAllBtn');
+  btn.textContent='전송 중...';btn.classList.add('saving');
+  show('sendMsg','전송 중... ('+list.length+'건)','wait');
+  try{
+    let res=await transmit(list,false);
+    if(res&&res.needConfirm){
+      const items=(res.dupes||[]).map(d=>{const e=list.find(x=>x.uid===d.uid);return e?{e,why:d.inBatch?'이번 전송 안에 같은 입력이 또 있습니다':'이미 입력됨 '+Number(d.existingQty||0).toLocaleString()+'개'}:null;}).filter(Boolean);
+      const yes=await confirmDlg('⚠ 중복 입력 확인','<div>이미 입력된 실적이 있습니다. 그래도 전송할까요?</div>'+dupHtml(items),'그래도 전송','취소');
+      if(!yes){show('sendMsg','전송 취소 - 대기 목록에서 중복 건을 빼거나 다시 눌러주세요.',false);return;}
+      const rest=list.filter(e=>pending.some(p=>p.uid===e.uid));
+      res=await transmit(rest,true);
+    }
+    if(res&&res.ok){
+      show('sendMsg','전체 입력 완료 - '+(res.saved!=null?res.saved:list.length)+'건 전송됨',true);
+      showSaveToast('전체 입력 완료 · '+(res.saved!=null?res.saved:list.length)+'건');
+    }else{
+      let msg=(res&&res.message)||'전송 실패';
+      if(msg==='unknown action')msg='서버(Code.gs)가 새 버전으로 배포되지 않았습니다. 관리자에게 알려주세요.';
+      const left=pending.filter(e=>e.kind===mode).length;
+      show('sendMsg',msg+(left?' (대기 '+left+'건은 그대로 남아 있습니다. 다시 눌러주세요.)':''),false);
+    }
+  }catch(err){
+    show('sendMsg','전송 중 오류: '+(err&&err.message?err.message:err)+' (대기 목록은 그대로입니다)',false);
+  }finally{
+    sending=false;btn.textContent='전체 입력 완료';btn.classList.remove('saving');renderPending();
+  }
+}
+
 function saveWeld(){saveProcess('weld')}
 function saveSc(){saveProcess('sc')}
 function saveDojang(){saveProcess('dojang')}
 function savePress(){saveProcess('press')}
 function saveSm(){saveProcess('sm')}
-function setSaving(id,on){const b=document.getElementById(id);if(!b)return;b.disabled=on;b.classList.toggle('saving',on);b.textContent=on?'저장 중...':'입력';}
+function setSaving(id,on){const b=document.getElementById(id);if(!b)return;b.disabled=on;b.classList.toggle('saving',on);b.textContent=on?'저장 중...':'입력 담기';}
 function resetFinish(clear=true){selectedItem=null;document.getElementById('itemNoInput').value='';document.getElementById('qty').value='';document.getElementById('selectedText').innerHTML='<div class="inputWaiting">입력 대기: 품번을 검색하세요.</div>';document.getElementById('items').innerHTML='품번 또는 품명을 입력하세요.';if(clear)show('msg','입력 대기',true);}
 function resetProcess(kind,clear=true){
   if(kind==='sm'){document.getElementById('smPartSearch').value='';document.getElementById('smPartItems').innerHTML='품번을 입력하세요.';}
@@ -376,9 +584,45 @@ function resetSc(clear=true){resetProcess('sc',clear)}
 function resetDojang(clear=true){resetProcess('dojang',clear)}
 function resetPress(clear=true){resetProcess('press',clear)}
 function resetSm(clear=true){resetProcess('sm',clear)}
-function loadResults(){const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;if(!workDate||!worker){document.getElementById('todayTotal').textContent='합계: 0개';document.getElementById('todayResults').textContent='작업자와 날짜를 선택하세요.';return;}const action={finish:'results',je:'jeResults',weld:'weldResults',sc:'scResults',dojang:'dojangResults',press:'pressResults',sm:'smResults'}[mode];jsonp({action,startDate:workDate,endDate:workDate,worker},d=>{if(!d.ok){document.getElementById('todayResults').textContent=d.message||'조회 실패';return;}const rows=(d.rows||[]).map(x=>({rowNo:x.rowNo,values:x.values||[]})).sort((a,b)=>String(b.values[0]||'').localeCompare(String(a.values[0]||'')));let total=0;const html=rows.map(x=>{const r=x.values;const qty=Number(mode==='je'?r[8]:r[8])||0;total+=qty;if(mode==='je')return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[5])}</div><div class="sub">${esc(r[0])} / ASSY ${esc(r[6])}</div></div><div class="doneQty">${qty}</div></div><button class="deleteBtn" onclick="deleteRow('je',${x.rowNo})">삭제</button></div>`;return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[7]||r[5])}</div><div class="sub">${esc(r[0])} / ${esc(r[5])}</div></div><div class="doneQty">${qty}</div></div><button class="deleteBtn" onclick="deleteRow('${mode==='finish'?'finish':mode}',${x.rowNo})">삭제</button></div>`;}).join('');document.getElementById('todayTotal').textContent='합계: '+total.toLocaleString()+'개';document.getElementById('todayResults').innerHTML=html||'입력 완료 내역이 없습니다.';});}
-function deleteRow(sheet,rowNo){if(!confirm('삭제 처리할까요?'))return;jsonp({action:'delete',sheet,rowNo},d=>{if(d.ok)loadResults();else alert(d.message||'삭제 실패');});}
-document.getElementById('workDate').value=localTomorrow();document.getElementById('worker').addEventListener('change',loadResults);document.getElementById('workDate').addEventListener('change',loadResults);document.getElementById('itemNoInput').addEventListener('input',debounce(renderItems));document.getElementById('weldSearch').addEventListener('input',debounce(()=>searchProcessRemote('weld'),320));document.getElementById('scSearch').addEventListener('input',debounce(()=>renderProcessItems('sc'),120));document.getElementById('dojangSearch').addEventListener('input',debounce(()=>searchProcessRemote('dojang'),320));document.getElementById('pressSearch').addEventListener('input',debounce(()=>searchProcessRemote('press'),320));document.getElementById('smSearch').addEventListener('input',debounce(()=>{renderProcessItems('sm');}));fillWorkers();ensureMaster('finish',()=>{fillWorkers();renderItems();loadResults();});
+function paintResults(){
+  const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;
+  const totalEl=document.getElementById('todayTotal'),box=document.getElementById('todayResults');
+  if(!workDate||!worker){totalEl.textContent='합계: 0개';box.textContent='작업자와 날짜를 선택하세요.';return;}
+  const st=resultStore[mode];
+  if(!st||st.date!==workDate||st.worker!==worker){box.textContent='조회 중...';return;}
+  const rows=st.rows.slice().sort((a,b)=>String(b.values[0]||'').localeCompare(String(a.values[0]||'')));
+  let total=0;
+  const html=rows.map(x=>{
+    const r=x.values;const qty=Number(r[8])||0;total+=qty;
+    const del=`<button class="deleteBtn" onclick="deleteRow('${mode}',${x.rowNo},'${escJs(r[12]||'')}')">삭제</button>`;
+    if(mode==='je')return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[5])}</div><div class="sub">${esc(r[0])} / ASSY ${esc(r[6])}</div></div><div class="doneQty">${qty}</div></div>${del}</div>`;
+    return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[7]||r[5])}</div><div class="sub">${esc(r[0])} / ${esc(r[5])}</div></div><div class="doneQty">${qty}</div></div>${del}</div>`;
+  }).join('');
+  totalEl.textContent='합계: '+total.toLocaleString()+'개';
+  box.innerHTML=html||'입력 완료 내역이 없습니다.';
+}
+function loadResults(){
+  const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;
+  if(!workDate||!worker){paintResults();return;}
+  const kind=mode;
+  const action={finish:'results',je:'jeResults',weld:'weldResults',sc:'scResults',dojang:'dojangResults',press:'pressResults',sm:'smResults'}[kind];
+  const st=resultStore[kind];
+  if(!st||st.date!==workDate||st.worker!==worker)document.getElementById('todayResults').textContent='조회 중...';
+  jsonp({action,startDate:workDate,endDate:workDate,worker},d=>{
+    if(document.getElementById('workDate').value!==workDate||document.getElementById('worker').value!==worker)return;
+    if(!d.ok){if(kind===mode)document.getElementById('todayResults').textContent=d.message||'조회 실패';return;}
+    resultStore[kind]={date:workDate,worker,rows:(d.rows||[]).map(x=>({rowNo:x.rowNo,values:x.values||[]}))};
+    paintResults();
+  });
+}
+function deleteRow(sheet,rowNo,rid){
+  if(!confirm('삭제 처리할까요?'))return;
+  jsonp({action:'delete',sheet,rowNo,rid:rid||''},d=>{
+    if(d.ok){const st=resultStore[sheet];if(st)st.rows=st.rows.filter(x=>rid?String(x.values[12]||'')!==rid:x.rowNo!==rowNo);paintResults();}
+    else{alert(d.message||'삭제 실패');loadResults();}
+  });
+}
+loadPending();renderPending();document.getElementById('workDate').value=localTomorrow();document.getElementById('worker').addEventListener('change',loadResults);document.getElementById('workDate').addEventListener('change',loadResults);document.getElementById('itemNoInput').addEventListener('input',debounce(renderItems));document.getElementById('weldSearch').addEventListener('input',debounce(()=>searchProcessRemote('weld'),320));document.getElementById('scSearch').addEventListener('input',debounce(()=>renderProcessItems('sc'),120));document.getElementById('dojangSearch').addEventListener('input',debounce(()=>searchProcessRemote('dojang'),320));document.getElementById('pressSearch').addEventListener('input',debounce(()=>searchProcessRemote('press'),320));document.getElementById('smSearch').addEventListener('input',debounce(()=>{renderProcessItems('sm');}));fillWorkers();ensureMaster('finish',()=>{fillWorkers();renderItems();loadResults();});
 
 function setSmPrefix(prefix){smPrefix=prefix;['','FP','FB'].forEach(v=>{const b=document.getElementById('smType'+(v||'Num'));const on=v===prefix;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});renderProcessItems('sm');}
 
