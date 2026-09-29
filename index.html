@@ -42,10 +42,9 @@
   <div id="pressArea" class="hide"><div class="card"><label>프레스 품번 검색</label><input id="pressSearch" autocomplete="off" placeholder="품번 입력"><div id="pressItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>프레스 선택 공정별 수량</label><div id="pressSelectedText" class="sub">입력 대기: 프레스 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="pressQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="savePressBtn" onclick="savePress()">입력 담기</button><button class="gray" onclick="resetPress()">입력칸 초기화</button><div id="pressMsg" class="msg ready">입력 대기</div></div></div>
   <div id="smArea" class="hide"><div class="card"><label>SM 관리번호 검색</label><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><input id="smSearch" inputmode="numeric" autocomplete="off" placeholder="관리번호 숫자 입력 (예: 22)"><div id="smItems" class="sub">SM파트를 불러오는 중입니다.</div><label>SM 품번 검색</label><input id="smPartSearch" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderProcessItems('sm')"><div id="smPartItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SM 선택 공정별 수량</label><div id="smSelectedText" class="sub">입력 대기: SM 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="smQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSmBtn" onclick="saveSm()">입력 담기</button><button class="gray" onclick="resetSm()">입력칸 초기화</button><div id="smMsg" class="msg ready">입력 대기</div></div></div>
 
-  <div class="card" id="pendingCard"><div class="doneHead"><h2>입력 대기 목록</h2><span id="pendingCount" class="pendBadge">0건</span></div><div class="sub">입력한 내용은 여기에 담기기만 하고, 아래 [전체 입력 완료]를 눌러야 한 번에 전송됩니다.</div><div id="pendingList" class="sub">대기 중인 입력이 없습니다.</div><div id="pendingOther" class="notice hide"></div><button type="button" id="sendAllBtn" class="sendAllBtn" onclick="sendAllPending()">전체 입력 완료</button><div id="sendMsg" class="msg ready">전송 대기</div></div>
+  <div class="card" id="pendingCard"><div class="doneHead"><h2>입력 대기 목록</h2><span id="pendingCount" class="pendBadge">0건</span></div><div class="sub">입력한 내용은 여기에 담기기만 하고, 아래 [전체 입력 완료]를 눌러야 한 번에 전송되고, 전송이 끝나면 PC(Slack)로 완료 알림이 자동으로 갑니다.</div><div id="pendingList" class="sub">대기 중인 입력이 없습니다.</div><div id="pendingOther" class="notice hide"></div><button type="button" id="sendAllBtn" class="sendAllBtn" onclick="sendAllPending()">전체 입력 완료</button><div id="sendMsg" class="msg ready">전송 대기</div></div>
 
   <div class="card"><div class="doneHead"><h2>입력 완료 내역 (전송된 것)</h2><button class="smallBtn" onclick="loadResults()">새로고침</button></div><div class="sub">선택한 작업일자와 작업자 기준으로 표시됩니다.</div><div id="todayTotal" class="totalBox">합계: 0개</div><div id="todayResults" class="sub">작업자와 날짜를 선택하세요.</div></div>
-  <div class="card"><button type="button" id="closePartBtn" class="closeBtn" onclick="closePartAlert()">완성파트 작업지시 입력완료</button><div class="sub">해당 파트의 오늘 작업을 모두 마쳤을 때 한 번만 눌러주세요. PC로 완료 알림이 갑니다.</div></div>
 </div>
 <div id="dlg" class="dlgBack hide"><div class="dlgBox"><div id="dlgTitle" class="dlgTitle"></div><div id="dlgBody" class="dlgBody"></div><div class="dlgBtns"><button type="button" id="dlgNo" class="gray"></button><button type="button" id="dlgYes"></button></div></div></div>
 <div id="saveToast" class="saveToast" role="status" aria-live="polite">저장 완료</div>
@@ -120,8 +119,6 @@ function setMode(m){
   document.getElementById('pressArea').classList.toggle('hide',m!=='press');
   document.getElementById('smArea').classList.toggle('hide',m!=='sm');
   document.getElementById('smSupportWrap').classList.toggle('hide',m!=='sm');
-  const partLabelMap={finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트',press:'프레스파트',sm:'SM파트'};
-  document.getElementById('closePartBtn').textContent=partLabelMap[m]+' 작업지시 입력완료';
   fillWorkers();
   renderPending();
   if(REMOTE_PART_SEARCH[m]){
@@ -152,19 +149,6 @@ function searchProcessRemote(kind){
     if(!d.ok){box.innerHTML='<div class="sub">'+esc(d.message||'품번 검색 실패')+'</div>';return;}
     procData[kind].items=d.items||[];
     renderProcessItems(kind);
-  });
-}
-function closePartAlert(){
-  const partLabelMap={finish:'완성파트',je:'제관파트',weld:'용접파트',sc:'SC파트',dojang:'도장파트',press:'프레스파트',sm:'SM파트'};
-  const part=partLabelMap[mode];
-  if(pending.some(e=>e.kind===mode)){alert('아직 전송하지 않은 입력 대기 건이 있습니다. 먼저 [전체 입력 완료]를 눌러 전송해 주세요.');return;}
-  if(!confirm(part+' 작업을 오늘 다 마치셨나요? PC로 완료 알림을 보냅니다.'))return;
-  const btn=document.getElementById('closePartBtn');
-  btn.disabled=true;btn.textContent='전송 중...';
-  jsonp({action:'closePart',part},d=>{
-    btn.disabled=false;
-    btn.textContent=part+' 작업지시 입력완료';
-    alert(d.ok?'완료 알림을 보냈습니다.':(d.message||'전송 실패'));
   });
 }
 const MASTER_ACTIONS={finish:'master',je:'jeMaster',weld:'weldMaster',sc:'scMaster',dojang:'dojangMaster',press:'pressMaster',sm:'smMaster'};
