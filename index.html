@@ -69,7 +69,7 @@ let mode='finish';
 let masterItems=[],jeSpecs=[];
 const FAST_WORKERS={
   finish:['강혜정','유정욱'],
-  je:['김동안','박창수','배인환','이상민'],
+  je:['김동안','박창수','배인환','신민욱','이상민'],
   weld:['강성근','김대기','김범수','김영수','박경숙','배진호','이원준','진청규','천성찬'],
   sc:['권진','배길만','성만기'],
   asm:['김덕태','김익수','박창환','윤점숙','정해점','조인호','천성찬'],
@@ -86,7 +86,11 @@ let loading={finish:false,je:false,weld:false,sc:false,asm:false,dojang:false,pr
 // 입력할 때마다 20초가량 걸리는 서버 검색을 반복하지 않습니다.
 const REMOTE_PART_SEARCH={weld:true,sc:false,asm:false,dojang:true,press:true};
 let searchRequestNo={weld:0,sc:0,asm:0,dojang:0,press:0};
-const JE_FALLBACK_WORKERS=['김동안','배인환','박창수','이상민'];
+const JE_FALLBACK_WORKERS=['김동안','배인환','박창수','신민욱','이상민'];
+// 제관: 김동안만 호기수 4자리를 입력하고, 그 외 작업자는 호기수 없이 사양의 서브 품번으로 등록합니다.
+const JE_HOGI_WORKER='김동안';
+function jeNeedHogi(){return document.getElementById('worker').value===JE_HOGI_WORKER;}
+function applyJeMode(){const need=jeNeedHogi();document.querySelectorAll('.hogiBox').forEach(b=>{b.style.display=need?'':'none';});document.querySelectorAll('.jeCnt').forEach(b=>{b.textContent=need?'호기수별 저장':'서브 품번 자동 등록';});}
 const JE_FALLBACK_SPECS=[];
 
 // 용접/SC/도장처럼 "품번 + 공정명" 구조를 쓰는 파트들의 설정과 상태
@@ -129,6 +133,7 @@ function setMode(m){
   document.getElementById('asmWorkerNote').classList.toggle('hide',m!=='asm');
   if(m==='asm')ensureAsmTeams();
   fillWorkers();
+  if(m==='je')applyJeMode();
   renderPending();
   if(REMOTE_PART_SEARCH[m]){
     loaded[m]=true;
@@ -320,7 +325,7 @@ function selectProcessMulti(kind,key1,key2){
   toggleProcessItem(kind,key1);
   toggleProcessItem(kind,key2);
 }
-function renderSpecs(){applyJeFallback();const box=document.getElementById('specs');if(!jeSpecs.length){box.innerHTML='<div class="sub">제관 사양이 없습니다.</div>';return;}box.innerHTML=jeSpecs.map((x,i)=>`<div class="specRow" id="jeRow_${i}"><label class="checkLine"><input type="checkbox" class="jeCheck" id="jeCheck_${i}" onchange="updateJeSelection()"><span class="checkText">${esc(x.spec)} 선택</span></label><div class="specTop"><div><div class="specName">${esc(x.spec)}</div><div class="specMeta">ASSY ${esc(x.assyNo)} / SUB ${esc(x.subAssyNo||'-')}</div></div><div class="specCnt">호기수별 저장</div></div><div class="specInputRow"><div><div class="hogiLabel">호기수 4자리</div><div id="hogiWrap_${i}" class="hogiWrap"></div></div><div><div class="hogiLabel">수량 선택</div><select class="qtySelect" id="jeQty_${i}" onchange="document.getElementById('jeCheck_${i}').checked=true;renderJeHogiInputs(${i});updateJeSelection();"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div></div>`).join('');(jeSpecs||[]).forEach((_,i)=>renderJeHogiInputs(i));updateJeSelection();}
+function renderSpecs(){applyJeFallback();const box=document.getElementById('specs');if(!jeSpecs.length){box.innerHTML='<div class="sub">제관 사양이 없습니다.</div>';return;}box.innerHTML=jeSpecs.map((x,i)=>`<div class="specRow" id="jeRow_${i}"><label class="checkLine"><input type="checkbox" class="jeCheck" id="jeCheck_${i}" onchange="updateJeSelection()"><span class="checkText">${esc(x.spec)} 선택</span></label><div class="specTop"><div><div class="specName">${esc(x.spec)}</div><div class="specMeta">ASSY ${esc(x.assyNo)} / SUB ${esc(x.subAssyNo||'-')}</div></div><div class="specCnt jeCnt">호기수별 저장</div></div><div class="specInputRow"><div class="hogiBox"><div class="hogiLabel">호기수 4자리</div><div id="hogiWrap_${i}" class="hogiWrap"></div></div><div><div class="hogiLabel">수량 선택</div><select class="qtySelect" id="jeQty_${i}" onchange="document.getElementById('jeCheck_${i}').checked=true;renderJeHogiInputs(${i});updateJeSelection();"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div></div>`).join('');(jeSpecs||[]).forEach((_,i)=>renderJeHogiInputs(i));applyJeMode();updateJeSelection();}
 function renderJeHogiInputs(i){const wrap=document.getElementById('hogiWrap_'+i);if(!wrap)return;const qty=Number(document.getElementById('jeQty_'+i)?.value||1);const old=[...wrap.querySelectorAll('input')].map(x=>x.value);wrap.innerHTML=Array.from({length:qty},(_,n)=>`<input class="hogiInput hogiMulti" id="hogi_${i}_${n}" maxlength="4" inputmode="numeric" placeholder="${n+1}호기" value="${esc(old[n]||'')}" onfocus="document.getElementById('jeCheck_${i}').checked=true;updateJeSelection();" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);document.getElementById('jeCheck_${i}').checked=true;updateJeSelection();">`).join('');}
 function getJeHogis(i){const qty=Number(document.getElementById('jeQty_'+i)?.value||1);const arr=[];for(let n=0;n<qty;n++){arr.push((document.getElementById(`hogi_${i}_${n}`)?.value||'').trim());}return arr;}
 function updateJeSelection(){let count=0;let total=0;let summary=[];(jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);const row=document.getElementById('jeRow_'+i);if(c&&c.checked){count++;row&&row.classList.add('active');const qty=Number(document.getElementById('jeQty_'+i)?.value||'1');total+=qty;summary.push(`${x.spec} ${qty}대`);}else{row&&row.classList.remove('active');}});const t=document.getElementById('jeSelectedText');if(!t)return;if(count){t.className='selectedBig';t.innerHTML=`선택 완료: ${count}개 사양 / 총 ${total}대<br>${esc(summary.join(' / '))}`;showJeSmall('선택 후 아래 버튼을 누르세요.', true);}else{t.className='inputWaiting';t.textContent='입력 대기: 사양을 선택하세요.';showJeSmall('입력 대기', true);}}
@@ -328,11 +333,12 @@ function saveJeSelected(){
   const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;
   if(!workDate)return showJeSmall('작업일자를 선택하세요.', false);
   if(!worker)return showJeSmall('작업자를 선택하세요.', false);
-  const targets=[];
-  (jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);if(c&&c.checked){const qty=Number(document.getElementById('jeQty_'+i).value||1);const hogis=getJeHogis(i);hogis.forEach((hogi,n)=>targets.push({x,i,hogi,unitNo:n+1,selectedQty:qty}));}});
+  const targets=[];const needHogi=jeNeedHogi();
+  (jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);if(c&&c.checked){const qty=Number(document.getElementById('jeQty_'+i).value||1);if(needHogi){const hogis=getJeHogis(i);hogis.forEach((hogi,n)=>targets.push({x,i,hogi,unitNo:n+1,selectedQty:qty}));}else{targets.push({x,i,hogi:'',unitNo:1,selectedQty:qty,subQty:qty});}}});
   if(!targets.length)return showJeSmall('담을 사양을 선택하세요.', false);
-  for(const t of targets){if(!/^\d{4}$/.test(t.hogi))return showJeSmall(`${t.x.spec} ${t.unitNo}번째 호기수는 숫자 4자리로 입력하세요. 예: 0001`, false);}
-  const entries=targets.map(t=>({uid:newUid(),kind:'je',workDate,worker,part:'제관파트',hogi:t.hogi,spec:String(t.x.spec||'').trim(),assyNo:String(t.x.assyNo||'').trim(),subAssyNo:String(t.x.subAssyNo||'').trim(),qty:1,memo:targets.length>1?'제관 복수호기 동시입력':'',addedAt:Date.now()}));
+  if(needHogi){for(const t of targets){if(!/^\d{4}$/.test(t.hogi))return showJeSmall(`${t.x.spec} ${t.unitNo}번째 호기수는 숫자 4자리로 입력하세요. 예: 0001`, false);}}
+  else{for(const t of targets){if(!String(t.x.subAssyNo||'').trim())return showJeSmall(`${t.x.spec} 사양의 서브 품번이 마스터에 없습니다. 관리자에게 알려주세요.`, false);}}
+  const entries=targets.map(t=>({uid:newUid(),kind:'je',workDate,worker,part:'제관파트',hogi:t.hogi,spec:String(t.x.spec||'').trim(),assyNo:String(t.x.assyNo||'').trim(),subAssyNo:String(t.x.subAssyNo||'').trim(),qty:needHogi?1:t.subQty,memo:needHogi&&targets.length>1?'제관 복수호기 동시입력':'',addedAt:Date.now()}));
   queueEntries(entries).then(ok=>{
     if(!ok)return showJeSmall('취소했습니다.', false);
     showJeSmall(`대기 목록에 담김 - ${entries.length}건 (마지막에 [전체 입력 완료])`, true);
@@ -400,9 +406,9 @@ function loadPending(){try{const v=JSON.parse(localStorage.getItem(PEND_KEY)||'[
 function savePending(){try{localStorage.setItem(PEND_KEY,JSON.stringify(pending));}catch(e){}}
 function normDate(v){const m=String(v==null?'':v).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);return m?m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'):String(v==null?'':v).trim();}
 function normHogi(v){const s=String(v==null?'':v).trim().replace(/^0+/,'');return s||'0';}
-function entryKey(e){return e.kind==='je'?[e.workDate,e.worker,normHogi(e.hogi),e.spec].join('|'):[e.workDate,e.worker,e.itemNo,e.process||''].join('|');}
-function rowKey(kind,v){const s=x=>String(x==null?'':x).trim();return kind==='je'?[normDate(v[1]),s(v[2]),normHogi(v[4]),s(v[5])].join('|'):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|');}
-function entryLabel(e){return e.kind==='je'?`${e.hogi} 호기 / ${e.spec}`:`${e.itemNo}${e.process?' / '+processLabel(e.process):''}`;}
+function entryKey(e){return e.kind==='je'?(e.hogi?[e.workDate,e.worker,normHogi(e.hogi),e.spec].join('|'):[e.workDate,e.worker,'SUB:'+e.subAssyNo,e.spec].join('|')):[e.workDate,e.worker,e.itemNo,e.process||''].join('|');}
+function rowKey(kind,v){const s=x=>String(x==null?'':x).trim();return kind==='je'?(s(v[4])?[normDate(v[1]),s(v[2]),normHogi(v[4]),s(v[5])].join('|'):[normDate(v[1]),s(v[2]),'SUB:'+s(v[7]),s(v[5])].join('|')):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|');}
+function entryLabel(e){return e.kind==='je'?(e.hogi?`${e.hogi} 호기 / ${e.spec}`:`${e.spec} / SUB ${e.subAssyNo||'-'}${Number(e.qty)>1?' x'+e.qty:''}`):`${e.itemNo}${e.process?' / '+processLabel(e.process):''}`;}
 function updateTabBadges(){Object.keys(TAB_BASE).forEach(k=>{const el=document.getElementById(TAB_BASE[k][0]);if(!el)return;const c=pending.filter(e=>e.kind===k).length;el.textContent=TAB_BASE[k][1]+(c?' ('+c+')':'');});}
 
 function confirmDlg(title,bodyHtml,yesText,noText){
@@ -590,7 +596,7 @@ function paintResults(){
   const html=rows.map(x=>{
     const r=x.values;const qty=Number(r[8])||0;total+=qty;
     const del=`<button class="deleteBtn" onclick="deleteRow('${mode}',${x.rowNo},'${escJs(r[12]||'')}')">삭제</button>`;
-    if(mode==='je')return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[5])}</div><div class="sub">${esc(r[0])} / ASSY ${esc(r[6])}</div></div><div class="doneQty">${qty}</div></div>${del}</div>`;
+    if(mode==='je')return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4]||('SUB '+(r[7]||'-')))} / ${esc(r[5])}</div><div class="sub">${esc(r[0])} / ASSY ${esc(r[6])}</div></div><div class="doneQty">${qty}</div></div>${del}</div>`;
     return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[7]||r[5])}</div><div class="sub">${esc(r[0])} / ${esc(r[5])}</div></div><div class="doneQty">${qty}</div></div>${del}</div>`;
   }).join('');
   totalEl.textContent='합계: '+total.toLocaleString()+'개';
@@ -654,7 +660,7 @@ function syncAsmWorker(){
   sel.value=v;
   if(mode==='asm'){const st=resultStore.asm,wd=document.getElementById('workDate').value;if(!st||st.date!==wd)loadResults();else paintResults();}
 }
-loadPending();renderPending();document.getElementById('workDate').value=localTomorrow();document.getElementById('worker').addEventListener('change',loadResults);document.getElementById('workDate').addEventListener('change',loadResults);document.getElementById('itemNoInput').addEventListener('input',debounce(renderItems));document.getElementById('weldSearch').addEventListener('input',debounce(()=>searchProcessRemote('weld'),320));document.getElementById('scSearch').addEventListener('input',debounce(()=>renderProcessItems('sc'),120));document.getElementById('asmSearch').addEventListener('input',debounce(()=>renderProcessItems('asm'),120));document.getElementById('asmMemberSearch').addEventListener('input',renderAsmTeam);document.getElementById('dojangSearch').addEventListener('input',debounce(()=>searchProcessRemote('dojang'),320));document.getElementById('pressSearch').addEventListener('input',debounce(()=>searchProcessRemote('press'),320));document.getElementById('smSearch').addEventListener('input',debounce(()=>{renderProcessItems('sm');}));fillWorkers();ensureMaster('finish',()=>{fillWorkers();renderItems();loadResults();});
+loadPending();renderPending();document.getElementById('workDate').value=localTomorrow();document.getElementById('worker').addEventListener('change',()=>{if(mode==='je')applyJeMode();loadResults();});document.getElementById('workDate').addEventListener('change',loadResults);document.getElementById('itemNoInput').addEventListener('input',debounce(renderItems));document.getElementById('weldSearch').addEventListener('input',debounce(()=>searchProcessRemote('weld'),320));document.getElementById('scSearch').addEventListener('input',debounce(()=>renderProcessItems('sc'),120));document.getElementById('asmSearch').addEventListener('input',debounce(()=>renderProcessItems('asm'),120));document.getElementById('asmMemberSearch').addEventListener('input',renderAsmTeam);document.getElementById('dojangSearch').addEventListener('input',debounce(()=>searchProcessRemote('dojang'),320));document.getElementById('pressSearch').addEventListener('input',debounce(()=>searchProcessRemote('press'),320));document.getElementById('smSearch').addEventListener('input',debounce(()=>{renderProcessItems('sm');}));fillWorkers();ensureMaster('finish',()=>{fillWorkers();renderItems();loadResults();});
 
 function setSmPrefix(prefix){smPrefix=prefix;['','FP','FB'].forEach(v=>{const b=document.getElementById('smType'+(v||'Num'));const on=v===prefix;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});renderProcessItems('sm');}
 
