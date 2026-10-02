@@ -12,6 +12,7 @@
 
 .pendBadge{background:#111827;color:#fff;border-radius:999px;padding:5px 12px;font-weight:900;font-size:15px;white-space:nowrap}.pendItem{padding:11px 0;border-bottom:1px solid #eee}.pendTop{display:flex;justify-content:space-between;gap:10px;align-items:center}.pendQty{width:96px!important;flex:none;font-size:22px!important;font-weight:900;text-align:center;padding:9px!important;border:3px solid #1769e0!important}.sendAllBtn{background:#087b25!important;font-size:24px!important;padding:20px!important;font-weight:900;margin-top:14px}.sendAllBtn:disabled{background:#9ca3af!important}.dlgBack{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}.dlgBack.hide{display:none}.dlgBox{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;max-height:85vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.4)}.dlgTitle{font-size:22px;font-weight:900;color:#b45309;margin-bottom:10px}.dlgBody{font-size:16px;line-height:1.45}.dupRow{background:#fff7ed;border:2px solid #fb923c;border-radius:10px;padding:9px;margin:8px 0;font-size:15px}.dlgBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.dlgBtns button{margin-top:0}
 .asmTeamBtns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.asmTeamBtns button{width:auto;padding:10px 16px}.asmMemberChips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.asmMember{display:inline-flex;align-items:center;gap:6px;background:#dbeafe;border:1px solid #93c5fd;color:#1e3a8a;border-radius:999px;padding:8px 10px 8px 14px;font-weight:700;font-size:16px}.asmMember button{width:auto;min-height:0;margin:0;padding:0 6px;background:transparent;color:#1e3a8a;border:0;font-size:20px;line-height:1}.asmAddBtn{width:auto!important;padding:9px 14px!important;background:#fff!important;color:#111!important;border:1px solid #cbd5e1!important;border-radius:999px!important;margin:0 8px 8px 0!important}
+.stageChips{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}.stageChip{width:auto!important;padding:14px 22px!important;border-radius:14px!important;border:2px solid #cbd5e1!important;background:#fff!important;color:#111!important;font-weight:800;font-size:20px}.stageChip.selected{background:#16a34a!important;color:#fff!important;border-color:#15803d!important;box-shadow:0 0 0 4px rgba(22,163,74,.18)}.stageHogi{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -90,7 +91,7 @@ const JE_FALLBACK_WORKERS=['김동안','배인환','박창수','신민욱','이�
 // 제관: 김동안만 호기수 4자리를 입력하고, 그 외 작업자는 호기수 없이 사양의 서브 품번으로 등록합니다.
 const JE_HOGI_WORKER='김동안';
 function jeNeedHogi(){return document.getElementById('worker').value===JE_HOGI_WORKER;}
-function applyJeMode(){const need=jeNeedHogi();document.querySelectorAll('.hogiBox').forEach(b=>{b.style.display=need?'':'none';});document.querySelectorAll('.jeCnt').forEach(b=>{b.textContent=need?'호기수별 저장':'서브 품번 자동 등록';});}
+function applyJeMode(){const need=jeNeedHogi();document.querySelectorAll('.hogiBox').forEach(b=>{b.style.display=need?'':'none';});document.querySelectorAll('.jeCnt').forEach(b=>{b.textContent=need?'호기수별 저장':'서브 품번 자동 등록';});if(typeof updateJeSelection==='function'&&document.getElementById('specs'))updateJeSelection();}
 const JE_FALLBACK_SPECS=[];
 
 // 용접/SC/도장처럼 "품번 + 공정명" 구조를 쓰는 파트들의 설정과 상태
@@ -174,6 +175,7 @@ function refreshMasterQuiet(kind){
     if(!d||!d.ok)return;
     writeMasterCache(kind,d);
     if(kind!=='je')applyMasterData(kind,d);
+    else if(!document.querySelector('.jeCheck:checked')){applyMasterData(kind,d);if(typeof renderSpecs==='function')renderSpecs();}
   });
 }
 function ensureMaster(kind,done){
@@ -326,16 +328,69 @@ function selectProcessMulti(kind,key1,key2){
   toggleProcessItem(kind,key1);
   toggleProcessItem(kind,key2);
 }
-function renderSpecs(){applyJeFallback();const box=document.getElementById('specs');if(!jeSpecs.length){box.innerHTML='<div class="sub">제관 사양이 없습니다.</div>';return;}box.innerHTML=jeSpecs.map((x,i)=>`<div class="specRow" id="jeRow_${i}"><label class="checkLine"><input type="checkbox" class="jeCheck" id="jeCheck_${i}" onchange="updateJeSelection()"><span class="checkText">${esc(x.spec)} 선택</span></label><div class="specTop"><div><div class="specName">${esc(x.spec)}</div><div class="specMeta">ASSY ${esc(x.assyNo)} / SUB ${esc(x.subAssyNo||'-')}</div></div><div class="specCnt jeCnt">호기수별 저장</div></div><div class="specInputRow"><div class="hogiBox"><div class="hogiLabel">호기수 4자리</div><div id="hogiWrap_${i}" class="hogiWrap"></div></div><div><div class="hogiLabel">수량 선택</div><select class="qtySelect" id="jeQty_${i}" onchange="document.getElementById('jeCheck_${i}').checked=true;renderJeHogiInputs(${i});updateJeSelection();"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div></div>`).join('');(jeSpecs||[]).forEach((_,i)=>renderJeHogiInputs(i));applyJeMode();updateJeSelection();}
-function renderJeHogiInputs(i){const wrap=document.getElementById('hogiWrap_'+i);if(!wrap)return;const qty=Number(document.getElementById('jeQty_'+i)?.value||1);const old=[...wrap.querySelectorAll('input')].map(x=>x.value);wrap.innerHTML=Array.from({length:qty},(_,n)=>`<input class="hogiInput hogiMulti" id="hogi_${i}_${n}" maxlength="4" inputmode="numeric" placeholder="${n+1}호기" value="${esc(old[n]||'')}" onfocus="document.getElementById('jeCheck_${i}').checked=true;updateJeSelection();" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);document.getElementById('jeCheck_${i}').checked=true;updateJeSelection();">`).join('');}
-function getJeHogis(i){const qty=Number(document.getElementById('jeQty_'+i)?.value||1);const arr=[];for(let n=0;n<qty;n++){arr.push((document.getElementById(`hogi_${i}_${n}`)?.value||'').trim());}return arr;}
-function updateJeSelection(){let count=0;let total=0;let summary=[];(jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);const row=document.getElementById('jeRow_'+i);if(c&&c.checked){count++;row&&row.classList.add('active');const qty=Number(document.getElementById('jeQty_'+i)?.value||'1');total+=qty;summary.push(`${x.spec} ${qty}대`);}else{row&&row.classList.remove('active');}});const t=document.getElementById('jeSelectedText');if(!t)return;if(count){t.className='selectedBig';t.innerHTML=`선택 완료: ${count}개 사양 / 총 ${total}대<br>${esc(summary.join(' / '))}`;showJeSmall('선택 후 아래 버튼을 누르세요.', true);}else{t.className='inputWaiting';t.textContent='입력 대기: 사양을 선택하세요.';showJeSmall('입력 대기', true);}}
+// 제관 사양 카드: "JEC230 1차 / JEC230 2차"처럼 같은 앞이름 + 'N차' 사양은 카드 하나로 묶어서 차수 버튼으로 고릅니다.
+let jeGroupOf={},jeGroups=[];
+function jeBuildGroups(){
+  jeGroupOf={};jeGroups=[];
+  const byBase={},order=[];
+  (jeSpecs||[]).forEach((x,i)=>{
+    const m=String(x.spec||'').trim().match(/^(.+?)\s+(\d+\s*차)$/);
+    if(!m)return;
+    const base=m[1].trim();
+    if(!byBase[base]){byBase[base]=[];order.push(base);}
+    byBase[base].push({i,stage:m[2].replace(/\s+/g,'')});
+  });
+  order.forEach(base=>{if(byBase[base].length>=2){const g=jeGroups.length;jeGroups.push({base,items:byBase[base]});byBase[base].forEach(it=>{jeGroupOf[it.i]=g;});}});
+}
+function jeQtyOf(i){const g=jeGroupOf[i];const el=document.getElementById(g!==undefined?('jeQty_g'+g):('jeQty_'+i));return Number((el&&el.value)||1);}
+function jeQtyOptions(){return '<option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>';}
+function renderSpecs(){
+  applyJeFallback();
+  const box=document.getElementById('specs');
+  if(!jeSpecs.length){box.innerHTML='<div class="sub">제관 사양이 없습니다.</div>';return;}
+  jeBuildGroups();
+  const done={};
+  box.innerHTML=jeSpecs.map((x,i)=>{
+    const g=jeGroupOf[i];
+    if(g!==undefined){
+      if(done[g])return '';done[g]=true;
+      const grp=jeGroups[g];
+      const first=jeSpecs[grp.items[0].i];
+      const chips=grp.items.map(it=>`<button type="button" class="stageChip" id="jeChip_${it.i}" onclick="toggleJeStage(${it.i})">${esc(it.stage)}</button><input type="checkbox" class="jeCheck" id="jeCheck_${it.i}" style="display:none">`).join('');
+      const hogis=grp.items.map(it=>`<div class="stageHogi" id="stageHogi_${it.i}" style="display:none"><div class="hogiLabel">${esc(it.stage)} 호기수 4자리</div><div id="hogiWrap_${it.i}" class="hogiWrap"></div></div>`).join('');
+      return `<div class="specRow" id="jeGroup_${g}"><div class="specTop"><div><div class="specName">${esc(grp.base)}</div><div class="specMeta">ASSY ${esc(first.assyNo)} / 차수를 눌러 선택 (여러 개 가능)</div></div><div class="specCnt jeCnt">호기수별 저장</div></div><div class="stageChips">${chips}</div><div class="specInputRow">${hogis}<div><div class="hogiLabel">수량 선택</div><select class="qtySelect" id="jeQty_g${g}" onchange="jeGroupQtyChange(${g})">${jeQtyOptions()}</select></div></div></div>`;
+    }
+    return `<div class="specRow" id="jeRow_${i}"><label class="checkLine"><input type="checkbox" class="jeCheck" id="jeCheck_${i}" onchange="updateJeSelection()"><span class="checkText">${esc(x.spec)} 선택</span></label><div class="specTop"><div><div class="specName">${esc(x.spec)}</div><div class="specMeta">ASSY ${esc(x.assyNo)} / SUB ${esc(x.subAssyNo||'-')}</div></div><div class="specCnt jeCnt">호기수별 저장</div></div><div class="specInputRow"><div class="hogiBox"><div class="hogiLabel">호기수 4자리</div><div id="hogiWrap_${i}" class="hogiWrap"></div></div><div><div class="hogiLabel">수량 선택</div><select class="qtySelect" id="jeQty_${i}" onchange="document.getElementById('jeCheck_${i}').checked=true;renderJeHogiInputs(${i});updateJeSelection();">${jeQtyOptions()}</select></div></div></div>`;
+  }).join('');
+  (jeSpecs||[]).forEach((_,i)=>renderJeHogiInputs(i));
+  applyJeMode();updateJeSelection();
+}
+function toggleJeStage(i){const c=document.getElementById('jeCheck_'+i);if(!c)return;c.checked=!c.checked;updateJeSelection();}
+function jeGroupQtyChange(g){(jeGroups[g]?jeGroups[g].items:[]).forEach(it=>renderJeHogiInputs(it.i));updateJeSelection();}
+function renderJeHogiInputs(i){const wrap=document.getElementById('hogiWrap_'+i);if(!wrap)return;const qty=jeQtyOf(i);const old=[...wrap.querySelectorAll('input')].map(x=>x.value);wrap.innerHTML=Array.from({length:qty},(_,n)=>`<input class="hogiInput hogiMulti" id="hogi_${i}_${n}" maxlength="4" inputmode="numeric" placeholder="${n+1}호기" value="${esc(old[n]||'')}" onfocus="document.getElementById('jeCheck_${i}').checked=true;updateJeSelection();" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);document.getElementById('jeCheck_${i}').checked=true;updateJeSelection();">`).join('');}
+function getJeHogis(i){const qty=jeQtyOf(i);const arr=[];for(let n=0;n<qty;n++){arr.push((document.getElementById(`hogi_${i}_${n}`)?.value||'').trim());}return arr;}
+function updateJeSelection(){
+  let count=0,total=0;const summary=[];const need=jeNeedHogi();
+  (jeSpecs||[]).forEach((x,i)=>{
+    const c=document.getElementById('jeCheck_'+i);const row=document.getElementById('jeRow_'+i);
+    const chip=document.getElementById('jeChip_'+i);const sh=document.getElementById('stageHogi_'+i);
+    const on=!!(c&&c.checked);
+    if(chip)chip.classList.toggle('selected',on);
+    if(sh)sh.style.display=(on&&need)?'':'none';
+    if(on){count++;row&&row.classList.add('active');const qty=jeQtyOf(i);total+=qty;summary.push(`${x.spec} ${qty}대`);}
+    else{row&&row.classList.remove('active');}
+  });
+  jeGroups.forEach((grp,g)=>{const gr=document.getElementById('jeGroup_'+g);if(gr)gr.classList.toggle('active',grp.items.some(it=>{const c=document.getElementById('jeCheck_'+it.i);return c&&c.checked;}));});
+  const t=document.getElementById('jeSelectedText');if(!t)return;
+  if(count){t.className='selectedBig';t.innerHTML=`선택 완료: ${count}개 사양 / 총 ${total}대<br>${esc(summary.join(' / '))}`;showJeSmall('선택 후 아래 버튼을 누르세요.', true);}
+  else{t.className='inputWaiting';t.textContent='입력 대기: 사양을 선택하세요.';showJeSmall('입력 대기', true);}
+}
 function saveJeSelected(){
   const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;
   if(!workDate)return showJeSmall('작업일자를 선택하세요.', false);
   if(!worker)return showJeSmall('작업자를 선택하세요.', false);
   const targets=[];const needHogi=jeNeedHogi();
-  (jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);if(c&&c.checked){const qty=Number(document.getElementById('jeQty_'+i).value||1);if(needHogi){const hogis=getJeHogis(i);hogis.forEach((hogi,n)=>targets.push({x,i,hogi,unitNo:n+1,selectedQty:qty}));}else{targets.push({x,i,hogi:'',unitNo:1,selectedQty:qty,subQty:qty});}}});
+  (jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);if(c&&c.checked){const qty=jeQtyOf(i);if(needHogi){const hogis=getJeHogis(i);hogis.forEach((hogi,n)=>targets.push({x,i,hogi,unitNo:n+1,selectedQty:qty}));}else{targets.push({x,i,hogi:'',unitNo:1,selectedQty:qty,subQty:qty});}}});
   if(!targets.length)return showJeSmall('담을 사양을 선택하세요.', false);
   if(needHogi){for(const t of targets){if(!/^\d{4}$/.test(t.hogi))return showJeSmall(`${t.x.spec} ${t.unitNo}번째 호기수는 숫자 4자리로 입력하세요. 예: 0001`, false);}}
   else{for(const t of targets){if(!String(t.x.subAssyNo||'').trim())return showJeSmall(`${t.x.spec} 사양의 서브 품번이 마스터에 없습니다. 관리자에게 알려주세요.`, false);}}
