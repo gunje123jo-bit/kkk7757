@@ -107,7 +107,7 @@ function localTomorrow(){const d=new Date();d.setDate(d.getDate()+1);return `${d
 function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function escJs(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');}
 function normalizeSearch(s){return String(s||'').toUpperCase().replace(/[^0-9A-Z가-힣]/g,'');}
-function jsonp(params,cb,attempt=0){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');let ended=false,timer=null;const readOnly=/^(master|jeMaster|weldMaster|scMaster|asmMaster|asmTeams|dojangMaster|pressMaster|smMaster|processSearch|results|jeResults|weldResults|scResults|asmResults|dojangResults|pressResults|smResults|allResults)$/.test(params.action||'');const cleanup=()=>{clearTimeout(timer);s.remove();};const fail=()=>{if(ended)return;ended=true;cleanup();window[callback]=()=>{};setTimeout(()=>{try{delete window[callback]}catch(e){}},30000);if(readOnly&&attempt<1){setTimeout(()=>jsonp(params,cb,attempt+1),500);return;}const error={ok:false,comm:true,message:'통신 오류입니다. 잠시 후 다시 시도해 주세요.'};if(typeof cb==='function')cb(error);else showActiveMsg(error.message,false);};window[callback]=data=>{if(ended)return;ended=true;cleanup();delete window[callback];cb(data);};s.onerror=fail;s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);timer=setTimeout(fail,45000);}
+function jsonp(params,cb,attempt=0){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');let ended=false,timer=null;const readOnly=/^(master|jeMaster|weldMaster|scMaster|asmMaster|asmTeams|roster|dojangMaster|pressMaster|smMaster|processSearch|results|jeResults|weldResults|scResults|asmResults|dojangResults|pressResults|smResults|allResults)$/.test(params.action||'');const cleanup=()=>{clearTimeout(timer);s.remove();};const fail=()=>{if(ended)return;ended=true;cleanup();window[callback]=()=>{};setTimeout(()=>{try{delete window[callback]}catch(e){}},30000);if(readOnly&&attempt<1){setTimeout(()=>jsonp(params,cb,attempt+1),500);return;}const error={ok:false,comm:true,message:'통신 오류입니다. 잠시 후 다시 시도해 주세요.'};if(typeof cb==='function')cb(error);else showActiveMsg(error.message,false);};window[callback]=data=>{if(ended)return;ended=true;cleanup();delete window[callback];cb(data);};s.onerror=fail;s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);timer=setTimeout(fail,45000);}
 function show(elId,msg,ok){const el=document.getElementById(elId);el.textContent=msg||'';let cls='err';if(ok===true)cls='ok';else if(ok==='wait')cls='wait';else if(msg==='입력 대기'||String(msg||'').includes('입력 대기'))cls='ready';el.className='msg '+cls;}
 function showJeSmall(msg,ok){const el=document.getElementById('jeMsg');if(!el)return;el.textContent=msg||'';el.className='jeMsgSmall '+(ok===false?'err':'ready');}
 function showActiveMsg(msg,ok){if(mode==='finish')show('msg',msg,ok);else if(mode==='je')showJeSmall(msg,ok);else if(PROC_CFG[mode])show(PROC_CFG[mode].msg,msg,ok);}
@@ -132,6 +132,7 @@ function setMode(m){
   document.getElementById('worker').style.display=m==='asm'?'none':'';
   document.getElementById('asmWorkerNote').classList.toggle('hide',m!=='asm');
   if(m==='asm')ensureAsmTeams();
+  refreshRoster();
   fillWorkers();
   if(m==='je')applyJeMode();
   renderPending();
@@ -196,7 +197,7 @@ function ensureMaster(kind,done){
     done&&done();
   });
 }
-function applyMasterData(kind,d){
+function applyMasterData(kind,d){Promise.resolve().then(applyRosterLists);
   if(kind==='finish'){masterItems=d.items||[];finishWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.finish);}
   if(kind==='je'){jeSpecs=d.specs||[];jeWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.je);applyJeFallback();}
   if(PROC_CFG[kind]){procData[kind].items=d.items||[];procData[kind].workers=(d.workers&&d.workers.length?d.workers:(FAST_WORKERS[kind]||[]));}
@@ -623,6 +624,27 @@ function deleteRow(sheet,rowNo,rid){
     else{alert(d.message||'삭제 실패');loadResults();}
   });
 }
+// ---------------------------------------------------------------- 작업자명단(구글 시트 '작업자명단')을 폰 작업자 목록에 반영
+let rosterData=null,lastRosterAt=0;
+try{rosterData=JSON.parse(localStorage.getItem('workResults.roster.v1')||'null');}catch(e){}
+function applyRosterLists(){
+  const r=rosterData&&rosterData.roster;if(!r)return;
+  if(r.finish&&r.finish.length)finishWorkers=r.finish.slice();
+  if(r.je&&r.je.length)jeWorkers=r.je.slice();
+  ['weld','sc','dojang','press','asm'].forEach(k=>{if(r[k]&&r[k].length)procData[k].workers=r[k].slice();});
+  if(rosterData.all&&rosterData.all.length)asmTeams.workers=rosterData.all.slice();
+  if(mode!=='sm')fillWorkers();
+}
+function refreshRoster(force){
+  if(!force&&Date.now()-lastRosterAt<15000)return;
+  lastRosterAt=Date.now();
+  jsonp({action:'roster'},d=>{
+    if(!d||!d.ok)return;
+    rosterData={roster:d.roster||{},all:d.all||[]};
+    try{localStorage.setItem('workResults.roster.v1',JSON.stringify(rosterData))}catch(e){}
+    applyRosterLists();
+  });
+}
 // ---------------------------------------------------------------- 조립파트: 조 선택 + 파트원 추가
 const ASM_DEFAULT_TEAMS=[{name:'A조',members:['박창환','조인호','천성찬','윤점숙']},{name:'B조',members:['정해점','김덕태','김익수']}];
 let asmTeams={teams:ASM_DEFAULT_TEAMS,workers:['강혜정']};
@@ -660,7 +682,7 @@ function syncAsmWorker(){
   sel.value=v;
   if(mode==='asm'){const st=resultStore.asm,wd=document.getElementById('workDate').value;if(!st||st.date!==wd)loadResults();else paintResults();}
 }
-loadPending();renderPending();document.getElementById('workDate').value=localTomorrow();document.getElementById('worker').addEventListener('change',()=>{if(mode==='je')applyJeMode();loadResults();});document.getElementById('workDate').addEventListener('change',loadResults);document.getElementById('itemNoInput').addEventListener('input',debounce(renderItems));document.getElementById('weldSearch').addEventListener('input',debounce(()=>searchProcessRemote('weld'),320));document.getElementById('scSearch').addEventListener('input',debounce(()=>renderProcessItems('sc'),120));document.getElementById('asmSearch').addEventListener('input',debounce(()=>renderProcessItems('asm'),120));document.getElementById('asmMemberSearch').addEventListener('input',renderAsmTeam);document.getElementById('dojangSearch').addEventListener('input',debounce(()=>searchProcessRemote('dojang'),320));document.getElementById('pressSearch').addEventListener('input',debounce(()=>searchProcessRemote('press'),320));document.getElementById('smSearch').addEventListener('input',debounce(()=>{renderProcessItems('sm');}));fillWorkers();ensureMaster('finish',()=>{fillWorkers();renderItems();loadResults();});
+loadPending();renderPending();document.getElementById('workDate').value=localTomorrow();document.getElementById('worker').addEventListener('change',()=>{if(mode==='je')applyJeMode();loadResults();});document.getElementById('workDate').addEventListener('change',loadResults);document.getElementById('itemNoInput').addEventListener('input',debounce(renderItems));document.getElementById('weldSearch').addEventListener('input',debounce(()=>searchProcessRemote('weld'),320));document.getElementById('scSearch').addEventListener('input',debounce(()=>renderProcessItems('sc'),120));document.getElementById('asmSearch').addEventListener('input',debounce(()=>renderProcessItems('asm'),120));document.getElementById('asmMemberSearch').addEventListener('input',renderAsmTeam);document.getElementById('dojangSearch').addEventListener('input',debounce(()=>searchProcessRemote('dojang'),320));document.getElementById('pressSearch').addEventListener('input',debounce(()=>searchProcessRemote('press'),320));document.getElementById('smSearch').addEventListener('input',debounce(()=>{renderProcessItems('sm');}));applyRosterLists();refreshRoster(true);fillWorkers();ensureMaster('finish',()=>{fillWorkers();renderItems();loadResults();});
 
 function setSmPrefix(prefix){smPrefix=prefix;['','FP','FB'].forEach(v=>{const b=document.getElementById('smType'+(v||'Num'));const on=v===prefix;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});renderProcessItems('sm');}
 
