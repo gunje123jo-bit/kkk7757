@@ -31,16 +31,16 @@
     <div class="sub">파트를 누를 때 해당 파트 마스터만 불러옵니다. SC 이후 대기시간을 줄이기 위한 방식입니다.</div>
   </div>
 
-  <div class="card"><div class="row2"><div><label>작업일자</label><input type="date" id="workDate"></div><div><label>작업자</label><div id="smSupportWrap" class="hide"><label><input type="checkbox" id="smSupport" style="width:auto" onchange="fillWorkers();loadResults()"> 지원 (SM2)</label></div><select id="worker"><option value="">작업자 선택</option></select><div id="asmWorkerNote" class="sub hide">조립파트는 아래에서 조와 파트원을 선택하세요.</div></div></div><div class="sub">선택한 작업일자 기준으로 실적이 저장됩니다.</div></div>
+  <div class="card"><div class="row2"><div><label>작업일자</label><input type="date" id="workDate"></div><div><label>작업자</label><div id="smSupportWrap" class="hide"><label><input type="checkbox" id="smSupport" style="width:auto" onchange="fillWorkers();loadResults()"> 지원 (SM2)</label></div><select id="worker"><option value="">작업자 선택</option></select><div id="asmWorkerNote" class="sub hide">조립파트는 A조(ECR) / B조(EC)를 선택하세요. 작업자 칸에는 ECR/EC가, 비고에는 조원 이름이 들어갑니다.</div></div></div><div class="sub">선택한 작업일자 기준으로 실적이 저장됩니다.</div></div>
 
   <div id="finishArea"><div class="card"><label>품목번호</label><input id="itemNoInput" autocomplete="off" placeholder="품번 또는 품명 검색"><div id="items" class="sub">품번 또는 품명을 입력하세요.</div></div><div class="card"><label>수량</label><input type="number" id="qty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveFinishBtn" onclick="saveFinish()">입력 담기</button><button class="gray" onclick="resetFinish()">입력칸 초기화</button><div id="selectedText" class="sub">입력 대기: 품번을 검색하세요.</div><div id="msg" class="msg ready">입력 대기</div></div></div>
 
-  <div id="jeArea" class="hide"><div class="card"><label>제관 사양 입력</label><div class="notice">여러 사양을 동시에 선택할 수 있습니다. 예: 15T 수량 3, 25T 수량 1 선택 후 한 번에 담기.</div><div id="specs" class="specList"></div><div class="jeBulkBar"><div id="jeSelectedText" class="inputWaiting">입력 대기: 사양을 선택하세요.</div><button id="saveJeSelectedBtn" class="jeBulkBtn" type="button" onclick="saveJeSelected()">선택 사양 담기</button><div id="jeMsg" class="jeMsgSmall ready">입력 대기</div></div></div></div>
+  <div id="jeArea" class="hide"><div class="card"><label>제관 입력</label><div class="notice">김동안: 사양별 호기수 4자리 입력(ASSY) 또는 SUB 크기·공정 입력. 그 외: SUB 사양 크기(10~13 / 14~18 / 20~25)와 공정을 고르고 수량을 입력하세요. JEC230은 차수를 고르고 수량을 선택합니다. 여러 개를 동시에 선택해 한 번에 담을 수 있습니다.</div><div id="jeSubBox" class="specList"></div><div id="specs" class="specList"></div><div class="jeBulkBar"><div id="jeSelectedText" class="inputWaiting">입력 대기: 사양을 선택하세요.</div><button id="saveJeSelectedBtn" class="jeBulkBtn" type="button" onclick="saveJeSelected()">선택 사양 담기</button><div id="jeMsg" class="jeMsgSmall ready">입력 대기</div></div></div></div>
 
   <div id="weldArea" class="hide"><div class="card"><label>용접 품번 검색</label><input id="weldSearch" autocomplete="off" placeholder="품번 입력"><div id="weldItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>선택 공정별 수량</label><div id="weldSelectedText" class="sub">입력 대기: 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="weldQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveWeldBtn" onclick="saveWeld()">입력 담기</button><button class="gray" onclick="resetWeld()">입력칸 초기화</button><div id="weldMsg" class="msg ready">입력 대기</div></div></div>
 
   <div id="scArea" class="hide"><div class="card"><label>SC 품번 검색</label><input id="scSearch" autocomplete="off" placeholder="품번 입력"><div id="scItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SC 선택 공정별 수량</label><div id="scSelectedText" class="sub">입력 대기: SC 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="scQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveScBtn" onclick="saveSc()">입력 담기</button><button class="gray" onclick="resetSc()">입력칸 초기화</button><div id="scMsg" class="msg ready">입력 대기</div></div></div>
-  <div id="asmArea" class="hide"><div class="card"><label>조 선택</label><div id="asmTeamBtns" class="asmTeamBtns"></div><label>조원 <span class="sub" id="asmMemberCount"></span></label><div id="asmMemberChips" class="asmMemberChips"></div><label>파트원 추가</label><input id="asmMemberSearch" autocomplete="off" placeholder="이름 검색 후 눌러서 추가"><div id="asmMemberResults" style="margin-top:8px"></div></div><div class="card"><label>조립 품번 검색</label><input id="asmSearch" autocomplete="off" placeholder="품번 입력"><div id="asmItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>조립 선택 공정별 수량</label><div id="asmSelectedText" class="sub">입력 대기: 조립 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="asmQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveAsmBtn" onclick="saveAsm()">입력 담기</button><button class="gray" onclick="resetAsm()">입력칸 초기화</button><div id="asmMsg" class="msg ready">입력 대기</div></div></div>
+  <div id="asmArea" class="hide"><div class="card"><label>조 선택</label><div id="asmTeamBtns" class="asmTeamBtns"></div><label>조원 <span class="sub" id="asmMemberCount"></span></label><div id="asmMemberChips" class="asmMemberChips"></div><label>파트원 추가</label><input id="asmMemberSearch" autocomplete="off" placeholder="이름 검색 후 눌러서 추가"><div id="asmMemberResults" style="margin-top:8px"></div><button type="button" class="gray" style="margin-top:10px" onclick="toggleAsmEdit()">조편성 명단 편집 (새 사람 등록)</button><div id="asmEditBox" class="hide" style="margin-top:10px"></div></div><div class="card"><label>조립 품번 검색</label><input id="asmSearch" autocomplete="off" placeholder="품번 입력"><div id="asmItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>조립 선택 공정별 수량</label><div id="asmSelectedText" class="sub">입력 대기: 조립 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="asmQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveAsmBtn" onclick="saveAsm()">입력 담기</button><button class="gray" onclick="resetAsm()">입력칸 초기화</button><div id="asmMsg" class="msg ready">입력 대기</div></div></div>
 
   <div id="dojangArea" class="hide"><div class="card"><label>도장 품번 검색</label><input id="dojangSearch" autocomplete="off" placeholder="품번 입력"><div id="dojangItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>도장 선택 공정별 수량</label><div id="dojangSelectedText" class="sub">입력 대기: 도장 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="dojangQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveDojangBtn" onclick="saveDojang()">입력 담기</button><button class="gray" onclick="resetDojang()">입력칸 초기화</button><div id="dojangMsg" class="msg ready">입력 대기</div></div></div>
   <div id="pressArea" class="hide"><div class="card"><label>프레스 품번 검색</label><input id="pressSearch" autocomplete="off" placeholder="품번 입력"><div id="pressItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>프레스 선택 공정별 수량</label><div id="pressSelectedText" class="sub">입력 대기: 프레스 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="pressQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="savePressBtn" onclick="savePress()">입력 담기</button><button class="gray" onclick="resetPress()">입력칸 초기화</button><div id="pressMsg" class="msg ready">입력 대기</div></div></div>
@@ -70,7 +70,7 @@ let mode='finish';
 let masterItems=[],jeSpecs=[];
 const FAST_WORKERS={
   finish:['강혜정','유정욱'],
-  je:['김동안','박창수','배인환','신민욱','이상민'],
+  je:['김동안','박창수','배인환','신민욱','이성민'],
   weld:['강성근','김대기','김범수','김영수','박경숙','배진호','이원준','진청규','천성찬'],
   sc:['권진','배길만','성만기'],
   asm:['김덕태','김익수','박창환','윤점숙','정해점','조인호','천성찬'],
@@ -87,11 +87,24 @@ let loading={finish:false,je:false,weld:false,sc:false,asm:false,dojang:false,pr
 // 입력할 때마다 20초가량 걸리는 서버 검색을 반복하지 않습니다.
 const REMOTE_PART_SEARCH={weld:true,sc:false,asm:false,dojang:true,press:true};
 let searchRequestNo={weld:0,sc:0,asm:0,dojang:0,press:0};
-const JE_FALLBACK_WORKERS=['김동안','배인환','박창수','신민욱','이상민'];
+const JE_FALLBACK_WORKERS=['김동안','배인환','박창수','신민욱','이성민'];
 // 제관: 김동안만 호기수 4자리를 입력하고, 그 외 작업자는 호기수 없이 사양의 서브 품번으로 등록합니다.
 const JE_HOGI_WORKER='김동안';
 function jeNeedHogi(){return document.getElementById('worker').value===JE_HOGI_WORKER;}
-function applyJeMode(){const need=jeNeedHogi();document.querySelectorAll('.hogiBox').forEach(b=>{b.style.display=need?'':'none';});document.querySelectorAll('.jeCnt').forEach(b=>{b.textContent=need?'호기수별 저장':'서브 품번 자동 등록';});if(typeof updateJeSelection==='function'&&document.getElementById('specs'))updateJeSelection();}
+let jeSubs=[],jeSubProcs=['메인 플레이트 용접','프레임 가접','컴플 본접'];
+function jeIsJec(x){return !!(x&&(x.jec===true||/^JEC/i.test(String(x.spec||''))||String(x.assyNo||'')==='55714346-WL'));}
+function jeStageProc(spec){const m=String(spec||'').match(/(\d+)\s*차/);return m?m[1]+'차 용접':'';}
+function jeDeriveSubs(specs){const map={},list=[];(specs||[]).forEach(x=>{if(jeIsJec(x)||!x.subAssyNo)return;let sb=map[x.subAssyNo];if(!sb){sb={subNo:x.subAssyNo,name:'',model:'',specs:[],nums:[]};map[x.subAssyNo]=sb;list.push(sb);}sb.specs.push(x.spec);const m=String(x.spec).match(/^(\d+)/);if(m)sb.nums.push(Number(m[1]));});return list.map(sb=>{const lo=sb.nums.length?Math.min(...sb.nums):0,hi=sb.nums.length?Math.max(...sb.nums):0;return{subNo:sb.subNo,name:sb.name,model:sb.model,specs:sb.specs,lo,range:sb.nums.length?(lo===hi?String(lo):lo+'~'+hi):''};}).sort((a,b)=>(a.lo-b.lo)||(a.subNo<b.subNo?-1:1));}
+function jeSubRange(no){const sb=(jeSubs||[]).find(x=>String(x.subNo)===String(no));return sb?sb.range:'';}
+function applyJeMode(){
+  const need=jeNeedHogi();
+  document.querySelectorAll('.hogiBox').forEach(b=>{b.style.display=need?'':'none';});
+  document.querySelectorAll('.jeCnt').forEach(b=>{b.textContent=need?'호기수별 저장':'차수별 수량 저장';});
+  const sbx=document.getElementById('jeSubBox');if(sbx)sbx.style.display='';
+  (jeSpecs||[]).forEach((x,i)=>{const show=jeIsJec(x)?!need:need;const el=document.getElementById('jeRow_'+i);if(el)el.style.display=show?'':'none';if(!show){const c=document.getElementById('jeCheck_'+i);if(c)c.checked=false;}});
+  (jeGroups||[]).forEach((grp,g)=>{const x=jeSpecs[grp.items[0].i];const show=jeIsJec(x)?!need:need;const el=document.getElementById('jeGroup_'+g);if(el)el.style.display=show?'':'none';if(!show)grp.items.forEach(it=>{const c=document.getElementById('jeCheck_'+it.i);if(c)c.checked=false;});});
+  if(typeof updateJeSelection==='function'&&document.getElementById('specs'))updateJeSelection();
+}
 const JE_FALLBACK_SPECS=[];
 
 // 용접/SC/도장처럼 "품번 + 공정명" 구조를 쓰는 파트들의 설정과 상태
@@ -175,7 +188,7 @@ function refreshMasterQuiet(kind){
     if(!d||!d.ok)return;
     writeMasterCache(kind,d);
     if(kind!=='je')applyMasterData(kind,d);
-    else if(!document.querySelector('.jeCheck:checked')){applyMasterData(kind,d);if(typeof renderSpecs==='function')renderSpecs();}
+    else if(!document.querySelector('.jeCheck:checked')&&!document.querySelector('#jeSubBox .stageChip.selected')){applyMasterData(kind,d);if(typeof renderSpecs==='function')renderSpecs();}
   });
 }
 function ensureMaster(kind,done){
@@ -201,7 +214,7 @@ function ensureMaster(kind,done){
 }
 function applyMasterData(kind,d){Promise.resolve().then(applyRosterLists);
   if(kind==='finish'){masterItems=d.items||[];finishWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.finish);}
-  if(kind==='je'){jeSpecs=d.specs||[];jeWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.je);applyJeFallback();}
+  if(kind==='je'){jeSpecs=d.specs||[];jeSubs=(d.subs&&d.subs.length)?d.subs:jeDeriveSubs(jeSpecs);if(d.subProcesses&&d.subProcesses.length)jeSubProcs=d.subProcesses;jeWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.je);applyJeFallback();}
   if(PROC_CFG[kind]){procData[kind].items=d.items||[];procData[kind].workers=(d.workers&&d.workers.length?d.workers:(FAST_WORKERS[kind]||[]));}
 }
 function readMasterCache(kind){
@@ -344,8 +357,21 @@ function jeBuildGroups(){
 }
 function jeQtyOf(i){const g=jeGroupOf[i];const el=document.getElementById(g!==undefined?('jeQty_g'+g):('jeQty_'+i));return Number((el&&el.value)||1);}
 function jeQtyOptions(){return '<option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>';}
+function renderJeSubs(){
+  const box=document.getElementById('jeSubBox');if(!box)return;
+  if(!jeSubs||!jeSubs.length){box.innerHTML='';return;}
+  box.innerHTML=jeSubs.map((sb,si)=>{
+    const chips=jeSubProcs.map((p,pi)=>`<button type="button" class="stageChip" id="jeSubChip_${si}_${pi}" onclick="toggleJeSub(${si},${pi})">${esc(p)}</button>`).join('');
+    const qtys=jeSubProcs.map((p,pi)=>`<div class="subQtyRow" id="jeSubRow_${si}_${pi}" style="display:none"><div class="hogiLabel">${esc(p)} 수량</div><input class="hogiInput" id="jeSubQty_${si}_${pi}" type="number" min="1" inputmode="numeric" placeholder="수량" oninput="updateJeSelection()"></div>`).join('');
+    return `<div class="specRow" id="jeSub_${si}"><div class="specTop"><div><div class="specName" style="font-size:30px">${esc(sb.range||sb.subNo)} <span style="font-size:16px;color:#475569">사양</span></div><div class="specMeta">SUB ${esc(sb.subNo)}${sb.name?' / '+esc(sb.name):''}<br>${esc((sb.specs||[]).join(' · '))}</div></div></div><div class="stageChips">${chips}</div>${qtys}</div>`;
+  }).join('');
+}
+function toggleJeSub(si,pi){const c=document.getElementById(`jeSubChip_${si}_${pi}`);if(!c)return;c.classList.toggle('selected');const on=c.classList.contains('selected');const row=document.getElementById(`jeSubRow_${si}_${pi}`);if(row)row.style.display=on?'':'none';if(on){const inp=document.getElementById(`jeSubQty_${si}_${pi}`);if(inp)setTimeout(()=>inp.focus(),0);}updateJeSelection();}
+function jeSubSelected(){const out=[];(jeSubs||[]).forEach((sb,si)=>{(jeSubProcs||[]).forEach((p,pi)=>{const c=document.getElementById(`jeSubChip_${si}_${pi}`);if(c&&c.classList.contains('selected')){const inp=document.getElementById(`jeSubQty_${si}_${pi}`);out.push({sb,si,pi,process:p,qty:Number((inp&&inp.value)||0)});}});});return out;}
+function clearJeSubSel(){document.querySelectorAll('#jeSubBox .stageChip').forEach(c=>c.classList.remove('selected'));document.querySelectorAll('#jeSubBox .subQtyRow').forEach(r=>{r.style.display='none';const i=r.querySelector('input');if(i)i.value='';});}
 function renderSpecs(){
   applyJeFallback();
+  renderJeSubs();
   const box=document.getElementById('specs');
   if(!jeSpecs.length){box.innerHTML='<div class="sub">제관 사양이 없습니다.</div>';return;}
   jeBuildGroups();
@@ -381,9 +407,12 @@ function updateJeSelection(){
     else{row&&row.classList.remove('active');}
   });
   jeGroups.forEach((grp,g)=>{const gr=document.getElementById('jeGroup_'+g);if(gr)gr.classList.toggle('active',grp.items.some(it=>{const c=document.getElementById('jeCheck_'+it.i);return c&&c.checked;}));});
+  const subSel=jeSubSelected();
+  (jeSubs||[]).forEach((sb,si)=>{const el=document.getElementById('jeSub_'+si);if(el)el.classList.toggle('active',subSel.some(x=>x.si===si));});
+  subSel.forEach(x=>{count++;total+=x.qty||0;summary.push(`${x.sb.range||x.sb.subNo} ${x.process} ${x.qty||0}개`);});
   const t=document.getElementById('jeSelectedText');if(!t)return;
-  if(count){t.className='selectedBig';t.innerHTML=`선택 완료: ${count}개 사양 / 총 ${total}대<br>${esc(summary.join(' / '))}`;showJeSmall('선택 후 아래 버튼을 누르세요.', true);}
-  else{t.className='inputWaiting';t.textContent='입력 대기: 사양을 선택하세요.';showJeSmall('입력 대기', true);}
+  if(count){t.className='selectedBig';t.innerHTML=`선택 완료: ${count}개 / 총 ${total}<br>${esc(summary.join(' / '))}`;showJeSmall('선택 후 아래 버튼을 누르세요.', true);}
+  else{t.className='inputWaiting';t.textContent=need?'입력 대기: 사양 또는 SUB 크기·공정을 선택하세요.':'입력 대기: SUB 크기·공정 또는 JEC 차수를 선택하세요.';showJeSmall('입력 대기', true);}
 }
 function saveJeSelected(){
   const workDate=document.getElementById('workDate').value,worker=document.getElementById('worker').value;
@@ -391,19 +420,22 @@ function saveJeSelected(){
   if(!worker)return showJeSmall('작업자를 선택하세요.', false);
   const targets=[];const needHogi=jeNeedHogi();
   (jeSpecs||[]).forEach((x,i)=>{const c=document.getElementById('jeCheck_'+i);if(c&&c.checked){const qty=jeQtyOf(i);if(needHogi){const hogis=getJeHogis(i);hogis.forEach((hogi,n)=>targets.push({x,i,hogi,unitNo:n+1,selectedQty:qty}));}else{targets.push({x,i,hogi:'',unitNo:1,selectedQty:qty,subQty:qty});}}});
-  if(!targets.length)return showJeSmall('담을 사양을 선택하세요.', false);
+  const subSel=jeSubSelected();
+  if(!targets.length&&!subSel.length)return showJeSmall(needHogi?'담을 사양 또는 SUB 크기·공정을 선택하세요.':'담을 SUB 크기·공정 또는 JEC 차수를 선택하세요.', false);
   if(needHogi){for(const t of targets){if(!/^\d{4}$/.test(t.hogi))return showJeSmall(`${t.x.spec} ${t.unitNo}번째 호기수는 숫자 4자리로 입력하세요. 예: 0001`, false);}}
-  else{for(const t of targets){if(!String(t.x.subAssyNo||'').trim())return showJeSmall(`${t.x.spec} 사양의 서브 품번이 마스터에 없습니다. 관리자에게 알려주세요.`, false);}}
-  const entries=targets.map(t=>({uid:newUid(),kind:'je',workDate,worker,part:'제관파트',hogi:t.hogi,spec:String(t.x.spec||'').trim(),assyNo:String(t.x.assyNo||'').trim(),subAssyNo:String(t.x.subAssyNo||'').trim(),qty:needHogi?1:t.subQty,memo:needHogi&&targets.length>1?'제관 복수호기 동시입력':'',addedAt:Date.now()}));
+  for(const sx of subSel){if(!(sx.qty>0))return showJeSmall(`${sx.sb.range||sx.sb.subNo} ${sx.process} 수량을 입력하세요.`, false);}
+  const entries=targets.map(t=>({uid:newUid(),kind:'je',workDate,worker,part:'제관파트',hogi:t.hogi,spec:String(t.x.spec||'').trim(),assyNo:String(t.x.assyNo||'').trim(),subAssyNo:String(t.x.subAssyNo||'').trim(),itemNo:String(t.x.assyNo||'').trim(),process:t.hogi?(t.x.process||'앗세이'):(t.x.process||jeStageProc(t.x.spec)),qty:needHogi?1:t.subQty,memo:needHogi&&targets.length>1?'제관 복수호기 동시입력':'',addedAt:Date.now()}));
+  subSel.forEach(sx=>entries.push({uid:newUid(),kind:'je',workDate,worker,part:'제관파트',hogi:'',spec:'',subNo:sx.sb.subNo,itemNo:sx.sb.subNo,process:sx.process,range:sx.sb.range||'',qty:sx.qty,memo:'',addedAt:Date.now()}));
   queueEntries(entries).then(ok=>{
     if(!ok)return showJeSmall('취소했습니다.', false);
     showJeSmall(`대기 목록에 담김 - ${entries.length}건 (마지막에 [전체 입력 완료])`, true);
     showSaveToast(`대기에 담김 · ${entries.length}건`);
-    const group={};entries.forEach(e=>{group[e.spec]=(group[e.spec]||0)+1;});
+    const group={};entries.forEach(e=>{const k=e.subNo?((e.range?e.range+' ':'')+e.process+' '+e.qty+'개'):e.spec;group[k]=(group[k]||0)+1;});
     targets.forEach(t=>{for(let n=0;n<t.selectedQty;n++){const inp=document.getElementById(`hogi_${t.i}_${n}`);if(inp)inp.value='';}const chk=document.getElementById('jeCheck_'+t.i);if(chk)chk.checked=false;});
+    clearJeSubSel();
     updateJeSelection();
     document.getElementById('jeSelectedText').className='selectedBig';
-    document.getElementById('jeSelectedText').innerHTML=`대기에 담김<br>${esc(Object.entries(group).map(([k,v])=>k+' '+v+'대').join(' / '))}`;
+    document.getElementById('jeSelectedText').innerHTML=`대기에 담김<br>${esc(Object.entries(group).map(([k,v])=>k+(k.indexOf('개')>=0?'':' '+v+'대')).join(' / '))}`;
   });
 }
 function setJeSaving(on){const btn=document.getElementById('saveJeSelectedBtn');if(btn){btn.disabled=on;btn.classList.toggle('saving',on);btn.textContent=on?'입력 중...':'선택 사양 입력 완료';}document.getElementById('specs')?.classList.toggle('disabledArea',on);}
@@ -432,7 +464,8 @@ function saveProcess(kind){
   let obj=procData[kind].selected;
   const arr=procData[kind].items;
   if(!workDate)return show(cfg.msg,'작업일자를 선택하세요.',false);
-  if(!worker)return show(cfg.msg,'작업자를 선택하세요.',false);
+  if(!worker)return show(cfg.msg,kind==='asm'?'조(A조/B조)를 선택하세요.':'작업자를 선택하세요.',false);
+  if(kind==='asm'&&!asmNorm(asmMembers).length)return show(cfg.msg,'조원을 1명 이상 선택하세요.',false);
   if(!obj&&typed&&kind!=='sm'){
     const nt=normalizeSearch(typed);
     const one=(arr||[]).find(x=>x.itemNo===typed||x.displayName===typed||x.inputKey===typed||normalizeSearch(x.itemNo)===nt||normalizeSearch(x.displayName)===nt||normalizeSearch(x.inputKey)===nt);
@@ -443,7 +476,7 @@ function saveProcess(kind){
   for(const r of rows){
     if(!r.saveQty||Number(r.saveQty)<=0)return show(cfg.msg,`${r.itemNo} / ${processLabel(r.process)} 수량을 입력하세요.`,false);
   }
-  const entries=rows.map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:r.model||'',process:r.process||'',qty:Number(r.saveQty),memo:rows.length>1?'공정별 수량 동시입력':'',addedAt:Date.now()}));
+  const entries=rows.map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:r.model||'',process:r.process||'',qty:Number(r.saveQty),memo:rows.length>1?'공정별 수량 동시입력':'',members:kind==='asm'?asmNorm(asmMembers).join(', '):undefined,addedAt:Date.now()}));
   queueEntries(entries).then(ok=>{
     if(!ok){show(cfg.msg,'취소했습니다.',false);return;}
     show(cfg.msg,rows.length>1?`대기 목록에 담김 - ${rows.length}개 공정`:'대기 목록에 담김 - 마지막에 [전체 입력 완료]',true);
@@ -462,9 +495,9 @@ function loadPending(){try{const v=JSON.parse(localStorage.getItem(PEND_KEY)||'[
 function savePending(){try{localStorage.setItem(PEND_KEY,JSON.stringify(pending));}catch(e){}}
 function normDate(v){const m=String(v==null?'':v).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);return m?m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'):String(v==null?'':v).trim();}
 function normHogi(v){const s=String(v==null?'':v).trim().replace(/^0+/,'');return s||'0';}
-function entryKey(e){return e.kind==='je'?(e.hogi?[e.workDate,e.worker,normHogi(e.hogi),e.spec].join('|'):[e.workDate,e.worker,'SUB:'+e.subAssyNo,e.spec].join('|')):[e.workDate,e.worker,e.itemNo,e.process||''].join('|');}
-function rowKey(kind,v){const s=x=>String(x==null?'':x).trim();return kind==='je'?(s(v[4])?[normDate(v[1]),s(v[2]),normHogi(v[4]),s(v[5])].join('|'):[normDate(v[1]),s(v[2]),'SUB:'+s(v[7]),s(v[5])].join('|')):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|');}
-function entryLabel(e){return e.kind==='je'?(e.hogi?`${e.hogi} 호기 / ${e.spec}`:`${e.spec} / SUB ${e.subAssyNo||'-'}${Number(e.qty)>1?' x'+e.qty:''}`):`${e.itemNo}${e.process?' / '+processLabel(e.process):''}`;}
+function entryKey(e){return e.kind==='je'?(e.hogi?[e.workDate,e.worker,normHogi(e.hogi),e.spec].join('|'):[e.workDate,e.worker,e.itemNo||e.subNo||'',e.process||''].join('|')):[e.workDate,e.worker,e.itemNo,e.process||''].join('|');}
+function rowKey(kind,v){const s=x=>String(x==null?'':x).trim();return kind==='je'?(s(v[13])?[normDate(v[1]),s(v[2]),normHogi(v[13]),s(v[14])].join('|'):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|')):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|');}
+function entryLabel(e){return e.kind==='je'?(e.hogi?`${e.hogi} 호기 / ${e.spec}`:(e.subNo?`${e.range?e.range+' / ':''}SUB ${e.subNo} / ${e.process}`:`${e.spec} / ${e.process||''}`)):`${e.itemNo}${e.process?' / '+processLabel(e.process):''}`;}
 function updateTabBadges(){Object.keys(TAB_BASE).forEach(k=>{const el=document.getElementById(TAB_BASE[k][0]);if(!el)return;const c=pending.filter(e=>e.kind===k).length;el.textContent=TAB_BASE[k][1]+(c?' ('+c+')':'');});}
 
 function confirmDlg(title,bodyHtml,yesText,noText){
@@ -652,7 +685,7 @@ function paintResults(){
   const html=rows.map(x=>{
     const r=x.values;const qty=Number(r[8])||0;total+=qty;
     const del=`<button class="deleteBtn" onclick="deleteRow('${mode}',${x.rowNo},'${escJs(r[12]||'')}')">삭제</button>`;
-    if(mode==='je')return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4]||('SUB '+(r[7]||'-')))} / ${esc(r[5])}</div><div class="sub">${esc(r[0])} / ASSY ${esc(r[6])}</div></div><div class="doneQty">${qty}</div></div>${del}</div>`;
+    if(mode==='je'){const hg=r[13]?r[13]+'호기':'';const rg=(jeSubProcs.indexOf(String(r[7]||''))>=0)?jeSubRange(r[4]):'';return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[7]||r[14]||r[5])}</div><div class="sub">${esc(r[0])}${hg?' / '+esc(hg):''}${rg?' / '+esc(rg)+' 사양':''}${r[14]?' / '+esc(r[14]):(r[5]?' / '+esc(r[5]):'')}</div></div><div class="doneQty">${qty}</div></div>${del}</div>`;}
     return `<div class="doneItem"><div class="doneTop"><div><div class="doneNo">${esc(r[4])} / ${esc(r[7]||r[5])}</div><div class="sub">${esc(r[0])} / ${esc(r[5])}</div></div><div class="doneQty">${qty}</div></div>${del}</div>`;
   }).join('');
   totalEl.textContent='합계: '+total.toLocaleString()+'개';
@@ -701,18 +734,22 @@ function refreshRoster(force){
   });
 }
 // ---------------------------------------------------------------- 조립파트: 조 선택 + 파트원 추가
-const ASM_DEFAULT_TEAMS=[{name:'A조',members:['박창환','조인호','천성찬','윤점숙']},{name:'B조',members:['정해점','김덕태','김익수']}];
+const ASM_DEFAULT_TEAMS=[{name:'ECR',members:['박창환','조인호','천성찬','윤점숙']},{name:'EC',members:['정해점','김덕태','김익수']}];
+const ASM_ERP={'A조':'ECR','B조':'EC'},ASM_LABEL={ECR:'A조 (ECR)',EC:'B조 (EC)'};
+function asmErpName(n){n=String(n||'').trim();return ASM_ERP[n]||n;}
+function asmLabel(n){return ASM_LABEL[n]||n;}
+function asmFixTeams(o){o.teams=(o.teams||[]).map(t=>({name:asmErpName(t.name),members:t.members||[]}));return o;}
 let asmTeams={teams:ASM_DEFAULT_TEAMS,workers:['강혜정']};
 let asmMembers=[],asmTeamOn='';
-try{const s=JSON.parse(localStorage.getItem('workResults.asmTeams.v1')||'null');if(s&&Array.isArray(s.teams)&&s.teams.length)asmTeams={teams:s.teams,workers:s.workers||[]};}catch(e){}
-try{const s=JSON.parse(localStorage.getItem('workResults.asmMembers.v1')||'null');if(s&&Array.isArray(s.m)){asmMembers=s.m;asmTeamOn=s.t||'';}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem('workResults.asmTeams.v1')||'null');if(s&&Array.isArray(s.teams)&&s.teams.length)asmTeams=asmFixTeams({teams:s.teams,workers:s.workers||[]});}catch(e){}
+try{const s=JSON.parse(localStorage.getItem('workResults.asmMembers.v1')||'null');if(s&&Array.isArray(s.m)){asmMembers=s.m;asmTeamOn=asmErpName(s.t||'');}}catch(e){}
 function asmSave(){try{localStorage.setItem('workResults.asmMembers.v1',JSON.stringify({m:asmMembers,t:asmTeamOn}))}catch(e){}}
 function asmNorm(list){return [...new Set((list||[]).map(x=>String(x||'').trim()).filter(Boolean))].sort((a,b)=>a<b?-1:a>b?1:0);}
 function asmWorkerStr(){return asmNorm(asmMembers).join(', ');}
 function ensureAsmTeams(){
   renderAsmTeam();
   jsonp({action:'asmTeams'},d=>{
-    if(d&&d.ok&&Array.isArray(d.teams)){asmTeams={teams:d.teams,workers:d.workers||[]};try{localStorage.setItem('workResults.asmTeams.v1',JSON.stringify(asmTeams))}catch(e){}renderAsmTeam();}
+    if(d&&d.ok&&Array.isArray(d.teams)){asmTeams=asmFixTeams({teams:d.teams,workers:d.workers||[]});try{localStorage.setItem('workResults.asmTeams.v1',JSON.stringify(asmTeams))}catch(e){}renderAsmTeam();}
   });
 }
 function pickAsmTeam(i){const t=asmTeams.teams[i];if(!t)return;asmMembers=asmNorm(t.members);asmTeamOn=t.name;asmSave();renderAsmTeam();syncAsmWorker();}
@@ -722,7 +759,7 @@ function removeAsmMember(n){asmMembers=asmMembers.filter(x=>x!==n);asmSave();ren
 function asmCandidates(){const all=new Set(asmTeams.workers||[]);asmTeams.teams.forEach(t=>(t.members||[]).forEach(m=>all.add(m)));return [...all].filter(n=>!asmMembers.includes(n)).sort((a,b)=>a<b?-1:a>b?1:0);}
 function renderAsmTeam(){
   const tb=document.getElementById('asmTeamBtns');if(!tb)return;
-  tb.innerHTML=asmTeams.teams.map((t,i)=>`<button type="button" class="tab ${asmTeamOn===t.name?'active':''}" onclick="pickAsmTeam(${i})">${esc(t.name)}</button>`).join('')+`<button type="button" class="tab gray" onclick="clearAsmMembers()">전체 해제</button>`;
+  tb.innerHTML=asmTeams.teams.map((t,i)=>`<button type="button" class="tab ${asmTeamOn===t.name?'active':''}" onclick="pickAsmTeam(${i})">${esc(asmLabel(t.name))}</button>`).join('')+`<button type="button" class="tab gray" onclick="clearAsmMembers()">전체 해제</button>`;
   document.getElementById('asmMemberCount').textContent=asmMembers.length?'('+asmMembers.length+'명)':'';
   document.getElementById('asmMemberChips').innerHTML=asmMembers.length?asmNorm(asmMembers).map(n=>`<span class="asmMember">${esc(n)}<button type="button" aria-label="${esc(n)} 빼기" onclick="removeAsmMember('${escJs(n)}')">×</button></span>`).join(''):'<span class="sub">조를 누르거나 아래에서 이름을 검색해 추가하세요.</span>';
   const q=document.getElementById('asmMemberSearch').value.trim();
@@ -731,9 +768,32 @@ function renderAsmTeam(){
   const list=asmCandidates().filter(n=>n.includes(q)).slice(0,20);
   box.innerHTML=list.length?list.map(n=>`<button type="button" class="asmAddBtn" onclick="addAsmMember('${escJs(n)}')">+ ${esc(n)}</button>`).join(''):'<span class="sub">일치하는 이름이 없습니다.</span>';
 }
+
+// ---- 조편성 명단 편집: 조원 추가/삭제, 새 사람 등록, 조 추가/삭제 → 구글시트(조립_조편성)에 저장
+let asmEdit=null;
+function toggleAsmEdit(){const b=document.getElementById('asmEditBox');if(!b)return;if(!b.classList.contains('hide')){b.classList.add('hide');asmEdit=null;return;}asmEdit=asmTeams.teams.map(t=>({name:t.name,members:asmNorm(t.members)}));b.classList.remove('hide');renderAsmEdit();}
+function renderAsmEdit(msg){
+  const b=document.getElementById('asmEditBox');if(!b||!asmEdit)return;
+  b.innerHTML=asmEdit.map((t,i)=>`<div class="card" style="margin:8px 0;padding:10px"><b>${esc(asmLabel(t.name))}</b> <span class="sub">(${t.members.length}명)</span><div class="asmMemberChips">${t.members.length?t.members.map(n=>`<span class="asmMember">${esc(n)}<button type="button" aria-label="${esc(n)} 삭제" onclick="asmEditRemove(${i},'${escJs(n)}')">×</button></span>`).join(''):'<span class="sub">조원 없음</span>'}</div><div style="display:flex;gap:6px"><input id="asmEditIn_${i}" autocomplete="off" placeholder="새 사람 이름 입력" style="flex:1"><button type="button" style="width:auto;padding:10px 14px" onclick="asmEditAdd(${i})">추가</button></div><button type="button" class="gray" style="margin-top:8px" onclick="asmEditDelTeam(${i})">이 조 삭제</button></div>`).join('')
+  +`<div style="display:flex;gap:6px;margin:8px 0"><input id="asmEditNewTeam" autocomplete="off" placeholder="새 조 이름 (ERP 작업자 이름)" style="flex:1"><button type="button" style="width:auto;padding:10px 14px" onclick="asmEditAddTeam()">조 추가</button></div><button type="button" onclick="asmEditSave()">조편성 저장</button><div id="asmEditMsg" class="sub" style="margin-top:6px">${esc(msg||'')}</div>`;
+}
+function asmEditAdd(i){const el=document.getElementById('asmEditIn_'+i);const n=(el.value||'').trim().replace(/[,，、]/g,'');if(!n)return;if(n.length>10)return renderAsmEdit('이름이 너무 깁니다.');const dup=asmEdit.find((t,j)=>j!==i&&t.members.includes(n));asmEdit[i].members=asmNorm(asmEdit[i].members.concat([n]));renderAsmEdit(dup?`${n} 님은 ${dup.name}에도 있습니다. (중복 허용)`:'');}
+function asmEditRemove(i,n){asmEdit[i].members=asmEdit[i].members.filter(x=>x!==n);renderAsmEdit();}
+function asmEditDelTeam(i){if(asmEdit.length<=1)return renderAsmEdit('조는 1개 이상 있어야 합니다.');if(!confirm(asmLabel(asmEdit[i].name)+' 을(를) 삭제할까요? (저장 전까지는 실제 반영되지 않습니다)'))return;asmEdit.splice(i,1);renderAsmEdit();}
+function asmEditAddTeam(){const el=document.getElementById('asmEditNewTeam');const n=(el.value||'').trim();if(!n)return;if(asmEdit.some(t=>t.name===n))return renderAsmEdit('이미 있는 조 이름입니다.');if(asmEdit.length>=10)return renderAsmEdit('조는 최대 10개입니다.');asmEdit.push({name:n,members:[]});renderAsmEdit();}
+function asmEditSave(){
+  const m=document.getElementById('asmEditMsg');if(m)m.textContent='저장 중...';
+  jsonp({action:'saveAsmTeams',teams:JSON.stringify(asmEdit)},d=>{
+    if(d&&d.ok&&Array.isArray(d.teams)){
+      asmTeams=asmFixTeams({teams:d.teams,workers:d.workers||[]});try{localStorage.setItem('workResults.asmTeams.v1',JSON.stringify(asmTeams))}catch(e){}
+      if(asmTeamOn&&!asmTeams.teams.some(t=>t.name===asmTeamOn)){asmTeamOn='';asmMembers=[];asmSave();syncAsmWorker();}
+      asmEdit=asmTeams.teams.map(t=>({name:t.name,members:asmNorm(t.members)}));renderAsmTeam();renderAsmEdit('저장 완료');showSaveToast('조편성 저장 완료');
+    }else{if(m)m.textContent=(d&&d.message)||'저장 실패 (Code.gs 새 버전 배포 여부를 확인하세요)';}
+  });
+}
 function syncAsmWorker(){
-  const sel=document.getElementById('worker'),v=asmWorkerStr();
-  sel.innerHTML=v?`<option value="${esc(v)}">${esc(v)}</option>`:'<option value="">작업자 선택</option>';
+  const sel=document.getElementById('worker'),v=asmTeamOn||'';
+  sel.innerHTML=v?`<option value="${esc(v)}">${esc(v)}</option>`:'<option value="">조 선택</option>';
   sel.value=v;
   if(mode==='asm'){const st=resultStore.asm,wd=document.getElementById('workDate').value;if(!st||st.date!==wd)loadResults();else paintResults();}
 }
