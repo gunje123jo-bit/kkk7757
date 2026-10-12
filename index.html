@@ -43,7 +43,7 @@
   <div id="teamArea" class="hide"><div class="card"><label>조 선택</label><div id="asmTeamBtns" class="asmTeamBtns"></div><label>조원 <span class="sub" id="asmMemberCount"></span></label><div id="asmMemberChips" class="asmMemberChips"></div><label>파트원 추가</label><input id="asmMemberSearch" autocomplete="off" placeholder="이름 검색 후 눌러서 추가"><div id="asmMemberResults" style="margin-top:8px"></div><button type="button" class="gray" style="margin-top:10px" onclick="toggleAsmEdit()">조편성 명단 편집 (새 사람 등록)</button><div id="asmEditBox" class="hide" style="margin-top:10px"></div></div></div>
   <div id="asmArea" class="hide"><div class="card"><label>조립 품번 검색</label><input id="asmSearch" autocomplete="off" placeholder="품번 입력"><div id="asmItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>조립 선택 공정별 수량</label><div id="asmSelectedText" class="sub">입력 대기: 조립 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="asmQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveAsmBtn" onclick="saveAsm()">입력 담기</button><button class="gray" onclick="resetAsm()">입력칸 초기화</button><div id="asmMsg" class="msg ready">입력 대기</div></div></div>
 
-  <div id="sm2Area" class="hide"><div class="card"><label>SM2 품번 검색</label><input id="sm2Search" autocomplete="off" placeholder="품번 입력"><div id="sm2Items" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SM2 선택 공정별 수량</label><div id="sm2SelectedText" class="sub">입력 대기: SM2 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="sm2Qty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSm2Btn" onclick="saveSm2()">입력 담기</button><button class="gray" onclick="resetSm2()">입력칸 초기화</button><div id="sm2Msg" class="msg ready">입력 대기</div></div></div>
+  <div id="sm2Area" class="hide"><div class="card"><label>SM2 모델 선택 (선택 안 해도 됩니다)</label><div id="sm2Models" class="asmTeamBtns"></div><label>품번 / 품명 검색</label><input id="sm2Search" autocomplete="off" placeholder="품번·품명·모델 입력 (공백으로 여러 단어, 예: COWL RH)"><div id="sm2Items" class="sub">모델을 누르거나 품번·품명을 입력하세요.</div></div><div class="card"><label>SM2 선택 공정별 수량</label><div id="sm2SelectedText" class="sub">입력 대기: SM2 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="sm2Qty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSm2Btn" onclick="saveSm2()">입력 담기</button><button class="gray" onclick="resetSm2()">입력칸 초기화</button><div id="sm2Msg" class="msg ready">입력 대기</div></div></div>
   <div id="dojangArea" class="hide"><div class="card"><label>도장 품번 검색</label><input id="dojangSearch" autocomplete="off" placeholder="품번 입력"><div id="dojangItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>도장 선택 공정별 수량</label><div id="dojangSelectedText" class="sub">입력 대기: 도장 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="dojangQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveDojangBtn" onclick="saveDojang()">입력 담기</button><button class="gray" onclick="resetDojang()">입력칸 초기화</button><div id="dojangMsg" class="msg ready">입력 대기</div></div></div>
   <div id="pressArea" class="hide"><div class="card"><label>프레스 품번 검색</label><input id="pressSearch" autocomplete="off" placeholder="품번 입력"><div id="pressItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>프레스 선택 공정별 수량</label><div id="pressSelectedText" class="sub">입력 대기: 프레스 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="pressQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="savePressBtn" onclick="savePress()">입력 담기</button><button class="gray" onclick="resetPress()">입력칸 초기화</button><div id="pressMsg" class="msg ready">입력 대기</div></div></div>
   <div id="smArea" class="hide"><div class="card"><label>SM 관리번호 검색</label><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><input id="smSearch" inputmode="numeric" autocomplete="off" placeholder="관리번호 숫자 입력 (예: 22)"><div id="smItems" class="sub">SM파트를 불러오는 중입니다.</div><label>SM 품번 검색</label><input id="smPartSearch" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderProcessItems('sm')"><div id="smPartItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SM 선택 공정별 수량</label><div id="smSelectedText" class="sub">입력 대기: SM 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="smQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSmBtn" onclick="saveSm()">입력 담기</button><button class="gray" onclick="resetSm()">입력칸 초기화</button><div id="smMsg" class="msg ready">입력 대기</div></div></div>
@@ -259,7 +259,7 @@ function groupProcessList(list,kind){
     const pKey=kind==='sm2'?'RAW:'+String(x.process||'').trim():processKeyForDedup(x.process);
     if(!map[key].seen[pKey]){map[key].rows.push(x);map[key].seen[pKey]=true;}
   });
-  return Object.values(map).slice(0,20);
+  return Object.values(map).slice(0,kind==='sm2'?400:20);
 }
 function clearProcessSelection(kind){
   procData[kind].selected=null;
@@ -284,6 +284,26 @@ function removeSelectedProcess(kind,key){
 function sameProcessGroup(a,b){
   return a&&b&&String(a.itemNo)===String(b.itemNo)&&String(a.itemName||'')===String(b.itemName||'')&&String(a.model||'')===String(b.model||'');
 }
+// ---- SM2: 모델 버튼 + 여러 단어 검색 (모델 비어 있는 품번은 '모델 미지정' 버튼 또는 모델 미선택 검색으로 찾음)
+let sm2Model='',sm2ModelList=[];
+function sm2ModelOk(x){if(!sm2Model)return true;const m=String(x.model||'').trim();return sm2Model==='__none__'?!m:m===sm2Model;}
+function sm2TextOk(x,q){
+  const tokens=String(q||'').split(/\s+/).filter(Boolean);
+  if(!tokens.length)return true;
+  const raw=[x.itemNo,x.itemName,x.model,x.process,x.displayName].join(' ');
+  const nraw=normalizeSearch(raw);
+  return tokens.every(t=>{const nt=normalizeSearch(t);return raw.toUpperCase().includes(t.toUpperCase())||(nt&&nraw.includes(nt));});
+}
+function setSm2Model(i){const m=sm2ModelList[i];sm2Model=(sm2Model===m?'':m);renderProcessItems('sm2');}
+function renderSm2Models(){
+  const box=document.getElementById('sm2Models');if(!box)return;
+  const cnt={};let none=false;
+  (procData.sm2.items||[]).forEach(x=>{const m=String(x.model||'').trim();if(m){(cnt[m]=cnt[m]||new Set()).add(x.itemNo);}else none=true;});
+  sm2ModelList=Object.keys(cnt).sort((a,b)=>cnt[b].size-cnt[a].size||(a<b?-1:1));
+  if(none)sm2ModelList.push('__none__');
+  if(sm2Model&&!sm2ModelList.includes(sm2Model))sm2Model='';
+  box.innerHTML=sm2ModelList.map((m,i)=>`<button type="button" class="tab ${sm2Model===m?'active':''}" onclick="setSm2Model(${i})">${m==='__none__'?'모델 미지정':esc(m)}</button>`).join('');
+}
 function renderProcessItems(kind){
   if(kind==='sm')return renderSmSeparate();
   const cfg=PROC_CFG[kind];
@@ -291,10 +311,11 @@ function renderProcessItems(kind){
   const box=document.getElementById(cfg.box);
   const source=procData[kind].items;
   if(!loaded[kind]){box.innerHTML=cfg.label+'파트 마스터 불러오는 중...';return;}
+  if(kind==='sm2')renderSm2Models();
   const q=searchEl.value.trim();
   const nq=normalizeSearch(q);
-  if(!q){box.innerHTML=kind==='sm'?'관리번호 또는 품번을 입력하세요.':'품번을 입력하세요.';return;}
-  const list=(source||[]).filter(x=>{if(kind==='sm')return smMatches(x,q);const raw=(x.itemNo+' '+x.itemName+' '+x.model+' '+x.process+' '+x.displayName+' '+x.inputKey);return raw.includes(q)||normalizeSearch(raw).includes(nq);}).slice(0,120);
+  if(!q&&!(kind==='sm2'&&sm2Model)){box.innerHTML=kind==='sm'?'관리번호 또는 품번을 입력하세요.':(kind==='sm2'?'모델을 누르거나 품번·품명을 입력하세요.':'품번을 입력하세요.');return;}
+  const list=(source||[]).filter(x=>{if(kind==='sm')return smMatches(x,q);if(kind==='sm2')return sm2ModelOk(x)&&sm2TextOk(x,q);const raw=(x.itemNo+' '+x.itemName+' '+x.model+' '+x.process+' '+x.displayName+' '+x.inputKey);return raw.includes(q)||normalizeSearch(raw).includes(nq);}).slice(0,kind==='sm2'?400:120);
   const selectedKeys=selectedProcessKeys(kind);
   const groups=groupProcessList(list,kind);
   box.innerHTML=groups.map((g,gi)=>{
@@ -677,6 +698,7 @@ function resetProcess(kind,clear=true){
   document.getElementById(cfg.selectedText).innerHTML=`<div class="inputWaiting">입력 대기: ${cfg.label} 품번/공정을 선택하세요.</div>`;
   document.getElementById(cfg.box).innerHTML='품번, 품명 또는 공정명을 입력하세요.';
   if(clear)show(cfg.msg,'입력 대기',true);
+  if(kind==='sm2')renderProcessItems('sm2');
 }
 function resetWeld(clear=true){resetProcess('weld',clear)}
 function resetSc(clear=true){resetProcess('sc',clear)}
