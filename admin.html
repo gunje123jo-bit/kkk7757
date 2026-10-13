@@ -180,7 +180,7 @@ let adminLoaded={finish:false,je:false,weld:false,sc:false,asm:false,dojang:fals
 function toggleInputPanel(){const p=document.getElementById('inputPanel');const show=p.classList.contains('hide');p.classList.toggle('hide',!show);const b=document.getElementById('pcInputBtn');b.classList.toggle('gray',show);if(show){selectPart(inputPart);ensureAdminMaster(inputPart);}}
 function showAdminSaveToast(){const el=document.getElementById('adminSaveToast');el.classList.add('show');clearTimeout(window.__adminSaveToastTimer);window.__adminSaveToastTimer=setTimeout(()=>el.classList.remove('show'),2000);}
 function selectInputPart(k){
-  inputPart=k;adminModel='';
+  inputPart=k;adminModel='';adminExtra=false;
   const tm=(k==='asm'||k==='sm2'||k==='dojang');
   document.getElementById('inWorker').style.display=tm?'none':'';
   document.getElementById('asmAdminBox').classList.toggle('hide',!tm);
@@ -207,7 +207,7 @@ function ensureAdminMaster(kind){
     if(!d.ok){document.getElementById('inMsg').textContent=d.message||'마스터 조회 실패';return;}
     if(kind==='finish'){adminMaster.finish.items=d.items||[];adminMaster.finish.workers=d.workers||[];}
     else if(kind==='je'){adminMaster.je.specs=d.specs||[];adminMaster.je.subs=d.subs||[];adminMaster.je.subProcesses=d.subProcesses||['메인 플레이트 용접','프레임 가접','컴플 본접'];adminMaster.je.workers=d.workers||[];}
-    else {adminMaster[kind].items=d.items||[];adminMaster[kind].workers=d.workers||[];adminMaster[kind].modelMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};adminMaster[kind].defaults=d.defaults||{};}
+    else {adminMaster[kind].items=(d.items||[]).concat(kind==='sm2'?(d.extraItems||[]).map(x=>Object.assign({},x,{_extra:true})):[]);adminMaster[kind].workers=d.workers||[];adminMaster[kind].modelMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};adminMaster[kind].defaults=d.defaults||{};}
     adminLoaded[kind]=true;
     fillAdminWorkers(kind);
     fillAdminDatalist(kind);
@@ -223,10 +223,10 @@ function fillAdminDatalist(kind){
   }else if(kind==='je'){
     fillAdminJeSpec();
   }else{
-    let list=(adminMaster[kind].items||[]).filter(admModelOk);
+    let list=(adminMaster[kind].items||[]).filter(x=>admShow(x)&&admModelOk(x));
     if(kind==='sm2'&&adminModel&&adminModel!=='__none__'){const mp=adminMaster.sm2.modelMap.items;list=list.slice().sort((a,b)=>((mp[String(b.itemNo).trim()]||[]).includes(adminModel)?1:0)-((mp[String(a.itemNo).trim()]||[]).includes(adminModel)?1:0));}
     const rec=kind==='sm2'?admSm2RecentMap():null;
-    document.getElementById('inProcList').innerHTML=list.map(x=>{const r=kind==='sm2'?admSm2Suggest(x.itemNo,x.model,rec).teams:[];return `<option value="${esc(x.displayName)}">${esc(x.itemName)} / ${esc(x.model)}${r.length?' · 추천 '+r.join('·')+'조':''}</option>`;}).join('');
+    document.getElementById('inProcList').innerHTML=list.map(x=>{const r=kind==='sm2'?admSm2Suggest(x.itemNo,x.model,rec).teams:[];return `<option value="${esc(x.displayName)}">${esc(x.itemName)} / ${esc(x.model)}${x._extra?' · 추가':''}${r.length?' · 추천 '+r.join('·')+'조':''}</option>`;}).join('');
   }
 }
 function adminJeWorker(){return document.getElementById('inWorker').value;}
@@ -280,7 +280,7 @@ function saveAdminJe(){
     if(d.ok){showAdminSaveToast();document.getElementById('inJeHogi').value='';loadResults(false);}
   });
 }
-let adminModel='';
+let adminModel='',adminExtra=false;
 let adminAsm={teams:[],workers:[]},adminAsmTeamOn='',adminTeamKind='asm';const adminTeamStore={};
 const ASM_LABEL_A={ECR:'A조 (ECR)',EC:'B조 (EC)'},ASM_ERP_A={'A조':'ECR','B조':'EC'};
 function adminTeamName(n){n=String(n||'').trim();if(adminTeamKind==='sm2'||adminTeamKind==='dojang'){const c=n.toUpperCase().replace(/(프레임|조)$/,'');return /^[A-D]$/.test(c)?c:n;}return ASM_ERP_A[n]||n;}
@@ -402,6 +402,8 @@ function admModelsOf(kind,x){
   if(a.length||b.length)return a.concat(b);
   const m=String(x.model||'').trim();return m?[mp.alias[m]||m]:[];
 }
+function admShow(x){return adminExtra||!x._extra;}
+function toggleAdminExtra(){adminExtra=!adminExtra;fillAdminDatalist(inputPart);}
 function admModelOk(x){
   if(!adminModel||(inputPart!=='sm'&&inputPart!=='sm2'))return true;
   const ms=admModelsOf(inputPart,x);return adminModel==='__none__'?!ms.length:ms.includes(adminModel);
@@ -413,12 +415,13 @@ function renderAdminModels(){
   const on=(inputPart==='sm'||inputPart==='sm2');
   box.classList.toggle('hide',!on);if(!on)return;
   const mp=admMap(inputPart),cnt={};let none=false;
-  (adminMaster[inputPart].items||[]).forEach(x=>{const ms=admModelsOf(inputPart,x);if(ms.length)ms.forEach(m=>{(cnt[m]=cnt[m]||new Set()).add(x.itemNo);});else none=true;});
+  (adminMaster[inputPart].items||[]).filter(admShow).forEach(x=>{const ms=admModelsOf(inputPart,x);if(ms.length)ms.forEach(m=>{(cnt[m]=cnt[m]||new Set()).add(x.itemNo);});else none=true;});
   const ord=(mp.order||[]).filter(m=>cnt[m]);
   adminModelList=ord.concat(Object.keys(cnt).filter(m=>!ord.includes(m)).sort((a,b)=>cnt[b].size-cnt[a].size||(a<b?-1:1)));
   if(none)adminModelList.push('__none__');
   if(adminModel&&!adminModelList.includes(adminModel))adminModel='';
   document.getElementById('adminModels').innerHTML=adminLoaded[inputPart]?adminModelList.map((m,i)=>`<button type="button" class="part ${adminModel===m?'active':''}" style="width:auto" onclick="setAdminModel(${i})">${m==='__none__'?'모델 미지정':esc(m)}</button>`).join(''):'<span class="sub">불러오는 중...</span>';
+  if(adminLoaded[inputPart]&&inputPart==='sm2'&&(adminMaster.sm2.items||[]).some(x=>x._extra))document.getElementById('adminModels').insertAdjacentHTML('beforeend',`<button type="button" class="part ${adminExtra?'active':''}" style="width:auto;border:2px dashed #94a3b8" onclick="toggleAdminExtra()">${adminExtra?'추가 검색 끄기':'추가 검색 (ST 없는 품번)'}</button>`);
 }
 function admSm2RecentMap(){
   const m={},d=String(document.getElementById('inWorkDate').value||'').replace(/\D/g,'').slice(0,8);

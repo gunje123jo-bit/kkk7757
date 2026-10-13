@@ -243,7 +243,7 @@ function applyMasterData(kind,d){Promise.resolve().then(applyRosterLists);
   if(kind==='je'){jeSpecs=d.specs||[];jeSubs=(d.subs&&d.subs.length)?d.subs:jeDeriveSubs(jeSpecs);if(d.subProcesses&&d.subProcesses.length)jeSubProcs=d.subProcesses;jeWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.je);applyJeFallback();}
   if(kind==='sm')smMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};
   if(kind==='sm2'){sm2Defaults=d.defaults||{};sm2Map=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};}
-  if(PROC_CFG[kind]){procData[kind].items=d.items||[];procData[kind].workers=(d.workers&&d.workers.length?d.workers:(FAST_WORKERS[kind]||[]));}
+  if(PROC_CFG[kind]){procData[kind].items=(d.items||[]).concat(kind==='sm2'?(d.extraItems||[]).map(x=>Object.assign({},x,{_extra:true})):[]);procData[kind].workers=(d.workers&&d.workers.length?d.workers:(FAST_WORKERS[kind]||[]));}
 }
 function readMasterCache(kind){
   try{const v=JSON.parse(localStorage.getItem('workResults.master.'+kind+'.v1')||'null');if(!v||!v.data)return null;const age=Date.now()-Number(v.savedAt||0);if(age>MASTER_STALE_MAX_MS)return null;return{data:v.data,fresh:age<MASTER_CACHE_MS};}catch(e){return null;}
@@ -350,7 +350,9 @@ function sm2SuggestSync(withMsg){
   renderAsmTeam();
 }
 // ---- SM2: 모델 버튼 + 여러 단어 검색 (모델 비어 있는 품번은 '모델 미지정' 버튼 또는 모델 미선택 검색으로 찾음)
-let sm2Model='',sm2ModelList=[];
+let sm2Model='',sm2ModelList=[],sm2Extra=false;
+function sm2Show(x){return sm2Extra||!x._extra;}   // ST 없는 품번(추가 검색)은 버튼을 켰을 때만 보임
+function toggleSm2Extra(){sm2Extra=!sm2Extra;renderProcessItems('sm2');}
 // 현장 기종(SM2_기종매핑) 기준 기종 목록: 매핑된 품번은 지정한 기종만, 그 밖의 품번은 ERP 모델명(별칭이 있으면 현장 기종 이름)
 function sm2ModelsOf(x){
   const no=String(x.itemNo||'').trim(),mp=sm2Map.items[no];
@@ -371,12 +373,12 @@ function setSm2Model(i){const m=sm2ModelList[i];sm2Model=(sm2Model===m?'':m);ren
 function renderSm2Models(){
   const box=document.getElementById('sm2Models');if(!box)return;
   const cnt={};let none=false;
-  (procData.sm2.items||[]).forEach(x=>{const ms=sm2ModelsOf(x);if(ms.length)ms.forEach(m=>{(cnt[m]=cnt[m]||new Set()).add(x.itemNo);});else none=true;});
+  (procData.sm2.items||[]).filter(sm2Show).forEach(x=>{const ms=sm2ModelsOf(x);if(ms.length)ms.forEach(m=>{(cnt[m]=cnt[m]||new Set()).add(x.itemNo);});else none=true;});
   const ord=(sm2Map.order||[]).filter(m=>cnt[m]);   // 시트에 적은 기종이 앞(시트 순서)
   sm2ModelList=ord.concat(Object.keys(cnt).filter(m=>!ord.includes(m)).sort((a,b)=>cnt[b].size-cnt[a].size||(a<b?-1:1)));
   if(none)sm2ModelList.push('__none__');
   if(sm2Model&&!sm2ModelList.includes(sm2Model))sm2Model='';
-  box.innerHTML=sm2ModelList.map((m,i)=>`<button type="button" class="tab ${sm2Model===m?'active':''}" onclick="setSm2Model(${i})">${m==='__none__'?'모델 미지정':esc(m)}</button>`).join('');
+  box.innerHTML=sm2ModelList.map((m,i)=>`<button type="button" class="tab ${sm2Model===m?'active':''}" onclick="setSm2Model(${i})">${m==='__none__'?'모델 미지정':esc(m)}</button>`).join('')+((procData.sm2.items||[]).some(x=>x._extra)?`<button type="button" class="tab ${sm2Extra?'active':'gray'}" style="border:2px dashed #94a3b8" onclick="toggleSm2Extra()">${sm2Extra?'추가 검색 끄기':'추가 검색 (ST 없는 품번)'}</button>`:'');
 }
 function renderProcessItems(kind){
   if(kind==='sm')return renderSmSeparate();
@@ -389,8 +391,9 @@ function renderProcessItems(kind){
   const q=searchEl.value.trim();
   const nq=normalizeSearch(q);
   if(!q&&!(kind==='sm2'&&sm2Model)){box.innerHTML=kind==='sm'?'관리번호 또는 품번을 입력하세요.':(kind==='sm2'?'모델을 누르거나 품번·품명을 입력하세요.':'품번을 입력하세요.');return;}
-  const list=(source||[]).filter(x=>{if(kind==='sm')return smMatches(x,q);if(kind==='sm2')return sm2ModelOk(x)&&sm2TextOk(x,q);const raw=(x.itemNo+' '+x.itemName+' '+x.model+' '+x.process+' '+x.displayName+' '+x.inputKey);return raw.includes(q)||normalizeSearch(raw).includes(nq);});
+  const list=(source||[]).filter(x=>{if(kind==='sm')return smMatches(x,q);if(kind==='sm2')return sm2Show(x)&&sm2ModelOk(x)&&sm2TextOk(x,q);const raw=(x.itemNo+' '+x.itemName+' '+x.model+' '+x.process+' '+x.displayName+' '+x.inputKey);return raw.includes(q)||normalizeSearch(raw).includes(nq);});
   if(kind==='sm2'&&sm2Model&&sm2Model!=='__none__')list.sort((a,b)=>((sm2Map.items[String(b.itemNo).trim()]||[]).includes(sm2Model)?1:0)-((sm2Map.items[String(a.itemNo).trim()]||[]).includes(sm2Model)?1:0));   // 작업지시 품번이 맨 위
+  if(kind==='sm2'&&sm2Extra)list.sort((a,b)=>(a._extra?1:0)-(b._extra?1:0));   // 추가 검색 품번은 뒤로
   list.splice(kind==='sm2'?400:120);
   const selectedKeys=selectedProcessKeys(kind);
   const groups=groupProcessList(list,kind);
@@ -400,7 +403,7 @@ function renderProcessItems(kind){
       const sel=selectedKeys.includes(String(r.inputKey));
       return `<button type="button" class="chip ${sel?'selected':''}" data-kind="${kind}" data-key="${esc(r.inputKey)}" onclick="toggleProcessItem('${kind}','${escJs(r.inputKey)}')">${esc(kind==='sm'&&!r.process?'선택':processLabel(r.process,kind))}</button>`;
     }).join('');
-    return `<div class="processGroup ${hasSel?'hasSelected':''}" data-kind="${kind}" data-group="${gi}"><div class="processTitle">${kind==='sm'?esc(g.rows.map(r=>r.managementNo).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', '))+' / ':''}${esc(g.itemNo)} / ${esc(g.itemName||'')}</div><div class="processMeta">${kind==='sm'?'모델: ':''}${esc(g.model||'')}${kind==='sm2'?sm2RecBadge(g):''}</div><div class="chips">${chips}</div><div class="processHelp">공정 선택 후 아래 [입력 담기]를 누르세요.</div></div>`;
+    return `<div class="processGroup ${hasSel?'hasSelected':''}" data-kind="${kind}" data-group="${gi}"><div class="processTitle">${kind==='sm'?esc(g.rows.map(r=>r.managementNo).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', '))+' / ':''}${esc(g.itemNo)} / ${esc(g.itemName||'')}</div><div class="processMeta">${kind==='sm'?'모델: ':''}${esc(g.model||'')}${kind==='sm2'?sm2RecBadge(g)+(g.rows.every(r=>r._extra)?'<span class="sm2Rec" style="background:#e2e8f0;border-color:#94a3b8;color:#334155">추가</span>':''):''}</div><div class="chips">${chips}</div><div class="processHelp">공정 선택 후 아래 [입력 담기]를 누르세요.</div></div>`;
   }).join('')||`<div class="sub">일치하는 ${cfg.label} 품번/공정이 없습니다.</div>`;
   updateProcessVisuals(kind,false);
 }
