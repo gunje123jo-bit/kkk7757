@@ -11,7 +11,7 @@
 .chip.selected{background:#16a34a!important;color:#fff!important;border-color:#15803d!important;box-shadow:0 0 0 4px rgba(22,163,74,.18)}.processGroup.hasSelected{border:4px solid #16a34a!important;background:#dcfce7!important}.processHelp{font-size:12px;font-weight:600;color:#6b7280;background:transparent;border:0;padding:0;margin-top:6px;text-align:right;line-height:1.3}.chip{font-size:18px!important;font-weight:900!important;padding:12px 16px!important}.selectedRows{display:flex;flex-direction:column;gap:10px;margin-top:10px}.selectedRow{background:#fff;border:2px solid #16a34a;border-radius:12px;padding:10px;text-align:left}.selectedRowTitle{font-size:17px;font-weight:900;color:#064e3b;line-height:1.25}.selectedRowMeta{font-size:13px;font-weight:700;color:#4b5563;margin-top:3px;line-height:1.25}.selectedQtyInput{margin-top:8px;font-size:22px!important;font-weight:900;text-align:center;border:3px solid #16a34a!important;background:#fff}.selectedRemove{width:auto;background:#6b7280;color:#fff;font-size:13px!important;padding:7px 10px!important;margin-top:7px}.qtyHidden{display:none!important}.closeBtn{background:#ea580c!important;font-size:19px!important;padding:16px!important;font-weight:900}
 
 .pendBadge{background:#111827;color:#fff;border-radius:999px;padding:5px 12px;font-weight:900;font-size:15px;white-space:nowrap}.pendItem{padding:11px 0;border-bottom:1px solid #eee}.pendTop{display:flex;justify-content:space-between;gap:10px;align-items:center}.pendQty{width:96px!important;flex:none;font-size:22px!important;font-weight:900;text-align:center;padding:9px!important;border:3px solid #1769e0!important}.sendAllBtn{background:#087b25!important;font-size:24px!important;padding:20px!important;font-weight:900;margin-top:14px}.sendAllBtn:disabled{background:#9ca3af!important}.dlgBack{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}.dlgBack.hide{display:none}.dlgBox{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;max-height:85vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.4)}.dlgTitle{font-size:22px;font-weight:900;color:#b45309;margin-bottom:10px}.dlgBody{font-size:16px;line-height:1.45}.dupRow{background:#fff7ed;border:2px solid #fb923c;border-radius:10px;padding:9px;margin:8px 0;font-size:15px}.dlgBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.dlgBtns button{margin-top:0}
-.asmTeamBtns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.asmTeamBtns button{width:auto;padding:10px 16px}.asmMemberChips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.asmMember{display:inline-flex;align-items:center;gap:6px;background:#dbeafe;border:1px solid #93c5fd;color:#1e3a8a;border-radius:999px;padding:8px 10px 8px 14px;font-weight:700;font-size:16px}.asmMember button{width:auto;min-height:0;margin:0;padding:0 6px;background:transparent;color:#1e3a8a;border:0;font-size:20px;line-height:1}.asmAddBtn{width:auto!important;padding:9px 14px!important;background:#fff!important;color:#111!important;border:1px solid #cbd5e1!important;border-radius:999px!important;margin:0 8px 8px 0!important}
+.asmTeamBtns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.asmTeamBtns button{width:auto;padding:10px 16px}.asmMemberChips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.asmMember{display:inline-flex;align-items:center;gap:6px;background:#dbeafe;border:1px solid #93c5fd;color:#1e3a8a;border-radius:999px;padding:8px 10px 8px 14px;font-weight:700;font-size:16px}.asmMember button{width:auto;min-height:0;margin:0;padding:0 6px;background:transparent;color:#1e3a8a;border:0;font-size:20px;line-height:1}.sm2Rec{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#fef3c7;border:1px solid #f59e0b;color:#92400e;font-weight:700;font-size:13px}.asmTeamBtns button.rec{outline:3px solid #f59e0b;outline-offset:1px}.asmAddBtn{width:auto!important;padding:9px 14px!important;background:#fff!important;color:#111!important;border:1px solid #cbd5e1!important;border-radius:999px!important;margin:0 8px 8px 0!important}
 .stageChips{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}.stageChip{width:auto!important;padding:14px 22px!important;border-radius:14px!important;border:2px solid #cbd5e1!important;background:#fff!important;color:#111!important;font-weight:800;font-size:20px}.stageChip.selected{background:#16a34a!important;color:#fff!important;border-color:#15803d!important;box-shadow:0 0 0 4px rgba(22,163,74,.18)}.stageHogi{margin-bottom:8px}
 </style>
 </head>
@@ -125,13 +125,13 @@ function localTomorrow(){const d=new Date();d.setDate(d.getDate()+1);return `${d
 function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function escJs(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');}
 function normalizeSearch(s){return String(s||'').toUpperCase().replace(/[^0-9A-Z가-힣]/g,'');}
-function jsonp(params,cb,attempt=0){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');let ended=false,timer=null;const readOnly=/^(master|jeMaster|weldMaster|scMaster|asmMaster|asmTeams|sm2Master|sm2Teams|roster|dojangMaster|pressMaster|smMaster|processSearch|results|jeResults|weldResults|scResults|asmResults|dojangResults|pressResults|smResults|sm2Results|allResults)$/.test(params.action||'');const cleanup=()=>{clearTimeout(timer);s.remove();};const fail=()=>{if(ended)return;ended=true;cleanup();window[callback]=()=>{};setTimeout(()=>{try{delete window[callback]}catch(e){}},30000);if(readOnly&&attempt<1){setTimeout(()=>jsonp(params,cb,attempt+1),500);return;}const error={ok:false,comm:true,message:'통신 오류입니다. 잠시 후 다시 시도해 주세요.'};if(typeof cb==='function')cb(error);else showActiveMsg(error.message,false);};window[callback]=data=>{if(ended)return;ended=true;cleanup();delete window[callback];cb(data);};s.onerror=fail;s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);timer=setTimeout(fail,45000);}
+function jsonp(params,cb,attempt=0){const callback='cb_'+Date.now()+'_'+Math.floor(Math.random()*10000);const s=document.createElement('script');let ended=false,timer=null;const readOnly=/^(master|jeMaster|weldMaster|scMaster|asmMaster|asmTeams|sm2Master|sm2Teams|dojangTeams|roster|dojangMaster|pressMaster|smMaster|processSearch|results|jeResults|weldResults|scResults|asmResults|dojangResults|pressResults|smResults|sm2Results|allResults)$/.test(params.action||'');const cleanup=()=>{clearTimeout(timer);s.remove();};const fail=()=>{if(ended)return;ended=true;cleanup();window[callback]=()=>{};setTimeout(()=>{try{delete window[callback]}catch(e){}},30000);if(readOnly&&attempt<1){setTimeout(()=>jsonp(params,cb,attempt+1),500);return;}const error={ok:false,comm:true,message:'통신 오류입니다. 잠시 후 다시 시도해 주세요.'};if(typeof cb==='function')cb(error);else showActiveMsg(error.message,false);};window[callback]=data=>{if(ended)return;ended=true;cleanup();delete window[callback];cb(data);};s.onerror=fail;s.src=GAS_URL+'?'+new URLSearchParams({...params,callback}).toString();document.body.appendChild(s);timer=setTimeout(fail,45000);}
 function show(elId,msg,ok){const el=document.getElementById(elId);el.textContent=msg||'';let cls='err';if(ok===true)cls='ok';else if(ok==='wait')cls='wait';else if(msg==='입력 대기'||String(msg||'').includes('입력 대기'))cls='ready';el.className='msg '+cls;}
 function showJeSmall(msg,ok){const el=document.getElementById('jeMsg');if(!el)return;el.textContent=msg||'';el.className='jeMsgSmall '+(ok===false?'err':'ready');}
 function showActiveMsg(msg,ok){if(mode==='finish')show('msg',msg,ok);else if(mode==='je')showJeSmall(msg,ok);else if(PROC_CFG[mode])show(PROC_CFG[mode].msg,msg,ok);}
 function showSaveToast(msg='저장 완료'){const el=document.getElementById('saveToast');el.textContent=msg;el.classList.add('show');clearTimeout(window.__saveToastTimer);window.__saveToastTimer=setTimeout(()=>el.classList.remove('show'),2000);}
 function applyJeFallback(){if(!jeSpecs||jeSpecs.length===0)jeSpecs=JE_FALLBACK_SPECS;if(!jeWorkers||jeWorkers.length===0)jeWorkers=JE_FALLBACK_WORKERS;}
-function isTeam(m){return m==='asm'||m==='sm2';}
+function isTeam(m){return m==='asm'||m==='sm2'||m==='dojang';}
 function currentWorkers(){if(mode==='sm')return document.getElementById('smSupport').checked?SM_SUPPORT_WORKERS:SM_WORKERS;if(mode==='finish')return finishWorkers;if(mode==='je')return jeWorkers;if(PROC_CFG[mode])return procData[mode].workers;return[]}
 function fillWorkers(){if(isTeam(mode)){syncAsmWorker();return;}const sel=document.getElementById('worker');const old=sel.value;let workers=currentWorkers().flatMap(v=>String(v||'').split(/[,，、\n]+/).map(x=>x.trim())).filter(Boolean);workers=[...new Set(workers)].sort((a,b)=>a.localeCompare(b,'ko'));sel.innerHTML='<option value="">작업자 선택</option>'+workers.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');if(workers.includes(old))sel.value=old;}
 function setMode(m){
@@ -222,6 +222,7 @@ function ensureMaster(kind,done){
 function applyMasterData(kind,d){Promise.resolve().then(applyRosterLists);
   if(kind==='finish'){masterItems=d.items||[];finishWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.finish);}
   if(kind==='je'){jeSpecs=d.specs||[];jeSubs=(d.subs&&d.subs.length)?d.subs:jeDeriveSubs(jeSpecs);if(d.subProcesses&&d.subProcesses.length)jeSubProcs=d.subProcesses;jeWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.je);applyJeFallback();}
+  if(kind==='sm2')sm2Defaults=d.defaults||{};
   if(PROC_CFG[kind]){procData[kind].items=d.items||[];procData[kind].workers=(d.workers&&d.workers.length?d.workers:(FAST_WORKERS[kind]||[]));}
 }
 function readMasterCache(kind){
@@ -284,6 +285,48 @@ function removeSelectedProcess(kind,key){
 function sameProcessGroup(a,b){
   return a&&b&&String(a.itemNo)===String(b.itemNo)&&String(a.itemName||'')===String(b.itemName||'')&&String(a.model||'')===String(b.model||'');
 }
+// ---- SM2: 추천 조 (최근 입력 > SM2_기본조 품번 줄 > SM2_기본조 기종 줄). 마스터와 함께 저장돼 있어 입력 중 서버 호출이 없습니다.
+let sm2Defaults={},sm2RecTeams=[],sm2TeamAuto=false;
+function sm2RecentMap(){
+  const m={};
+  const st=resultStore&&resultStore.sm2;
+  if(st&&st.date===document.getElementById('workDate').value)(st.rows||[]).slice().sort((a,b)=>String(a.values[0]||'').localeCompare(String(b.values[0]||''))).forEach(x=>{const v=x.values||[],w=String(v[2]||'').trim(),no=String(v[4]||'').trim();if(/^[A-D]$/.test(w)&&no)m[no]=w;});
+  (pending||[]).filter(e=>e.kind==='sm2'&&/^[A-D]$/.test(String(e.worker||''))).forEach(e=>{m[String(e.itemNo||'').trim()]=e.worker;});
+  return m;
+}
+function sm2Suggest(itemNo,model,recent){
+  const no=String(itemNo||'').trim(),md=String(model||'').trim();
+  recent=recent||sm2RecentMap();
+  if(recent[no])return{teams:[recent[no]],src:'최근 입력'};
+  const d=sm2Defaults||{};
+  const g=v=>String(v||'').split(',').map(x=>x.trim()).filter(x=>/^[A-D]$/.test(x));
+  if(g(d[no]).length)return{teams:g(d[no]),src:'기본조(품번)'};
+  if(md&&g(d[md]).length)return{teams:g(d[md]),src:'기본조(기종)'};
+  return{teams:[],src:''};
+}
+function sm2RecBadge(g){const r=sm2Suggest(g.itemNo,g.model);return r.teams.length?`<span class="sm2Rec">추천 ${r.teams.join('·')}조</span>`:'';}
+function sm2SelectTeam(name,auto){
+  const t=asmTeams.teams.find(x=>x.name===name);if(!t)return false;
+  asmMembers=asmNorm(t.members);asmTeamOn=t.name;sm2TeamAuto=!!auto;asmSave();renderAsmTeam();syncAsmWorker();return true;
+}
+function sm2SuggestSync(withMsg){
+  const obj=procData.sm2.selected,msgId=PROC_CFG.sm2.msg;
+  const rows=(obj&&obj.rows)||[];
+  const recent=sm2RecentMap(),per={};
+  rows.forEach(r=>{per[r.itemNo]=sm2Suggest(r.itemNo,r.model,recent).teams;});
+  const lists=Object.values(per).filter(l=>l.length);
+  let rec=[],conflict=false;
+  if(lists.length){
+    rec=lists.reduce((a,l)=>a.filter(t=>l.includes(t)));
+    if(!rec.length){conflict=true;rec=[...new Set(lists.flat())];}
+  }
+  sm2RecTeams=rec;
+  if(conflict){if(withMsg)show(msgId,'선택한 품번들의 추천 조가 서로 다릅니다. 조별로 따로 담아 주세요.',false);}
+  else if(rec.length===1&&(!asmTeamOn||sm2TeamAuto)){
+    if(asmTeamOn!==rec[0]&&sm2SelectTeam(rec[0],true)&&withMsg)show(msgId,rec[0]+'조 자동 선택 (추천) — 다르면 조 버튼을 누르세요.',true);
+  }
+  renderAsmTeam();
+}
 // ---- SM2: 모델 버튼 + 여러 단어 검색 (모델 비어 있는 품번은 '모델 미지정' 버튼 또는 모델 미선택 검색으로 찾음)
 let sm2Model='',sm2ModelList=[];
 function sm2ModelOk(x){if(!sm2Model)return true;const m=String(x.model||'').trim();return sm2Model==='__none__'?!m:m===sm2Model;}
@@ -324,7 +367,7 @@ function renderProcessItems(kind){
       const sel=selectedKeys.includes(String(r.inputKey));
       return `<button type="button" class="chip ${sel?'selected':''}" data-kind="${kind}" data-key="${esc(r.inputKey)}" onclick="toggleProcessItem('${kind}','${escJs(r.inputKey)}')">${esc(kind==='sm'&&!r.process?'선택':processLabel(r.process,kind))}</button>`;
     }).join('');
-    return `<div class="processGroup ${hasSel?'hasSelected':''}" data-kind="${kind}" data-group="${gi}"><div class="processTitle">${kind==='sm'?esc(g.rows.map(r=>r.managementNo).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', '))+' / ':''}${esc(g.itemNo)} / ${esc(g.itemName||'')}</div><div class="processMeta">${kind==='sm'?'모델: ':''}${esc(g.model||'')}</div><div class="chips">${chips}</div><div class="processHelp">공정 선택 후 아래 [입력 담기]를 누르세요.</div></div>`;
+    return `<div class="processGroup ${hasSel?'hasSelected':''}" data-kind="${kind}" data-group="${gi}"><div class="processTitle">${kind==='sm'?esc(g.rows.map(r=>r.managementNo).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).join(', '))+' / ':''}${esc(g.itemNo)} / ${esc(g.itemName||'')}</div><div class="processMeta">${kind==='sm'?'모델: ':''}${esc(g.model||'')}${kind==='sm2'?sm2RecBadge(g):''}</div><div class="chips">${chips}</div><div class="processHelp">공정 선택 후 아래 [입력 담기]를 누르세요.</div></div>`;
   }).join('')||`<div class="sub">일치하는 ${cfg.label} 품번/공정이 없습니다.</div>`;
   updateProcessVisuals(kind,false);
 }
@@ -340,7 +383,8 @@ function toggleProcessItem(kind,inputKey){
   procData[kind].selected=newObj;
   updateProcessVisuals(kind,true);
 }
-function updateProcessVisuals(kind,withMsg=true){
+function updateProcessVisuals(kind,withMsg=true){updateProcessVisuals0(kind,withMsg);if(kind==='sm2')sm2SuggestSync(withMsg);}
+function updateProcessVisuals0(kind,withMsg=true){
   const cfg=PROC_CFG[kind];
   const box=document.getElementById(kind==='sm'?'smArea':cfg.box);
   const selectedText=document.getElementById(cfg.selectedText);
@@ -493,9 +537,9 @@ function saveProcess(kind){
   let obj=procData[kind].selected;
   const arr=procData[kind].items;
   if(!workDate)return show(cfg.msg,'작업일자를 선택하세요.',false);
-  if(!worker)return show(cfg.msg,kind==='asm'?'조(A조/B조)를 선택하세요.':(kind==='sm2'?'조(A~D조)를 선택하거나 1명만 추가하세요.':'작업자를 선택하세요.'),false);
+  if(!worker)return show(cfg.msg,kind==='asm'?'조(A조/B조)를 선택하세요.':((kind==='sm2'||kind==='dojang')?(kind==='dojang'?'A조를 선택하거나 1명만 추가하세요.':'조(A~D조)를 선택하거나 1명만 추가하세요.'):'작업자를 선택하세요.'),false);
   if(isTeam(kind)&&!asmNorm(asmMembers).length)return show(cfg.msg,'조원을 1명 이상 선택하세요.',false);
-  if(kind==='sm2'&&!asmTeamOn&&asmNorm(asmMembers).length!==1)return show(cfg.msg,'조(A~D조)를 선택하거나 1명만 추가하세요.',false);
+  if((kind==='sm2'||kind==='dojang')&&!asmTeamOn&&asmNorm(asmMembers).length!==1)return show(cfg.msg,kind==='dojang'?'A조를 선택하거나 1명만 추가하세요.':'조(A~D조)를 선택하거나 1명만 추가하세요.',false);
   if(!obj&&typed&&kind!=='sm'){
     const nt=normalizeSearch(typed);
     const one=(arr||[]).find(x=>x.itemNo===typed||x.displayName===typed||x.inputKey===typed||normalizeSearch(x.itemNo)===nt||normalizeSearch(x.displayName)===nt||normalizeSearch(x.inputKey)===nt);
@@ -506,7 +550,7 @@ function saveProcess(kind){
   for(const r of rows){
     if(!r.saveQty||Number(r.saveQty)<=0)return show(cfg.msg,`${r.itemNo} / ${processLabel(r.process,kind)} 수량을 입력하세요.`,false);
   }
-  const entries=rows.map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:r.model||'',process:r.process||'',qty:Number(r.saveQty),memo:(rows.length>1&&kind!=='sm2')?'공정별 수량 동시입력':'',members:(kind==='asm'||(kind==='sm2'&&asmTeamOn))?asmNorm(asmMembers).join(', '):undefined,addedAt:Date.now()}));
+  const entries=rows.map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:r.model||'',process:r.process||'',qty:Number(r.saveQty),memo:(rows.length>1&&kind!=='sm2')?'공정별 수량 동시입력':'',members:(kind==='asm'||((kind==='sm2'||kind==='dojang')&&asmTeamOn))?asmNorm(asmMembers).join(', '):undefined,addedAt:Date.now()}));
   queueEntries(entries).then(ok=>{
     if(!ok){show(cfg.msg,'취소했습니다.',false);return;}
     show(cfg.msg,rows.length>1?`대기 목록에 담김 - ${rows.length}개 공정`:'대기 목록에 담김 - 마지막에 [전체 입력 완료]',true);
@@ -754,6 +798,7 @@ function applyRosterLists(){
   if(r.je&&r.je.length)jeWorkers=r.je.slice();
   ['weld','sc','dojang','press','asm'].forEach(k=>{if(r[k]&&r[k].length)procData[k].workers=r[k].slice();});
   if(teamKind==='asm'&&rosterData.all&&rosterData.all.length)asmTeams.workers=rosterData.all.slice();
+  if(teamKind==='dojang'&&r.dojang&&r.dojang.length)asmTeams.workers=r.dojang.slice();
   if(mode!=='sm')fillWorkers();
 }
 function refreshRoster(force){
@@ -771,16 +816,18 @@ const ASM_DEFAULT_TEAMS=[{name:'ECR',members:['박창환','조인호','천성찬
 const ASM_ERP={'A조':'ECR','B조':'EC'},ASM_LABEL={ECR:'A조 (ECR)',EC:'B조 (EC)'};
 // 조 화면은 조립(asm)과 SM2(sm2)가 함께 씁니다. 탭을 바꾸면 teamUse()가 현재 조 상태를 저장해 두고 상대 파트 상태로 바꿉니다.
 const SM2_DEFAULT_TEAMS=[{name:'A',members:['리만훙','박건우','진성호','조민호']},{name:'B',members:['이반뚱','하쑤안꾸옥']},{name:'C',members:['길성현','이정훈']},{name:'D',members:['유기태','탄반뚜엔','석동일']}];
+const DOJANG_DEFAULT_TEAMS=[{name:'A',members:['권영수','김동윤','김민수','김태성','김희성','배민우']}];
 const TEAM_CFG={
   asm:{get:'asmTeams',save:'saveAsmTeams',tkey:'workResults.asmTeams.v1',mkey:'workResults.asmMembers.v1',note:'조립파트는 A조(ECR) / B조(EC)를 선택하세요. 작업자 칸에는 ECR/EC가, 비고에는 조원 이름이 들어갑니다.',newTeam:'새 조 이름 (ERP 작업자 이름)',sheet:'조립_조편성'},
-  sm2:{get:'sm2Teams',save:'saveSm2Teams',tkey:'workResults.sm2Teams.v1',mkey:'workResults.sm2Members.v1',note:'SM2파트는 A~D조를 선택하세요. 작업자 칸에는 A~D(ERP 사번)가, 비고에는 조원 이름이 들어갑니다. 조를 고르지 않고 1명만 추가하면 그 사람 이름이 들어갑니다. SM 인원도 검색해서 추가할 수 있습니다.',newTeam:'새 조 이름 (A~D)',sheet:'SM2_조편성'}
+  sm2:{get:'sm2Teams',save:'saveSm2Teams',tkey:'workResults.sm2Teams.v1',mkey:'workResults.sm2Members.v1',note:'SM2파트는 A~D조를 선택하세요. 작업자 칸에는 A~D(ERP 사번)가, 비고에는 조원 이름이 들어갑니다. 조를 고르지 않고 1명만 추가하면 그 사람 이름이 들어갑니다. SM 인원도 검색해서 추가할 수 있습니다.',newTeam:'새 조 이름 (A~D)',sheet:'SM2_조편성'},
+  dojang:{get:'dojangTeams',save:'saveDojangTeams',tkey:'workResults.dojangTeams.v1',mkey:'workResults.dojangMembers.v1',note:'도장파트는 A조(프레임)를 누르면 조원 이름이 표시됩니다. 빠진 사람은 ×로 빼세요. 작업자 칸에는 A(ERP 사번)가, 비고에는 조원 이름이 들어갑니다. 조를 고르지 않고 1명만 추가하면 그 사람 이름이 들어갑니다.',newTeam:"새 조 이름 (A~D)",sheet:'도장_조편성'}
 };
 let teamKind='asm';
 const TEAM_STORE={};
-function asmErpName(n,k){k=k||teamKind;n=String(n||'').trim();if(k==='sm2'){const c=n.toUpperCase().replace(/(프레임|조)$/,'');return /^[A-D]$/.test(c)?c:n;}return ASM_ERP[n]||n;}
-function asmLabel(n){if(teamKind==='sm2')return /^[A-D]$/.test(n)?n+'조 ('+n+'프레임)':n;return ASM_LABEL[n]||n;}
+function asmErpName(n,k){k=k||teamKind;n=String(n||'').trim();if(k==='sm2'||k==='dojang'){const c=n.toUpperCase().replace(/(프레임|조)$/,'');return /^[A-D]$/.test(c)?c:n;}return ASM_ERP[n]||n;}
+function asmLabel(n){if(teamKind==='dojang')return /^[A-D]$/.test(n)?n+'조'+(n==='A'?' (프레임)':''):n;if(teamKind==='sm2')return /^[A-D]$/.test(n)?n+'조 ('+n+'프레임)':n;return ASM_LABEL[n]||n;}
 function asmFixTeams(o,k){k=k||teamKind;o.teams=(o.teams||[]).map(t=>({name:asmErpName(t.name,k),members:t.members||[]}));return o;}
-function teamDefault(k){return k==='sm2'?{teams:SM2_DEFAULT_TEAMS,workers:SM_WORKERS.concat(SM_SUPPORT_WORKERS)}:{teams:ASM_DEFAULT_TEAMS,workers:['강혜정']};}
+function teamDefault(k){if(k==='dojang')return{teams:DOJANG_DEFAULT_TEAMS,workers:procData.dojang.workers.slice()};return k==='sm2'?{teams:SM2_DEFAULT_TEAMS,workers:SM_WORKERS.concat(SM_SUPPORT_WORKERS)}:{teams:ASM_DEFAULT_TEAMS,workers:['강혜정']};}
 function teamLoadLocal(k){
   const c=TEAM_CFG[k];let teams=teamDefault(k),members=[],on='';
   try{const s=JSON.parse(localStorage.getItem(c.tkey)||'null');if(s&&Array.isArray(s.teams)&&s.teams.length)teams=asmFixTeams({teams:s.teams,workers:s.workers||[]},k);}catch(e){}
@@ -812,14 +859,15 @@ function ensureAsmTeams(){
     }
   });
 }
-function pickAsmTeam(i){const t=asmTeams.teams[i];if(!t)return;asmMembers=asmNorm(t.members);asmTeamOn=t.name;asmSave();renderAsmTeam();syncAsmWorker();}
-function clearAsmMembers(){asmMembers=[];asmTeamOn='';asmSave();renderAsmTeam();syncAsmWorker();}
+function pickAsmTeam(i){const t=asmTeams.teams[i];if(!t)return;asmMembers=asmNorm(t.members);asmTeamOn=t.name;sm2TeamAuto=false;asmSave();renderAsmTeam();syncAsmWorker();
+  if(teamKind==='sm2'&&sm2RecTeams.length&&!sm2RecTeams.includes(t.name))show(PROC_CFG.sm2.msg,'추천('+sm2RecTeams.join('·')+'조)과 다른 조입니다. 맞으면 그대로 담으세요.','wait');}
+function clearAsmMembers(){asmMembers=[];asmTeamOn='';sm2TeamAuto=false;asmSave();renderAsmTeam();syncAsmWorker();}
 function addAsmMember(n){asmMembers=asmNorm(asmMembers.concat([n]));asmSave();document.getElementById('asmMemberSearch').value='';renderAsmTeam();syncAsmWorker();}
 function removeAsmMember(n){asmMembers=asmMembers.filter(x=>x!==n);asmSave();renderAsmTeam();syncAsmWorker();}
 function asmCandidates(){const all=new Set(asmTeams.workers||[]);asmTeams.teams.forEach(t=>(t.members||[]).forEach(m=>all.add(m)));return [...all].filter(n=>!asmMembers.includes(n)).sort((a,b)=>a<b?-1:a>b?1:0);}
 function renderAsmTeam(){
   const tb=document.getElementById('asmTeamBtns');if(!tb)return;
-  tb.innerHTML=asmTeams.teams.map((t,i)=>`<button type="button" class="tab ${asmTeamOn===t.name?'active':''}" onclick="pickAsmTeam(${i})">${esc(asmLabel(t.name))}</button>`).join('')+`<button type="button" class="tab gray" onclick="clearAsmMembers()">전체 해제</button>`;
+  tb.innerHTML=asmTeams.teams.map((t,i)=>`<button type="button" class="tab ${asmTeamOn===t.name?'active':''} ${(teamKind==='sm2'&&sm2RecTeams.includes(t.name))?'rec':''}" onclick="pickAsmTeam(${i})">${esc(asmLabel(t.name))}</button>`).join('')+`<button type="button" class="tab gray" onclick="clearAsmMembers()">전체 해제</button>`;
   document.getElementById('asmMemberCount').textContent=asmMembers.length?'('+asmMembers.length+'명)':'';
   document.getElementById('asmMemberChips').innerHTML=asmMembers.length?asmNorm(asmMembers).map(n=>`<span class="asmMember">${esc(n)}<button type="button" aria-label="${esc(n)} 빼기" onclick="removeAsmMember('${escJs(n)}')">×</button></span>`).join(''):'<span class="sub">조를 누르거나 아래에서 이름을 검색해 추가하세요.</span>';
   const q=document.getElementById('asmMemberSearch').value.trim();
@@ -854,7 +902,7 @@ function asmEditSave(){
 function syncAsmWorker(){
   const sel=document.getElementById('worker');
   let v=asmTeamOn||'';
-  if(!v&&mode==='sm2'&&asmNorm(asmMembers).length===1)v=asmNorm(asmMembers)[0];   // SM2: 조 없이 1명만 → 그 사람 이름
+  if(!v&&(mode==='sm2'||mode==='dojang')&&asmNorm(asmMembers).length===1)v=asmNorm(asmMembers)[0];   // SM2: 조 없이 1명만 → 그 사람 이름
   sel.innerHTML=v?`<option value="${esc(v)}">${esc(v)}</option>`:'<option value="">조 선택</option>';
   sel.value=v;
   if(isTeam(mode)){const st=resultStore[mode],wd=document.getElementById('workDate').value;if(!st||st.date!==wd)loadResults();else paintResults();}
