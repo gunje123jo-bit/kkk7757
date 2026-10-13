@@ -30,7 +30,7 @@
         <div><button type="button" onclick="saveAdminJe()">저장</button></div>
       </div>
       <div id="inProcForm" class="row hide" style="margin-top:8px">
-        <div style="flex:1;min-width:260px"><label>품번/공정 검색</label><div id="smAdminSearch" class="hide"><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><label>관리번호 검색</label><input id="smAdminNumber" inputmode="numeric" placeholder="관리번호 숫자 입력 (예: 22)" oninput="renderSmAdminSearch()"><div id="smAdminResults" class="smQuickResults"><div class="smQuickHint">관리번호를 입력하면 모델과 품번이 바로 표시됩니다.</div></div><select id="smAdminChoice" class="hide" onchange="selectSmAdminChoice()"><option value=""></option></select><label style="margin-top:12px">품번 검색</label><input id="smAdminPartNumber" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderSmAdminPartSearch()"><div><select id="smAdminPartChoice" onchange="selectSmAdminPartChoice()" style="max-width:100%;padding:10px;margin-top:8px"><option value="">품번을 입력하세요.</option></select></div></div><input id="inProcItem" list="inProcList" placeholder="목록에서 품번/공정을 선택하세요" autocomplete="off"><datalist id="inProcList"></datalist></div>
+        <div style="flex:1;min-width:260px"><div id="adminModelBox" class="hide"><label>기종 선택 (선택 안 해도 됩니다)</label><div id="adminModels" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px"></div></div><label>품번/공정 검색</label><div id="smAdminSearch" class="hide"><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><label>관리번호 검색</label><input id="smAdminNumber" inputmode="numeric" placeholder="관리번호 숫자 입력 (예: 22)" oninput="renderSmAdminSearch()"><div id="smAdminResults" class="smQuickResults"><div class="smQuickHint">관리번호를 입력하면 모델과 품번이 바로 표시됩니다.</div></div><select id="smAdminChoice" class="hide" onchange="selectSmAdminChoice()"><option value=""></option></select><label style="margin-top:12px">품번 검색</label><input id="smAdminPartNumber" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderSmAdminPartSearch()"><div><select id="smAdminPartChoice" onchange="selectSmAdminPartChoice()" style="max-width:100%;padding:10px;margin-top:8px"><option value="">품번을 입력하세요.</option></select></div></div><input id="inProcItem" list="inProcList" placeholder="목록에서 품번/공정을 선택하세요" autocomplete="off"><datalist id="inProcList"></datalist></div>
         <div><label>수량</label><input id="inProcQty" type="number" min="1" style="width:100px"></div>
         <div><button type="button" onclick="saveAdminProc()">저장</button></div>
       </div>
@@ -179,7 +179,7 @@ let adminLoaded={finish:false,je:false,weld:false,sc:false,asm:false,dojang:fals
 function toggleInputPanel(){const p=document.getElementById('inputPanel');const show=p.classList.contains('hide');p.classList.toggle('hide',!show);const b=document.getElementById('pcInputBtn');b.classList.toggle('gray',show);if(show){selectPart(inputPart);ensureAdminMaster(inputPart);}}
 function showAdminSaveToast(){const el=document.getElementById('adminSaveToast');el.classList.add('show');clearTimeout(window.__adminSaveToastTimer);window.__adminSaveToastTimer=setTimeout(()=>el.classList.remove('show'),2000);}
 function selectInputPart(k){
-  inputPart=k;
+  inputPart=k;adminModel='';
   const tm=(k==='asm'||k==='sm2'||k==='dojang');
   document.getElementById('inWorker').style.display=tm?'none':'';
   document.getElementById('asmAdminBox').classList.toggle('hide',!tm);
@@ -196,6 +196,7 @@ function selectInputPart(k){
   document.getElementById('inJeForm').classList.toggle('hide',k!=='je');
   document.getElementById('inProcForm').classList.toggle('hide',!(k==='weld'||k==='sc'||k==='asm'||(k==='dojang'||k==='sm'||k==='sm2'||k==='press')));
   document.getElementById('inMsg').textContent='';
+  renderAdminModels();
   ensureAdminMaster(k);
 }
 function ensureAdminMaster(kind){
@@ -205,7 +206,7 @@ function ensureAdminMaster(kind){
     if(!d.ok){document.getElementById('inMsg').textContent=d.message||'마스터 조회 실패';return;}
     if(kind==='finish'){adminMaster.finish.items=d.items||[];adminMaster.finish.workers=d.workers||[];}
     else if(kind==='je'){adminMaster.je.specs=d.specs||[];adminMaster.je.subs=d.subs||[];adminMaster.je.subProcesses=d.subProcesses||['메인 플레이트 용접','프레임 가접','컴플 본접'];adminMaster.je.workers=d.workers||[];}
-    else {adminMaster[kind].items=d.items||[];adminMaster[kind].workers=d.workers||[];}
+    else {adminMaster[kind].items=d.items||[];adminMaster[kind].workers=d.workers||[];adminMaster[kind].modelMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};adminMaster[kind].defaults=d.defaults||{};}
     adminLoaded[kind]=true;
     fillAdminWorkers(kind);
     fillAdminDatalist(kind);
@@ -214,13 +215,17 @@ function ensureAdminMaster(kind){
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='inWorker'&&document.getElementById('inJeForm')&&!document.getElementById('inJeForm').classList.contains('hide'))fillAdminJeSpec();});
 function fillAdminWorkers(kind){const sel=document.getElementById('inWorker');const old=sel.value;const list=[...new Set((kind==='sm'?(document.getElementById('smSupport').checked?SM_SUPPORT_WORKERS:SM_WORKERS):adminMaster[kind].workers)||[])].sort();sel.innerHTML='<option value="">작업자 선택</option>'+list.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');if(list.includes(old))sel.value=old;}
 function fillAdminDatalist(kind){
+  renderAdminModels();
   if(kind==='sm'){renderSmAdminSearch();renderSmAdminPartSearch();return;}
   if(kind==='finish'){
     document.getElementById('inFinishList').innerHTML=(adminMaster.finish.items||[]).map(x=>`<option value="${esc(x.itemNo)}">${esc(x.itemName)} / ${esc(x.model)}</option>`).join('');
   }else if(kind==='je'){
     fillAdminJeSpec();
   }else{
-    document.getElementById('inProcList').innerHTML=(adminMaster[kind].items||[]).map(x=>`<option value="${esc(x.displayName)}">${esc(x.itemName)} / ${esc(x.model)}</option>`).join('');
+    let list=(adminMaster[kind].items||[]).filter(admModelOk);
+    if(kind==='sm2'&&adminModel&&adminModel!=='__none__'){const mp=adminMaster.sm2.modelMap.items;list=list.slice().sort((a,b)=>((mp[String(b.itemNo).trim()]||[]).includes(adminModel)?1:0)-((mp[String(a.itemNo).trim()]||[]).includes(adminModel)?1:0));}
+    const rec=kind==='sm2'?admSm2RecentMap():null;
+    document.getElementById('inProcList').innerHTML=list.map(x=>{const r=kind==='sm2'?admSm2Suggest(x.itemNo,x.model,rec).teams:[];return `<option value="${esc(x.displayName)}">${esc(x.itemName)} / ${esc(x.model)}${r.length?' · 추천 '+r.join('·')+'조':''}</option>`;}).join('');
   }
 }
 function adminJeWorker(){return document.getElementById('inWorker').value;}
@@ -274,6 +279,7 @@ function saveAdminJe(){
     if(d.ok){showAdminSaveToast();document.getElementById('inJeHogi').value='';loadResults(false);}
   });
 }
+let adminModel='';
 let adminAsm={teams:[],workers:[]},adminAsmTeamOn='',adminTeamKind='asm';const adminTeamStore={};
 const ASM_LABEL_A={ECR:'A조 (ECR)',EC:'B조 (EC)'},ASM_ERP_A={'A조':'ECR','B조':'EC'};
 function adminTeamName(n){n=String(n||'').trim();if(adminTeamKind==='sm2'||adminTeamKind==='dojang'){const c=n.toUpperCase().replace(/(프레임|조)$/,'');return /^[A-D]$/.test(c)?c:n;}return ASM_ERP_A[n]||n;}
@@ -295,7 +301,8 @@ function renderAdminAsm(){
   document.getElementById('asmAdminTeams').innerHTML=adminAsm.teams.map((t,i)=>`<button type="button" class="part ${adminAsmTeamOn===t.name?'active':''}" style="width:auto" onclick="pickAsmAdminTeam(${i})">${esc(adminTeamLabel(t.name))}</button>`).join('')+'<button type="button" class="part" style="width:auto" onclick="adminAsmTeamOn=\'\';document.getElementById(\'inAsmMembers\').value=\'\';renderAdminAsm()">해제</button>';
   document.getElementById('inAsmAdd').innerHTML='<option value="">+ 파트원 추가</option>'+(adminAsm.workers||[]).map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
 }
-function pickAsmAdminTeam(i){const t=adminAsm.teams[i];if(t){adminAsmTeamOn=t.name;document.getElementById('inAsmMembers').value=(t.members||[]).join(', ');renderAdminAsm();}}
+let adminTeamAuto=false;
+function pickAsmAdminTeam(i,auto){const t=adminAsm.teams[i];if(t){adminTeamAuto=!!auto;adminAsmTeamOn=t.name;document.getElementById('inAsmMembers').value=(t.members||[]).join(', ');renderAdminAsm();}}
 function addAsmAdminMember(n){if(!n)return;const cur=asmAdminNames();if(!cur.includes(n))cur.push(n);document.getElementById('inAsmMembers').value=cur.join(', ');}
 function saveAdminProc(){
   const cfgAction={weld:'saveWeld',sc:'saveSc',asm:'saveAsm',dojang:'saveDojang',press:'savePress',sm:'saveSm',sm2:'saveSm2'}[inputPart];
@@ -345,10 +352,73 @@ let smAdminPartMatches=[];
 function renderSmAdminPartSearch(){
  document.getElementById('inProcItem').value='';document.getElementById('smAdminChoice').value='';
  const q=document.getElementById('smAdminPartNumber').value.trim();
- smAdminPartMatches=q?(adminMaster.sm.items||[]).filter(x=>String(x.itemNo||'').toUpperCase().includes(q.toUpperCase())):[];
- document.getElementById('smAdminPartChoice').innerHTML='<option value="">'+(q?'모델과 품번을 확인하고 선택하세요.':'품번을 입력하세요.')+'</option>'+smAdminPartMatches.map((x,i)=>`<option value="${i}">모델: ${esc(x.model||'')} / ${esc(x.itemNo)} / ${esc(x.itemName||'')} / ${esc(x.process||'')}</option>`).join('');
+ smAdminPartMatches=(q||adminModel)?(adminMaster.sm.items||[]).filter(x=>(!q||String(x.itemNo||'').toUpperCase().includes(q.toUpperCase()))&&admModelOk(x)):[];
+ if(adminModel&&adminModel!=='__none__'){const mp=adminMaster.sm.modelMap.items;smAdminPartMatches.sort((a,b)=>((mp[String(b.itemNo).trim()]||[]).includes(adminModel)?1:0)-((mp[String(a.itemNo).trim()]||[]).includes(adminModel)?1:0));}
+ const total=smAdminPartMatches.length;if(total>500)smAdminPartMatches=smAdminPartMatches.slice(0,500);
+ document.getElementById('smAdminPartChoice').innerHTML='<option value="">'+((q||adminModel)?(total?'모델과 품번을 확인하고 선택하세요.'+(total>500?' (500개까지만 표시, 품번을 더 입력하세요)':''):'일치하는 품목이 없습니다.'):'기종을 누르거나 품번을 입력하세요.')+'</option>'+smAdminPartMatches.map((x,i)=>`<option value="${i}">모델: ${esc(x.model||'')} / ${x.managementNo?esc(x.managementNo)+' / ':''}${esc(x.itemNo)} / ${esc(x.itemName||'')} / ${esc(x.process||'')}</option>`).join('');
 }
 function selectSmAdminPartChoice(){document.getElementById('smAdminChoice').value='';const v=document.getElementById('smAdminPartChoice').value;document.getElementById('inProcItem').value=v!==''&&smAdminPartMatches[Number(v)]?smAdminPartMatches[Number(v)].displayName:'';}
+
+// ---- 기종 버튼(SM / SM2) + SM2 추천 조 : 폰(index.html)과 같은 규칙
+function admMap(kind){return (adminMaster[kind]&&adminMaster[kind].modelMap)||{order:[],items:{},alias:{}};}
+function admModelsOf(kind,x){
+  const mp=admMap(kind),no=String(x.itemNo||'').trim(),mg=String(x.managementNo||'').trim();
+  const a=mp.items[no]||[],b=(kind==='sm'?mp.items[mg]:null)||[];
+  if(a.length||b.length)return a.concat(b);
+  const m=String(x.model||'').trim();return m?[mp.alias[m]||m]:[];
+}
+function admModelOk(x){
+  if(!adminModel||(inputPart!=='sm'&&inputPart!=='sm2'))return true;
+  const ms=admModelsOf(inputPart,x);return adminModel==='__none__'?!ms.length:ms.includes(adminModel);
+}
+let adminModelList=[];
+function setAdminModel(i){const m=adminModelList[i];adminModel=(adminModel===m?'':m);fillAdminDatalist(inputPart);}
+function renderAdminModels(){
+  const box=document.getElementById('adminModelBox');if(!box)return;
+  const on=(inputPart==='sm'||inputPart==='sm2');
+  box.classList.toggle('hide',!on);if(!on)return;
+  const mp=admMap(inputPart),cnt={};let none=false;
+  (adminMaster[inputPart].items||[]).forEach(x=>{const ms=admModelsOf(inputPart,x);if(ms.length)ms.forEach(m=>{(cnt[m]=cnt[m]||new Set()).add(x.itemNo);});else none=true;});
+  const ord=(mp.order||[]).filter(m=>cnt[m]);
+  adminModelList=ord.concat(Object.keys(cnt).filter(m=>!ord.includes(m)).sort((a,b)=>cnt[b].size-cnt[a].size||(a<b?-1:1)));
+  if(none)adminModelList.push('__none__');
+  if(adminModel&&!adminModelList.includes(adminModel))adminModel='';
+  document.getElementById('adminModels').innerHTML=adminLoaded[inputPart]?adminModelList.map((m,i)=>`<button type="button" class="part ${adminModel===m?'active':''}" style="width:auto" onclick="setAdminModel(${i})">${m==='__none__'?'모델 미지정':esc(m)}</button>`).join(''):'<span class="sub">불러오는 중...</span>';
+}
+function admSm2RecentMap(){
+  const m={},d=String(document.getElementById('inWorkDate').value||'').replace(/\D/g,'').slice(0,8);
+  (sm2Rows||[]).slice().sort((a,b)=>String((a.values||[])[0]||'').localeCompare(String((b.values||[])[0]||''))).forEach(x=>{
+    const v=x.values||[],w=String(v[2]||'').trim(),no=String(v[4]||'').trim();
+    if(/^[A-D]$/.test(w)&&no&&String(v[1]||'').replace(/\D/g,'').slice(0,8)===d)m[no]=w;
+  });
+  return m;
+}
+function admSm2Suggest(itemNo,model,recent){
+  const no=String(itemNo||'').trim(),md=String(model||'').trim();
+  recent=recent||admSm2RecentMap();
+  if(recent[no])return{teams:[recent[no]],src:'최근 입력'};
+  const d=(adminMaster.sm2&&adminMaster.sm2.defaults)||{},mp=admMap('sm2');
+  const g=v=>String(v||'').split(',').map(x=>x.trim()).filter(x=>/^[A-D]$/.test(x));
+  if(g(d[no]).length)return{teams:g(d[no]),src:'기본조(품번)'};
+  if(md&&g(d[md]).length)return{teams:g(d[md]),src:'기본조(기종)'};
+  const mm=(mp.items[no]||[]).concat(mp.alias[md]?[mp.alias[md]]:[]).find(k=>g(d[k]).length);
+  if(mm)return{teams:g(d[mm]),src:'기본조(기종)'};
+  return{teams:[],src:''};
+}
+function admSm2AutoTeam(){
+  if(inputPart!=='sm2')return;
+  const typed=document.getElementById('inProcItem').value.trim();
+  const obj=(adminMaster.sm2.items||[]).find(x=>x.displayName===typed);
+  if(!obj)return;
+  const r=admSm2Suggest(obj.itemNo,obj.model);
+  if(r.teams.length!==1||(adminAsmTeamOn&&!adminTeamAuto))return;
+  const i=adminAsm.teams.findIndex(t=>t.name===r.teams[0]);
+  if(i<0||adminAsmTeamOn===r.teams[0])return;
+  pickAsmAdminTeam(i,true);
+  document.getElementById('inMsg').textContent=r.teams[0]+'조 자동 선택 (추천: '+r.src+') — 다르면 조 버튼을 누르세요.';
+}
+document.getElementById('inProcItem').addEventListener('input',admSm2AutoTeam);
+document.getElementById('inProcItem').addEventListener('change',admSm2AutoTeam);
 </script>
 </body>
 </html>
