@@ -40,7 +40,7 @@
   <div id="weldArea" class="hide"><div class="card"><label>용접 품번 검색</label><input id="weldSearch" autocomplete="off" placeholder="품번 입력"><div id="weldItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>선택 공정별 수량</label><div id="weldSelectedText" class="sub">입력 대기: 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="weldQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveWeldBtn" onclick="saveWeld()">입력 담기</button><button class="gray" onclick="resetWeld()">입력칸 초기화</button><div id="weldMsg" class="msg ready">입력 대기</div></div></div>
 
   <div id="scArea" class="hide"><div class="card"><label>SC 품번 검색</label><input id="scSearch" autocomplete="off" placeholder="품번 입력"><div id="scItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SC 선택 공정별 수량</label><div id="scSelectedText" class="sub">입력 대기: SC 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="scQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveScBtn" onclick="saveSc()">입력 담기</button><button class="gray" onclick="resetSc()">입력칸 초기화</button><div id="scMsg" class="msg ready">입력 대기</div></div></div>
-  <div id="teamArea" class="hide"><div class="card"><label>조 선택</label><div id="asmTeamBtns" class="asmTeamBtns"></div><label>조원 <span class="sub" id="asmMemberCount"></span></label><div id="asmMemberChips" class="asmMemberChips"></div><label>파트원 추가</label><input id="asmMemberSearch" autocomplete="off" placeholder="이름 검색 후 눌러서 추가"><div id="asmMemberResults" style="margin-top:8px"></div><button type="button" class="gray" style="margin-top:10px" onclick="toggleAsmEdit()">조편성 명단 편집 (새 사람 등록)</button><div id="asmEditBox" class="hide" style="margin-top:10px"></div></div></div>
+  <div id="teamArea" class="hide"><div class="card"><label>조 선택</label><div id="asmTeamBtns" class="asmTeamBtns"></div><input id="asmMemberSearch" autocomplete="off" placeholder="작업자 이름 검색 (예: 서우)"><div id="asmMemberResults" style="margin-top:8px"></div><label>조원 <span class="sub" id="asmMemberCount"></span></label><div id="asmMemberChips" class="asmMemberChips"></div><div id="asmEditBox" class="hide" style="margin-top:10px"></div></div></div>
   <div id="asmArea" class="hide"><div class="card"><label>조립 품번 검색</label><input id="asmSearch" autocomplete="off" placeholder="품번 입력"><div id="asmItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>조립 선택 공정별 수량</label><div id="asmSelectedText" class="sub">입력 대기: 조립 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="asmQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveAsmBtn" onclick="saveAsm()">입력 담기</button><button class="gray" onclick="resetAsm()">입력칸 초기화</button><div id="asmMsg" class="msg ready">입력 대기</div></div></div>
 
   <div id="sm2Area" class="hide"><div class="card"><label>SM2 모델 선택 (선택 안 해도 됩니다)</label><div id="sm2Models" class="asmTeamBtns"></div><label>품번 / 품명 검색</label><input id="sm2Search" autocomplete="off" placeholder="품번·품명·모델 입력 (공백으로 여러 단어, 예: COWL RH)"><div id="sm2Items" class="sub">모델을 누르거나 품번·품명을 입력하세요.</div></div><div class="card"><label>SM2 선택 공정별 수량</label><div id="sm2SelectedText" class="sub">입력 대기: SM2 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="sm2Qty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSm2Btn" onclick="saveSm2()">입력 담기</button><button class="gray" onclick="resetSm2()">입력칸 초기화</button><div id="sm2Msg" class="msg ready">입력 대기</div></div></div>
@@ -871,7 +871,7 @@ function teamUse(k){
   if(k===teamKind)return;
   TEAM_STORE[teamKind]={teams:asmTeams,members:asmMembers,on:asmTeamOn};
   const t=TEAM_STORE[k]||teamLoadLocal(k);
-  asmTeams=t.teams;asmMembers=t.members;asmTeamOn=t.on;teamKind=k;asmEdit=null;
+  asmTeams=t.teams;asmMembers=t.members;asmTeamOn=t.on;teamKind=k;asmEdit=null;{const eb=document.getElementById('asmEditBox');if(eb)eb.classList.add('hide');}
   const b=document.getElementById('asmEditBox');if(b)b.classList.add('hide');
 }
 let asmTeams={teams:ASM_DEFAULT_TEAMS,workers:['강혜정']};
@@ -897,12 +897,12 @@ function pickAsmTeam(i){const t=asmTeams.teams[i];if(!t)return;asmMembers=asmNor
 function clearAsmMembers(){asmMembers=[];asmTeamOn='';sm2TeamAuto=false;asmSave();renderAsmTeam();syncAsmWorker();}
 function addAsmMember(n){asmMembers=asmNorm(asmMembers.concat([n]));asmSave();document.getElementById('asmMemberSearch').value='';renderAsmTeam();syncAsmWorker();}
 function removeAsmMember(n){asmMembers=asmMembers.filter(x=>x!==n);asmSave();renderAsmTeam();syncAsmWorker();}
-function asmCandidates(){const all=new Set(asmTeams.workers||[]);asmTeams.teams.forEach(t=>(t.members||[]).forEach(m=>all.add(m)));return [...all].filter(n=>!asmMembers.includes(n)).sort((a,b)=>a<b?-1:a>b?1:0);}
+function asmCandidates(){const all=new Set(asmTeams.workers||[]);if(teamKind==='dojang')(procData.dojang.workers||[]).forEach(n=>all.add(n));asmTeams.teams.forEach(t=>(t.members||[]).forEach(m=>all.add(m)));return [...all].filter(n=>!asmMembers.includes(n)).sort((a,b)=>a<b?-1:a>b?1:0);}
 function renderAsmTeam(){
   const tb=document.getElementById('asmTeamBtns');if(!tb)return;
-  tb.innerHTML=asmTeams.teams.map((t,i)=>`<button type="button" class="tab ${asmTeamOn===t.name?'active':''} ${(teamKind==='sm2'&&sm2RecTeams.includes(t.name))?'rec':''}" onclick="pickAsmTeam(${i})">${esc(asmLabel(t.name))}</button>`).join('')+`<button type="button" class="tab gray" onclick="clearAsmMembers()">전체 해제</button>`;
+  tb.innerHTML=asmTeams.teams.map((t,i)=>`<button type="button" class="tab ${asmTeamOn===t.name?'active':''} ${(teamKind==='sm2'&&sm2RecTeams.includes(t.name))?'rec':''}" onclick="pickAsmTeam(${i})">${esc(asmLabel(t.name))}</button>`).join('')+`<button type="button" class="tab gray" onclick="clearAsmMembers()">해제</button><button type="button" class="tab" style="padding:6px 10px;font-size:14px;min-height:0;background:#fff;color:#111;border:1px solid #cbd5e1" onclick="toggleAsmEdit()">${asmEdit?'편집 닫기':'파트원 편집'}</button>`;
   document.getElementById('asmMemberCount').textContent=asmMembers.length?'('+asmMembers.length+'명)':'';
-  document.getElementById('asmMemberChips').innerHTML=asmMembers.length?asmNorm(asmMembers).map(n=>`<span class="asmMember">${esc(n)}<button type="button" aria-label="${esc(n)} 빼기" onclick="removeAsmMember('${escJs(n)}')">×</button></span>`).join(''):'<span class="sub">조를 누르거나 아래에서 이름을 검색해 추가하세요.</span>';
+  document.getElementById('asmMemberChips').innerHTML=asmMembers.length?asmNorm(asmMembers).map(n=>`<span class="asmMember">${esc(n)}<button type="button" aria-label="${esc(n)} 빼기" onclick="removeAsmMember('${escJs(n)}')">×</button></span>`).join(''):'<span class="sub">조를 누르거나 위 검색칸에서 이름을 검색해 추가하세요.</span>';
   const q=document.getElementById('asmMemberSearch').value.trim();
   const box=document.getElementById('asmMemberResults');
   if(!q){box.innerHTML='';return;}
@@ -912,7 +912,7 @@ function renderAsmTeam(){
 
 // ---- 조편성 명단 편집: 조원 추가/삭제, 새 사람 등록, 조 추가/삭제 → 구글시트(조립_조편성)에 저장
 let asmEdit=null;
-function toggleAsmEdit(){const b=document.getElementById('asmEditBox');if(!b)return;if(!b.classList.contains('hide')){b.classList.add('hide');asmEdit=null;return;}asmEdit=asmTeams.teams.map(t=>({name:t.name,members:asmNorm(t.members)}));b.classList.remove('hide');renderAsmEdit();}
+function toggleAsmEdit(){const b=document.getElementById('asmEditBox');if(!b)return;if(!b.classList.contains('hide')){b.classList.add('hide');asmEdit=null;renderAsmTeam();return;}asmEdit=asmTeams.teams.map(t=>({name:t.name,members:asmNorm(t.members)}));b.classList.remove('hide');renderAsmEdit();renderAsmTeam();}
 function renderAsmEdit(msg){
   const b=document.getElementById('asmEditBox');if(!b||!asmEdit)return;
   b.innerHTML=asmEdit.map((t,i)=>`<div class="card" style="margin:8px 0;padding:10px"><b>${esc(asmLabel(t.name))}</b> <span class="sub">(${t.members.length}명)</span><div class="asmMemberChips">${t.members.length?t.members.map(n=>`<span class="asmMember">${esc(n)}<button type="button" aria-label="${esc(n)} 삭제" onclick="asmEditRemove(${i},'${escJs(n)}')">×</button></span>`).join(''):'<span class="sub">조원 없음</span>'}</div><div style="display:flex;gap:6px"><input id="asmEditIn_${i}" autocomplete="off" placeholder="새 사람 이름 입력" style="flex:1"><button type="button" style="width:auto;padding:10px 14px" onclick="asmEditAdd(${i})">추가</button></div><button type="button" class="gray" style="margin-top:8px" onclick="asmEditDelTeam(${i})">이 조 삭제</button></div>`).join('')

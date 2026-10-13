@@ -6,6 +6,7 @@
   <title>작업실적 조회</title>
   <style>
     body{font-family:Arial,'Noto Sans KR',sans-serif;margin:0;background:#f5f6f8;color:#111}header{background:#111827;color:#fff;padding:12px 16px;font-size:22px;font-weight:900}.wrap{max-width:1180px;margin:0 auto;padding:14px}.box{background:#fff;border-radius:12px;margin-bottom:10px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.08)}label{font-weight:800;display:block;margin-bottom:5px}input,button{font-size:16px;padding:10px;border-radius:8px;border:1px solid #ccc}button{border:0;background:#1769e0;color:white;font-weight:800;margin-right:6px;cursor:pointer}button.gray{background:#666}.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.muted{color:#555;font-size:13px;margin-top:8px}.partBox{display:flex;gap:10px;flex-wrap:wrap}.part{background:#e5e7eb;color:#111;border:1px solid #cbd5e1}.part.active{background:#111827;color:#fff}.smTypeBtn{background:#e5e7eb!important;color:#111!important;border:2px solid #cbd5e1!important}.smTypeBtn.active{background:#1769e0!important;color:#fff!important;border-color:#0b5ed7!important;box-shadow:0 0 0 3px rgba(23,105,224,.22)}.smQuickResults{display:grid;gap:7px;margin-top:8px;max-width:620px}.smQuickHint{padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;color:#475569;font-weight:800}.smQuickCard{display:block;width:100%;margin:0;text-align:left;background:#f8fafc;color:#111;border:2px solid #cbd5e1;border-radius:10px;padding:10px 12px}.smQuickCard:hover{border-color:#1769e0}.smQuickCard.active{background:#eaf2ff;color:#073b86;border-color:#1769e0;box-shadow:0 0 0 2px rgba(23,105,224,.14)}.smQuickModel{font-size:15px;color:#475569;margin-bottom:3px}.smQuickPart{font-size:19px;font-weight:900}.smQuickMeta{font-size:13px;color:#475569;margin-top:3px}.saveToast{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%) scale(.94);z-index:10000;background:#087b25;color:#fff;border-radius:16px;padding:22px 36px;font-size:26px;font-weight:900;box-shadow:0 12px 36px rgba(0,0,0,.35);opacity:0;visibility:hidden;transition:opacity .18s ease,transform .18s ease}.saveToast.show{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}.pill{display:inline-block;background:#eef5ff;border:1px solid #bfdbfe;color:#0b5ed7;border-radius:999px;padding:4px 10px;font-weight:900;margin-left:6px}.summary{font-weight:900;font-size:18px}.tableWrap{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.08)}table{border-collapse:collapse;width:100%;min-width:980px}th,td{border:1px solid #ddd;padding:10px;text-align:left;white-space:nowrap}th{background:#eee;font-weight:900}.qty{text-align:right;font-weight:900}.del{background:#e11d2e;color:#fff;border-radius:8px;padding:8px 10px}.subBox{display:flex;gap:8px;flex-wrap:wrap}.subCard{padding:8px 12px;background:#f1f5f9;border:1px solid #dbe3ee;border-radius:8px;font-weight:900}.off{background:#888}.copyBtn{background:#0f766e;color:#fff;border-radius:7px;padding:6px 8px;font-size:13px;font-weight:900;margin-right:8px}.copyBtn.done{background:#16a34a}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:14px 18px;border-radius:10px;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:9999;display:none}.itemCell{font-weight:900}.hide{display:none}
+    .admChip{display:inline-flex;align-items:center;gap:6px;background:#dbeafe;border:1px solid #93c5fd;color:#1e3a8a;border-radius:999px;padding:5px 6px 5px 12px;font-weight:700}.admChip button{width:auto;min-height:0;margin:0;padding:0 6px;background:transparent;color:#1e3a8a;border:0;font-size:18px;line-height:1;cursor:pointer}.admAdd{width:auto!important;padding:6px 12px!important;background:#fff!important;color:#111!important;border:1px solid #cbd5e1!important;border-radius:8px;cursor:pointer}.admSmall{width:auto!important;padding:5px 10px!important;font-size:13px!important}
   </style>
 </head>
 <body>
@@ -16,7 +17,7 @@
     <div id="inputPanel" class="hide">
       <div class="partBox" style="margin:10px 0"><button type="button" id="inBtnFinish" class="part active" onclick="selectInputPart('finish')">완성파트</button><button type="button" id="inBtnJe" class="part" onclick="selectInputPart('je')">제관파트</button><button type="button" id="inBtnWeld" class="part" onclick="selectInputPart('weld')">용접파트</button><button type="button" id="inBtnSc" class="part" onclick="selectInputPart('sc')">SC파트</button><button type="button" id="inBtnAsm" class="part" onclick="selectInputPart('asm')">조립파트</button><button type="button" id="inBtnDojang" class="part" onclick="selectInputPart('dojang')">도장파트</button><button type="button" id="inBtnPress" class="part" onclick="selectInputPart('press')">프레스파트</button><button type="button" id="inBtnSm" class="part" onclick="selectInputPart('sm')">SM파트</button><button type="button" id="inBtnSm2" class="part" onclick="selectInputPart('sm2')">SM2파트</button></div>
       <div class="row"><div><label>작업일자</label><input id="inWorkDate" type="date"></div><div><label>작업자</label><span id="smSupportWrap" class="hide"><label><input type="checkbox" id="smSupport" onchange="fillAdminWorkers(inputPart)"> 지원 (SM2)</label></span><select id="inWorker"><option value="">작업자 선택</option></select></div></div>
-      <div id="asmAdminBox" class="hide" style="margin-top:8px"><label id="asmAdminLabel">조립 조 선택 / 파트원</label><div id="asmAdminTeams" style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0"></div><div class="row"><div style="flex:1;min-width:240px"><input id="inAsmMembers" placeholder="조원 이름 (쉼표로 구분)"></div><div><select id="inAsmAdd" onchange="addAsmAdminMember(this.value);this.value=''"><option value="">+ 파트원 추가</option></select></div></div></div>
+      <div id="asmAdminBox" class="hide" style="margin-top:8px"><label id="asmAdminLabel">조립 조 선택 / 파트원</label><div id="asmAdminTeams" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0"></div><div style="max-width:420px"><input id="inAsmSearch" autocomplete="off" placeholder="작업자 이름 검색 (예: 서우)" oninput="renderAdminAsmSearch()"><div id="inAsmResults" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div></div><label style="margin-top:8px">조원 <span id="inAsmCount" class="sub"></span></label><div id="inAsmChips" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0"></div><input id="inAsmMembers" type="hidden"><div id="asmAdminEditBox" class="hide" style="margin-top:8px"></div></div>
       <div id="inFinishForm" class="row" style="margin-top:8px">
         <div style="flex:1;min-width:220px"><label>품번 검색</label><input id="inFinishItem" list="inFinishList" placeholder="품번 입력 또는 목록에서 선택" autocomplete="off"><datalist id="inFinishList"></datalist></div>
         <div><label>수량</label><input id="inFinishQty" type="number" min="1" style="width:100px"></div>
@@ -289,7 +290,7 @@ function adminTeamUse(k){
   const el=document.getElementById('inAsmMembers');
   adminTeamStore[adminTeamKind]={a:adminAsm,on:adminAsmTeamOn,m:el.value};
   const t=adminTeamStore[k]||{a:{teams:[],workers:[]},on:'',m:''};
-  adminAsm=t.a;adminAsmTeamOn=t.on;el.value=t.m;adminTeamKind=k;
+  adminAsm=t.a;adminAsmTeamOn=t.on;el.value=t.m;adminTeamKind=k;admEdit=null;{const eb=document.getElementById('asmAdminEditBox');if(eb)eb.classList.add('hide');}
 }
 function loadAdminAsm(){
   if(adminAsm.teams.length){renderAdminAsm();return;}
@@ -298,12 +299,46 @@ function loadAdminAsm(){
 }
 function asmAdminNames(){return [...new Set(document.getElementById('inAsmMembers').value.split(/[,，、]+/).map(x=>x.trim()).filter(Boolean))].sort((a,b)=>a<b?-1:a>b?1:0);}
 function renderAdminAsm(){
-  document.getElementById('asmAdminTeams').innerHTML=adminAsm.teams.map((t,i)=>`<button type="button" class="part ${adminAsmTeamOn===t.name?'active':''}" style="width:auto" onclick="pickAsmAdminTeam(${i})">${esc(adminTeamLabel(t.name))}</button>`).join('')+'<button type="button" class="part" style="width:auto" onclick="adminAsmTeamOn=\'\';document.getElementById(\'inAsmMembers\').value=\'\';renderAdminAsm()">해제</button>';
-  document.getElementById('inAsmAdd').innerHTML='<option value="">+ 파트원 추가</option>'+(adminAsm.workers||[]).map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  const canEdit=(adminTeamKind==='sm2'||adminTeamKind==='dojang');
+  document.getElementById('asmAdminTeams').innerHTML=adminAsm.teams.map((t,i)=>`<button type="button" class="part ${adminAsmTeamOn===t.name?'active':''}" style="width:auto" onclick="pickAsmAdminTeam(${i})">${esc(adminTeamLabel(t.name))}</button>`).join('')+'<button type="button" class="part" style="width:auto" onclick="adminAsmTeamOn=\'\';document.getElementById(\'inAsmMembers\').value=\'\';renderAdminAsm()">해제</button>'+(canEdit?`<button type="button" class="part admSmall" onclick="toggleAdminAsmEdit()">${admEdit?'편집 닫기':'파트원 편집'}</button>`:'');
+  renderAdminChips();renderAdminAsmSearch();
 }
-let adminTeamAuto=false;
+function renderAdminChips(){
+  const n=asmAdminNames();
+  document.getElementById('inAsmCount').textContent=n.length?'('+n.length+'명)':'';
+  document.getElementById('inAsmChips').innerHTML=n.length?n.map(x=>`<span class="admChip">${esc(x)}<button type="button" aria-label="${esc(x)} 빼기" onclick="removeAsmAdminMember(${JSON.stringify(x).replace(/"/g,'&quot;')})">×</button></span>`).join(''):'<span class="sub">조를 누르거나 위 검색칸에서 이름을 검색해 추가하세요.</span>';
+}
+function renderAdminAsmSearch(){
+  const q=document.getElementById('inAsmSearch').value.trim(),box=document.getElementById('inAsmResults'),cur=asmAdminNames();
+  if(!q){box.innerHTML='';return;}
+  const all=new Set(adminAsm.workers||[]);if(adminTeamKind==='dojang')((adminMaster.dojang&&adminMaster.dojang.workers)||[]).forEach(n=>all.add(n));adminAsm.teams.forEach(t=>(t.members||[]).forEach(m=>all.add(m)));
+  const list=[...all].filter(n=>!cur.includes(n)&&n.includes(q)).sort().slice(0,20);
+  box.innerHTML=list.length?list.map(n=>`<button type="button" class="admAdd" onclick="addAsmAdminMember(${JSON.stringify(n).replace(/"/g,'&quot;')})">+ ${esc(n)}</button>`).join(''):'<span class="sub">일치하는 이름이 없습니다.</span>';
+}
+function removeAsmAdminMember(n){const el=document.getElementById('inAsmMembers');el.value=asmAdminNames().filter(x=>x!==n).join(', ');renderAdminChips();renderAdminAsmSearch();}
+// ---- 파트원 편집: 조 고정 인원을 바꿔 구글시트(SM2_조편성 / 도장_조편성)에 저장
+let admEdit=null;
+function toggleAdminAsmEdit(){const b=document.getElementById('asmAdminEditBox');if(admEdit){admEdit=null;b.classList.add('hide');renderAdminAsm();return;}admEdit=adminAsm.teams.map(t=>({name:t.name,members:(t.members||[]).slice().sort()}));b.classList.remove('hide');renderAdminAsmEdit();renderAdminAsm();}
+function renderAdminAsmEdit(msg){
+  const b=document.getElementById('asmAdminEditBox');if(!b||!admEdit)return;
+  b.innerHTML=admEdit.map((t,i)=>`<div style="border:1px solid #cbd5e1;border-radius:8px;padding:8px;margin:6px 0;background:#fff"><b>${esc(adminTeamLabel(t.name))}</b> <span class="sub">(${t.members.length}명)</span><div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">${t.members.length?t.members.map(n=>`<span class="admChip">${esc(n)}<button type="button" onclick="admEditRemove(${i},${JSON.stringify(n).replace(/"/g,'&quot;')})">×</button></span>`).join(''):'<span class="sub">조원 없음</span>'}</div><div style="display:flex;gap:6px;max-width:420px"><input id="admEditIn_${i}" autocomplete="off" placeholder="추가할 사람 이름"><button type="button" class="part admSmall" onclick="admEditAdd(${i})">추가</button></div></div>`).join('')+'<button type="button" onclick="admEditSave()" style="width:auto">조편성 저장</button> <span id="admEditMsg" class="sub">'+esc(msg||'')+'</span>';
+}
+function admEditAdd(i){const el=document.getElementById('admEditIn_'+i),n=(el.value||'').trim().replace(/[,，、]/g,'');if(!n)return;if(n.length>10)return renderAdminAsmEdit('이름이 너무 깁니다.');if(!admEdit[i].members.includes(n))admEdit[i].members=admEdit[i].members.concat([n]).sort();renderAdminAsmEdit();}
+function admEditRemove(i,n){admEdit[i].members=admEdit[i].members.filter(x=>x!==n);renderAdminAsmEdit();}
+function admEditSave(){
+  const k=adminTeamKind,m=document.getElementById('admEditMsg');if(m)m.textContent='저장 중...';
+  jsonp({action:k==='sm2'?'saveSm2Teams':'saveDojangTeams',teams:JSON.stringify(admEdit)},d=>{
+    if(k!==adminTeamKind)return;
+    if(d&&d.ok&&Array.isArray(d.teams)){
+      adminAsm={teams:d.teams.map(t=>({name:adminTeamName(t.name),members:t.members||[]})),workers:d.workers||[]};
+      if(adminAsmTeamOn&&!adminAsm.teams.some(t=>t.name===adminAsmTeamOn)){adminAsmTeamOn='';document.getElementById('inAsmMembers').value='';}
+      admEdit=adminAsm.teams.map(t=>({name:t.name,members:(t.members||[]).slice().sort()}));
+      renderAdminAsm();renderAdminAsmEdit('저장 완료');
+    }else if(m)m.textContent=(d&&d.message)||'저장 실패';
+  });
+}
 function pickAsmAdminTeam(i,auto){const t=adminAsm.teams[i];if(t){adminTeamAuto=!!auto;adminAsmTeamOn=t.name;document.getElementById('inAsmMembers').value=(t.members||[]).join(', ');renderAdminAsm();}}
-function addAsmAdminMember(n){if(!n)return;const cur=asmAdminNames();if(!cur.includes(n))cur.push(n);document.getElementById('inAsmMembers').value=cur.join(', ');}
+function addAsmAdminMember(n){if(!n)return;const cur=asmAdminNames();if(!cur.includes(n))cur.push(n);document.getElementById('inAsmMembers').value=cur.join(', ');document.getElementById('inAsmSearch').value='';renderAdminChips();renderAdminAsmSearch();}
 function saveAdminProc(){
   const cfgAction={weld:'saveWeld',sc:'saveSc',asm:'saveAsm',dojang:'saveDojang',press:'savePress',sm:'saveSm',sm2:'saveSm2'}[inputPart];
   const defaultPart={weld:'용접파트',sc:'SC파트',asm:'조립파트',dojang:'도장파트',press:'프레스파트',sm:'SM파트',sm2:'SM2파트'}[inputPart];
