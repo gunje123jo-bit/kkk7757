@@ -44,7 +44,7 @@
   <div id="asmArea" class="hide"><div class="card"><label>조립 품번 검색</label><input id="asmSearch" autocomplete="off" placeholder="품번 입력"><div id="asmItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>조립 선택 공정별 수량</label><div id="asmSelectedText" class="sub">입력 대기: 조립 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="asmQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveAsmBtn" onclick="saveAsm()">입력 담기</button><button class="gray" onclick="resetAsm()">입력칸 초기화</button><div id="asmMsg" class="msg ready">입력 대기</div></div></div>
 
   <div id="sm2Area" class="hide"><div class="card"><label>SM2 모델 선택 (선택 안 해도 됩니다)</label><div id="sm2Models" class="asmTeamBtns"></div><label>품번 / 품명 검색</label><input id="sm2Search" autocomplete="off" placeholder="품번·품명·모델 입력 (공백으로 여러 단어, 예: COWL RH)"><div id="sm2Items" class="sub">모델을 누르거나 품번·품명을 입력하세요.</div></div><div class="card"><label>SM2 선택 공정별 수량</label><div id="sm2SelectedText" class="sub">입력 대기: SM2 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="sm2Qty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSm2Btn" onclick="saveSm2()">입력 담기</button><button class="gray" onclick="resetSm2()">입력칸 초기화</button><div id="sm2Msg" class="msg ready">입력 대기</div></div></div>
-  <div id="dojangArea" class="hide"><div class="card"><label>도장 품번 검색</label><input id="dojangSearch" autocomplete="off" placeholder="품번 입력"><div id="dojangItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>도장 선택 공정별 수량</label><div id="dojangSelectedText" class="sub">입력 대기: 도장 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="dojangQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveDojangBtn" onclick="saveDojang()">입력 담기</button><button class="gray" onclick="resetDojang()">입력칸 초기화</button><div id="dojangMsg" class="msg ready">입력 대기</div></div></div>
+  <div id="dojangArea" class="hide"><div class="card"><div id="dojangModelBox" class="hide"><label>프레임(A조) 모델 선택 (선택 안 해도 됩니다)</label><div id="dojangModels" class="asmTeamBtns"></div></div><label>도장 품번 검색</label><input id="dojangSearch" autocomplete="off" placeholder="품번 입력"><div id="dojangItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>도장 선택 공정별 수량</label><div id="dojangSelectedText" class="sub">입력 대기: 도장 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="dojangQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveDojangBtn" onclick="saveDojang()">입력 담기</button><button class="gray" onclick="resetDojang()">입력칸 초기화</button><div id="dojangMsg" class="msg ready">입력 대기</div></div></div>
   <div id="pressArea" class="hide"><div class="card"><label>프레스 품번 검색</label><input id="pressSearch" autocomplete="off" placeholder="품번 입력"><div id="pressItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>프레스 선택 공정별 수량</label><div id="pressSelectedText" class="sub">입력 대기: 프레스 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="pressQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="savePressBtn" onclick="savePress()">입력 담기</button><button class="gray" onclick="resetPress()">입력칸 초기화</button><div id="pressMsg" class="msg ready">입력 대기</div></div></div>
   <div id="smArea" class="hide"><div class="card"><label>SM 기종 선택 (선택 안 해도 됩니다)</label><div id="smModels" class="asmTeamBtns"></div><div id="smModelItems" class="sub">기종을 누르면 품번 목록이 나옵니다.</div><label>SM 관리번호 검색</label><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><input id="smSearch" inputmode="numeric" autocomplete="off" placeholder="관리번호 숫자 입력 (예: 22)"><div id="smItems" class="sub">SM파트를 불러오는 중입니다.</div><label>SM 품번 검색</label><input id="smPartSearch" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderProcessItems('sm')"><div id="smPartItems" class="sub">품번을 입력하세요.</div></div><div class="card"><label>SM 선택 공정별 수량</label><div id="smSelectedText" class="sub">입력 대기: SM 품번/공정을 선택하세요.</div><input class="qtyHidden" type="number" id="smQty" min="1" inputmode="numeric" placeholder="수량 입력"><button id="saveSmBtn" onclick="saveSm()">입력 담기</button><button class="gray" onclick="resetSm()">입력칸 초기화</button><div id="smMsg" class="msg ready">입력 대기</div></div></div>
 
@@ -179,6 +179,7 @@ function setMode(m){
   if(REMOTE_PART_SEARCH[m]){
     loaded[m]=true;
     procData[m].items=[];
+    if(m==='dojang'){loadDojangFrame();if(dojangModel)procData[m].items=dojangFrameItems.filter(dojangModelOk);}
     clearProcessSelection(m);
     renderProcessItems(m);
     loadResults();
@@ -197,7 +198,7 @@ function searchProcessRemote(kind){
   const query=input.value.trim();
   clearProcessSelection(kind);
   const requestNo=++searchRequestNo[kind];
-  if(!query){procData[kind].items=[];box.innerHTML='품번을 입력하세요.';return;}
+  if(!query){procData[kind].items=(kind==='dojang'&&dojangModel)?dojangFrameItems.filter(dojangModelOk):[];if(kind==='dojang'&&dojangModel){renderProcessItems(kind);return;}box.innerHTML='품번을 입력하세요.';return;}
   box.innerHTML='품번 검색 중...';
   jsonp({action:'processSearch',kind,query},d=>{
     if(requestNo!==searchRequestNo[kind])return;
@@ -242,6 +243,7 @@ function applyMasterData(kind,d){Promise.resolve().then(applyRosterLists);
   if(kind==='finish'){masterItems=d.items||[];finishWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.finish);}
   if(kind==='je'){jeSpecs=d.specs||[];jeSubs=(d.subs&&d.subs.length)?d.subs:jeDeriveSubs(jeSpecs);if(d.subProcesses&&d.subProcesses.length)jeSubProcs=d.subProcesses;jeWorkers=(d.workers&&d.workers.length?d.workers:FAST_WORKERS.je);applyJeFallback();}
   if(kind==='sm')smMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};
+  if(kind==='dojang')dojangMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};
   if(kind==='sm2'){sm2Defaults=d.defaults||{};sm2Map=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};}
   if(PROC_CFG[kind]){procData[kind].items=(d.items||[]).concat(kind==='sm2'?(d.extraItems||[]).map(x=>Object.assign({},x,{_extra:true})):[]);procData[kind].workers=(d.workers&&d.workers.length?d.workers:(FAST_WORKERS[kind]||[]));}
 }
@@ -350,6 +352,31 @@ function sm2SuggestSync(withMsg){
   renderAsmTeam();
 }
 // ---- SM2: 모델 버튼 + 여러 단어 검색 (모델 비어 있는 품번은 '모델 미지정' 버튼 또는 모델 미선택 검색으로 찾음)
+// ---- 도장: A조(프레임) 모델 버튼. 도장_기종매핑에 적은 품번만 모델 버튼으로 찾고, 나머지는 품번 검색으로 입력합니다.
+let dojangMap={order:[],items:{},alias:{}},dojangModel='',dojangModelList=[];
+function dojangModelsOf(x){return dojangMap.items[String(x.itemNo||'').trim()]||[];}
+function dojangModelOk(x){return !dojangModel||dojangModelsOf(x).includes(dojangModel);}
+function setDojangModel(i){
+  const m=dojangModelList[i];dojangModel=(dojangModel===m?'':m);
+  const inp=document.getElementById('dojangSearch');if(inp)inp.value='';
+  clearProcessSelection('dojang');
+  procData.dojang.items=dojangModel?dojangFrameItems.filter(dojangModelOk):[];
+  renderProcessItems('dojang');
+}
+let dojangFrameItems=[],dojangFrameLoaded=false;
+function loadDojangFrame(){
+  if(dojangFrameLoaded)return;
+  try{const v=JSON.parse(localStorage.getItem('workResults.dojangFrame.v1')||'null');if(v&&v.data&&Date.now()-Number(v.savedAt||0)<12*3600*1000){dojangMap=v.data.modelMap||dojangMap;dojangFrameItems=v.data.items||[];dojangFrameLoaded=true;renderDojangModels();}}catch(e){}
+  jsonp({action:'dojangFrame'},d=>{if(!d||!d.ok)return;dojangMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};dojangFrameItems=d.items||[];dojangFrameLoaded=true;try{localStorage.setItem('workResults.dojangFrame.v1',JSON.stringify({savedAt:Date.now(),data:d}));}catch(e){}renderDojangModels();});
+}
+function renderDojangModels(){
+  const box=document.getElementById('dojangModels'),wrap=document.getElementById('dojangModelBox');if(!box||!wrap)return;
+  const have={};(dojangFrameItems||[]).forEach(x=>dojangModelsOf(x).forEach(m=>{have[m]=1;}));
+  dojangModelList=(dojangMap.order||[]).filter(m=>have[m]);
+  if(dojangModel&&!dojangModelList.includes(dojangModel))dojangModel='';
+  wrap.classList.toggle('hide',!dojangModelList.length);
+  box.innerHTML=dojangModelList.map((m,i)=>`<button type="button" class="tab ${dojangModel===m?'active':''}" onclick="setDojangModel(${i})">${esc(m)}</button>`).join('');
+}
 let sm2Model='',sm2ModelList=[],sm2Extra=false;
 function sm2Show(x){return sm2Extra||!x._extra;}   // ST 없는 품번(추가 검색)은 버튼을 켰을 때만 보임
 function toggleSm2Extra(){sm2Extra=!sm2Extra;renderProcessItems('sm2');}
@@ -388,10 +415,11 @@ function renderProcessItems(kind){
   const source=procData[kind].items;
   if(!loaded[kind]){box.innerHTML=cfg.label+'파트 마스터 불러오는 중...';return;}
   if(kind==='sm2')renderSm2Models();
+  if(kind==='dojang')renderDojangModels();
   const q=searchEl.value.trim();
   const nq=normalizeSearch(q);
-  if(!q&&!(kind==='sm2'&&sm2Model)){box.innerHTML=kind==='sm'?'관리번호 또는 품번을 입력하세요.':(kind==='sm2'?'모델을 누르거나 품번·품명을 입력하세요.':'품번을 입력하세요.');return;}
-  const list=(source||[]).filter(x=>{if(kind==='sm')return smMatches(x,q);if(kind==='sm2')return sm2Show(x)&&sm2ModelOk(x)&&sm2TextOk(x,q);const raw=(x.itemNo+' '+x.itemName+' '+x.model+' '+x.process+' '+x.displayName+' '+x.inputKey);return raw.includes(q)||normalizeSearch(raw).includes(nq);});
+  if(!q&&!(kind==='sm2'&&sm2Model)&&!(kind==='dojang'&&dojangModel)){box.innerHTML=kind==='sm'?'관리번호 또는 품번을 입력하세요.':(kind==='sm2'?'모델을 누르거나 품번·품명을 입력하세요.':'품번을 입력하세요.');return;}
+  const list=(source||[]).filter(x=>{if(kind==='sm')return smMatches(x,q);if(kind==='sm2')return sm2Show(x)&&sm2ModelOk(x)&&sm2TextOk(x,q);if(kind==='dojang'&&!dojangModelOk(x))return false;const raw=(x.itemNo+' '+x.itemName+' '+x.model+' '+x.process+' '+x.displayName+' '+x.inputKey);return !q||raw.includes(q)||normalizeSearch(raw).includes(nq);});
   if(kind==='sm2'&&sm2Model&&sm2Model!=='__none__')list.sort((a,b)=>((sm2Map.items[String(b.itemNo).trim()]||[]).includes(sm2Model)?1:0)-((sm2Map.items[String(a.itemNo).trim()]||[]).includes(sm2Model)?1:0));   // 작업지시 품번이 맨 위
   if(kind==='sm2'&&sm2Extra)list.sort((a,b)=>(a._extra?1:0)-(b._extra?1:0));   // 추가 검색 품번은 뒤로
   list.splice(kind==='sm2'?400:120);

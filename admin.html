@@ -224,6 +224,7 @@ function fillAdminDatalist(kind){
     fillAdminJeSpec();
   }else{
     let list=(adminMaster[kind].items||[]).filter(x=>admShow(x)&&admModelOk(x));
+    if(kind==='dojang'){const seen={};list=list.filter(x=>seen[x.displayName]?false:(seen[x.displayName]=1));}   // 도장은 작업자별로 같은 품번/공정 행이 여러 줄이라 한 번만 보여 줍니다
     if(kind==='sm2'&&adminModel&&adminModel!=='__none__'){const mp=adminMaster.sm2.modelMap.items;list=list.slice().sort((a,b)=>((mp[String(b.itemNo).trim()]||[]).includes(adminModel)?1:0)-((mp[String(a.itemNo).trim()]||[]).includes(adminModel)?1:0));}
     const rec=kind==='sm2'?admSm2RecentMap():null;
     document.getElementById('inProcList').innerHTML=list.map(x=>{const r=kind==='sm2'?admSm2Suggest(x.itemNo,x.model,rec).teams:[];return `<option value="${esc(x.displayName)}">${esc(x.itemName)} / ${esc(x.model)}${x._extra?' · 추가':''}${r.length?' · 추천 '+r.join('·')+'조':''}</option>`;}).join('');
@@ -399,26 +400,27 @@ function admMap(kind){return (adminMaster[kind]&&adminMaster[kind].modelMap)||{o
 function admModelsOf(kind,x){
   const mp=admMap(kind),no=String(x.itemNo||'').trim(),mg=String(x.managementNo||'').trim();
   const a=mp.items[no]||[],b=(kind==='sm'?mp.items[mg]:null)||[];
+  if(kind==='dojang')return a;   // 도장: 매핑에 적은 프레임 품번만 모델 버튼 대상
   if(a.length||b.length)return a.concat(b);
   const m=String(x.model||'').trim();return m?[mp.alias[m]||m]:[];
 }
 function admShow(x){return adminExtra||!x._extra;}
 function toggleAdminExtra(){adminExtra=!adminExtra;fillAdminDatalist(inputPart);}
 function admModelOk(x){
-  if(!adminModel||(inputPart!=='sm'&&inputPart!=='sm2'))return true;
+  if(!adminModel||(inputPart!=='sm'&&inputPart!=='sm2'&&inputPart!=='dojang'))return true;
   const ms=admModelsOf(inputPart,x);return adminModel==='__none__'?!ms.length:ms.includes(adminModel);
 }
 let adminModelList=[];
 function setAdminModel(i){const m=adminModelList[i];adminModel=(adminModel===m?'':m);fillAdminDatalist(inputPart);}
 function renderAdminModels(){
   const box=document.getElementById('adminModelBox');if(!box)return;
-  const on=(inputPart==='sm'||inputPart==='sm2');
+  const on=(inputPart==='sm'||inputPart==='sm2'||inputPart==='dojang');
   box.classList.toggle('hide',!on);if(!on)return;
   const mp=admMap(inputPart),cnt={};let none=false;
   (adminMaster[inputPart].items||[]).filter(admShow).forEach(x=>{const ms=admModelsOf(inputPart,x);if(ms.length)ms.forEach(m=>{(cnt[m]=cnt[m]||new Set()).add(x.itemNo);});else none=true;});
   const ord=(mp.order||[]).filter(m=>cnt[m]);
   adminModelList=ord.concat(Object.keys(cnt).filter(m=>!ord.includes(m)).sort((a,b)=>cnt[b].size-cnt[a].size||(a<b?-1:1)));
-  if(none)adminModelList.push('__none__');
+  if(none&&inputPart!=='dojang')adminModelList.push('__none__');
   if(adminModel&&!adminModelList.includes(adminModel))adminModel='';
   document.getElementById('adminModels').innerHTML=adminLoaded[inputPart]?adminModelList.map((m,i)=>`<button type="button" class="part ${adminModel===m?'active':''}" style="width:auto" onclick="setAdminModel(${i})">${m==='__none__'?'모델 미지정':esc(m)}</button>`).join(''):'<span class="sub">불러오는 중...</span>';
   if(adminLoaded[inputPart]&&inputPart==='sm2'&&(adminMaster.sm2.items||[]).some(x=>x._extra))document.getElementById('adminModels').insertAdjacentHTML('beforeend',`<button type="button" class="part ${adminExtra?'active':''}" style="width:auto;border:2px dashed #94a3b8" onclick="toggleAdminExtra()">${adminExtra?'추가 검색 끄기':'추가 검색 (ST 없는 품번)'}</button>`);
