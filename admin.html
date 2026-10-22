@@ -31,7 +31,7 @@
         <div><button type="button" onclick="saveAdminJe()">저장</button></div>
       </div>
       <div id="inProcForm" class="row hide" style="margin-top:8px">
-        <div style="flex:1;min-width:260px"><div id="adminModelBox" class="hide"><label>기종 선택 (선택 안 해도 됩니다)</label><div id="adminModels" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px"></div></div><label>품번/공정 검색</label><div id="smAdminSearch" class="hide"><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><label>관리번호 검색</label><input id="smAdminNumber" inputmode="numeric" placeholder="관리번호 숫자 입력 (예: 22)" oninput="renderSmAdminSearch()"><div id="smAdminResults" class="smQuickResults"><div class="smQuickHint">관리번호를 입력하면 모델과 품번이 바로 표시됩니다.</div></div><select id="smAdminChoice" class="hide" onchange="selectSmAdminChoice()"><option value=""></option></select><label style="margin-top:12px">품번 검색</label><input id="smAdminPartNumber" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderSmAdminPartSearch()"><div><select id="smAdminPartChoice" onchange="selectSmAdminPartChoice()" style="max-width:100%;padding:10px;margin-top:8px"><option value="">품번을 입력하세요.</option></select></div></div><input id="inProcItem" list="inProcList" placeholder="목록에서 품번/공정을 선택하세요" autocomplete="off"><datalist id="inProcList"></datalist></div>
+        <div style="flex:1;min-width:260px"><div id="adminModelBox" class="hide"><label>기종 선택 (선택 안 해도 됩니다)</label><div id="adminModels" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0 10px"></div></div><label>품번/공정 검색</label><div id="smAdminSearch" class="hide"><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><label>관리번호 검색</label><input id="smAdminNumber" inputmode="numeric" placeholder="관리번호 숫자 입력 (예: 22)" oninput="renderSmAdminSearch()"><div id="smAdminResults" class="smQuickResults"><div class="smQuickHint">관리번호를 입력하면 모델과 품번이 바로 표시됩니다.</div></div><select id="smAdminChoice" class="hide" onchange="selectSmAdminChoice()"><option value=""></option></select><label style="margin-top:12px">품번 검색</label><input id="smAdminPartNumber" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderSmAdminPartSearch()"><div><select id="smAdminPartChoice" onchange="selectSmAdminPartChoice()" style="max-width:100%;padding:10px;margin-top:8px"><option value="">품번을 입력하세요.</option></select></div></div><input id="inProcItem" list="inProcList" placeholder="목록에서 품번/공정을 선택하세요" autocomplete="off"><datalist id="inProcList"></datalist></div>
         <div><label>수량</label><input id="inProcQty" type="number" min="1" style="width:100px"></div>
         <div><button type="button" onclick="saveAdminProc()">저장</button></div>
       </div>
@@ -207,7 +207,7 @@ function ensureAdminMaster(kind){
     if(!d.ok){document.getElementById('inMsg').textContent=d.message||'마스터 조회 실패';return;}
     if(kind==='finish'){adminMaster.finish.items=d.items||[];adminMaster.finish.workers=d.workers||[];}
     else if(kind==='je'){adminMaster.je.specs=d.specs||[];adminMaster.je.subs=d.subs||[];adminMaster.je.subProcesses=d.subProcesses||['메인 플레이트 용접','프레임 가접','컴플 본접'];adminMaster.je.workers=d.workers||[];}
-    else {adminMaster[kind].items=(d.items||[]).concat(kind==='sm2'?(d.extraItems||[]).map(x=>Object.assign({},x,{_extra:true})):[]);adminMaster[kind].workers=d.workers||[];adminMaster[kind].modelMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};adminMaster[kind].defaults=d.defaults||{};}
+    else {adminMaster[kind].items=(d.items||[]).concat((kind==='sm2'||kind==='sm')?(d.extraItems||[]).map(x=>Object.assign({},x,{_extra:true})):[]);adminMaster[kind].workers=d.workers||[];adminMaster[kind].modelMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};adminMaster[kind].defaults=d.defaults||{};}
     adminLoaded[kind]=true;
     fillAdminWorkers(kind);
     fillAdminDatalist(kind);
@@ -365,13 +365,13 @@ function renderSmAdminSearch(){
  document.getElementById('smAdminPartChoice').value='';
  document.getElementById('inProcItem').value='';
  const q=document.getElementById('smAdminNumber').value;
- smAdminMatches=(adminMaster.sm.items||[]).filter(x=>smMatches(x,q));
+ smAdminMatches=(adminMaster.sm.items||[]).filter(x=>admShow(x)&&smMatches(x,q));
  const choice=document.getElementById('smAdminChoice');
  choice.innerHTML='<option value=""></option>'+smAdminMatches.map((x,i)=>`<option value="${i}">${esc(x.itemNo)}</option>`).join('');
  const results=document.getElementById('smAdminResults');
  if(!q){results.innerHTML='<div class="smQuickHint">관리번호를 입력하면 모델과 품번이 바로 표시됩니다.</div>';return;}
  if(!smAdminMatches.length){results.innerHTML='<div class="smQuickHint">일치하는 품목이 없습니다.</div>';return;}
- results.innerHTML=smAdminMatches.map((x,i)=>`<button type="button" class="smQuickCard" id="smQuickCard_${i}" onclick="selectSmAdminCard(${i})"><div class="smQuickModel">모델: ${esc(x.model||'-')}</div><div class="smQuickPart">품번: ${esc(x.itemNo||'-')}</div><div class="smQuickMeta">${esc(x.itemName||'')} / ${esc(x.process||'')}</div></button>`).join('');
+ results.innerHTML=smAdminMatches.map((x,i)=>`<button type="button" class="smQuickCard" id="smQuickCard_${i}" onclick="selectSmAdminCard(${i})"><div class="smQuickModel">모델: ${esc(x.model||'-')}</div><div class="smQuickPart">품번: ${esc(x.itemNo||'-')}</div><div class="smQuickMeta">${esc(x.itemName||'')} / ${esc(x.process||'')}${x._extra?' · 추가':''}</div></button>`).join('');
  if(smAdminMatches.length===1)selectSmAdminCard(0);
 }
 function selectSmAdminCard(i){
@@ -388,10 +388,10 @@ let smAdminPartMatches=[];
 function renderSmAdminPartSearch(){
  document.getElementById('inProcItem').value='';document.getElementById('smAdminChoice').value='';
  const q=document.getElementById('smAdminPartNumber').value.trim();
- smAdminPartMatches=(q||adminModel)?(adminMaster.sm.items||[]).filter(x=>(!q||String(x.itemNo||'').toUpperCase().includes(q.toUpperCase()))&&admModelOk(x)):[];
+ smAdminPartMatches=(q||adminModel)?(adminMaster.sm.items||[]).filter(x=>admShow(x)&&(!q||String(x.itemNo||'').toUpperCase().includes(q.toUpperCase()))&&admModelOk(x)):[];
  if(adminModel&&adminModel!=='__none__'){const mp=adminMaster.sm.modelMap.items;smAdminPartMatches.sort((a,b)=>((mp[String(b.itemNo).trim()]||[]).includes(adminModel)?1:0)-((mp[String(a.itemNo).trim()]||[]).includes(adminModel)?1:0));}
  const total=smAdminPartMatches.length;if(total>500)smAdminPartMatches=smAdminPartMatches.slice(0,500);
- document.getElementById('smAdminPartChoice').innerHTML='<option value="">'+((q||adminModel)?(total?'모델과 품번을 확인하고 선택하세요.'+(total>500?' (500개까지만 표시, 품번을 더 입력하세요)':''):'일치하는 품목이 없습니다.'):'기종을 누르거나 품번을 입력하세요.')+'</option>'+smAdminPartMatches.map((x,i)=>`<option value="${i}">모델: ${esc(x.model||'')} / ${x.managementNo?esc(x.managementNo)+' / ':''}${esc(x.itemNo)} / ${esc(x.itemName||'')} / ${esc(x.process||'')}</option>`).join('');
+ document.getElementById('smAdminPartChoice').innerHTML='<option value="">'+((q||adminModel)?(total?'모델과 품번을 확인하고 선택하세요.'+(total>500?' (500개까지만 표시, 품번을 더 입력하세요)':''):'일치하는 품목이 없습니다.'):'기종을 누르거나 품번을 입력하세요.')+'</option>'+smAdminPartMatches.map((x,i)=>`<option value="${i}">모델: ${esc(x.model||'')} / ${x.managementNo?esc(x.managementNo)+' / ':''}${esc(x.itemNo)} / ${esc(x.itemName||'')} / ${esc(x.process||'')}${x._extra?' · 추가':''}</option>`).join('');
 }
 function selectSmAdminPartChoice(){document.getElementById('smAdminChoice').value='';const v=document.getElementById('smAdminPartChoice').value;document.getElementById('inProcItem').value=v!==''&&smAdminPartMatches[Number(v)]?smAdminPartMatches[Number(v)].displayName:'';}
 
@@ -401,6 +401,7 @@ function admModelsOf(kind,x){
   const mp=admMap(kind),no=String(x.itemNo||'').trim(),mg=String(x.managementNo||'').trim();
   const a=mp.items[no]||[],b=(kind==='sm'?mp.items[mg]:null)||[];
   if(kind==='dojang')return a;   // 도장: 매핑에 적은 프레임 품번만 모델 버튼 대상
+  if(kind==='sm'){if(!/앗세이|ASS'?Y/i.test(String(x.process||'')))return [];return [...new Set(a.concat(b))];}   // SM: 매핑 품번 + ERP 등록 공정만
   if(a.length||b.length)return a.concat(b);
   const m=String(x.model||'').trim();return m?[mp.alias[m]||m]:[];
 }
@@ -420,10 +421,10 @@ function renderAdminModels(){
   (adminMaster[inputPart].items||[]).filter(admShow).forEach(x=>{const ms=admModelsOf(inputPart,x);if(ms.length)ms.forEach(m=>{(cnt[m]=cnt[m]||new Set()).add(x.itemNo);});else none=true;});
   const ord=(mp.order||[]).filter(m=>cnt[m]);
   adminModelList=ord.concat(Object.keys(cnt).filter(m=>!ord.includes(m)).sort((a,b)=>cnt[b].size-cnt[a].size||(a<b?-1:1)));
-  if(none&&inputPart!=='dojang')adminModelList.push('__none__');
+  if(none&&inputPart!=='dojang'&&inputPart!=='sm')adminModelList.push('__none__');
   if(adminModel&&!adminModelList.includes(adminModel))adminModel='';
-  document.getElementById('adminModels').innerHTML=adminLoaded[inputPart]?adminModelList.map((m,i)=>`<button type="button" class="part ${adminModel===m?'active':''}" style="width:auto" onclick="setAdminModel(${i})">${m==='__none__'?'모델 미지정':esc(m)}</button>`).join(''):'<span class="sub">불러오는 중...</span>';
-  if(adminLoaded[inputPart]&&inputPart==='sm2'&&(adminMaster.sm2.items||[]).some(x=>x._extra))document.getElementById('adminModels').insertAdjacentHTML('beforeend',`<button type="button" class="part ${adminExtra?'active':''}" style="width:auto;border:2px dashed #94a3b8" onclick="toggleAdminExtra()">${adminExtra?'추가 검색 끄기':'추가 검색 (ST 없는 품번)'}</button>`);
+  document.getElementById('adminModels').innerHTML=adminLoaded[inputPart]?adminModelList.map((m,i)=>`<button type="button" class="part ${adminModel===m?'active':''}" style="width:100%;min-width:0;padding:10px 4px;line-height:1.2;overflow-wrap:anywhere" onclick="setAdminModel(${i})">${m==='__none__'?'모델 미지정':esc(m)}</button>`).join(''):'<span class="sub">불러오는 중...</span>';
+  if(adminLoaded[inputPart]&&(inputPart==='sm2'||inputPart==='sm')&&(adminMaster[inputPart].items||[]).some(x=>x._extra))document.getElementById('adminModels').insertAdjacentHTML('beforeend',`<button type="button" class="part ${adminExtra?'active':''}" style="width:100%;grid-column:1/-1;border:2px dashed #94a3b8" onclick="toggleAdminExtra()">${adminExtra?'추가 검색 끄기':'추가 검색 (ST 없는 품번)'}</button>`);
 }
 function admSm2RecentMap(){
   const m={},d=String(document.getElementById('inWorkDate').value||'').replace(/\D/g,'').slice(0,8);
