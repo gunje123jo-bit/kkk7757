@@ -32,6 +32,7 @@
       </div>
       <div id="inProcForm" class="row hide" style="margin-top:8px">
         <div style="flex:1;min-width:260px"><div id="adminModelBox" class="hide"><label>기종 선택 (선택 안 해도 됩니다)</label><div id="adminModels" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0 10px"></div></div><label>품번/공정 검색</label><div id="smAdminSearch" class="hide"><div style="display:flex;gap:8px;margin-bottom:8px"><button type="button" id="smTypeNum" style="width:auto" class="tab smTypeBtn active" aria-pressed="true" onclick="setSmPrefix('')">일반</button><button type="button" id="smTypeFP" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FP')">FP</button><button type="button" id="smTypeFB" style="width:auto" class="tab smTypeBtn" aria-pressed="false" onclick="setSmPrefix('FB')">FB</button></div><label>관리번호 검색</label><input id="smAdminNumber" inputmode="numeric" placeholder="관리번호 숫자 입력 (예: 22)" oninput="renderSmAdminSearch()"><div id="smAdminResults" class="smQuickResults"><div class="smQuickHint">관리번호를 입력하면 모델과 품번이 바로 표시됩니다.</div></div><select id="smAdminChoice" class="hide" onchange="selectSmAdminChoice()"><option value=""></option></select><label style="margin-top:12px">품번 검색</label><input id="smAdminPartNumber" autocomplete="off" placeholder="품번 입력 (예: 14681932-SM)" oninput="renderSmAdminPartSearch()"><div><select id="smAdminPartChoice" onchange="selectSmAdminPartChoice()" style="max-width:100%;padding:10px;margin-top:8px"><option value="">품번을 입력하세요.</option></select></div></div><input id="inProcItem" list="inProcList" placeholder="목록에서 품번/공정을 선택하세요" autocomplete="off"><datalist id="inProcList"></datalist></div>
+        <div id="inModelPickWrap" class="hide"><label>서브공정그룹 (필수)</label><select id="inModelPick" style="min-width:150px"></select></div>
         <div><label>수량</label><input id="inProcQty" type="number" min="1" style="width:100px"></div>
         <div><button type="button" onclick="saveAdminProc()">저장</button></div>
       </div>
@@ -180,7 +181,7 @@ let adminLoaded={finish:false,je:false,weld:false,sc:false,asm:false,dojang:fals
 function toggleInputPanel(){const p=document.getElementById('inputPanel');const show=p.classList.contains('hide');p.classList.toggle('hide',!show);const b=document.getElementById('pcInputBtn');b.classList.toggle('gray',show);if(show){selectPart(inputPart);ensureAdminMaster(inputPart);}}
 function showAdminSaveToast(){const el=document.getElementById('adminSaveToast');el.classList.add('show');clearTimeout(window.__adminSaveToastTimer);window.__adminSaveToastTimer=setTimeout(()=>el.classList.remove('show'),2000);}
 function selectInputPart(k){
-  inputPart=k;adminModel='';adminExtra=false;
+  inputPart=k;adminModel='';adminExtra=false;setTimeout(admUpdateModelPick,0);
   const tm=(k==='asm'||k==='sm2'||k==='dojang');
   document.getElementById('inWorker').style.display=tm?'none':'';
   document.getElementById('asmAdminBox').classList.toggle('hide',!tm);
@@ -340,6 +341,20 @@ function admEditSave(){
 }
 function pickAsmAdminTeam(i,auto){const t=adminAsm.teams[i];if(t){adminTeamAuto=!!auto;adminAsmTeamOn=t.name;document.getElementById('inAsmMembers').value=(t.members||[]).join(', ');renderAdminAsm();}}
 function addAsmAdminMember(n){if(!n)return;const cur=asmAdminNames();if(!cur.includes(n))cur.push(n);document.getElementById('inAsmMembers').value=cur.join(', ');document.getElementById('inAsmSearch').value='';renderAdminChips();renderAdminAsmSearch();}
+// 서브공정그룹 선택(조립): 마스터 모델 칸에 쉼표로 적힌 선택지가 있는 품번은 하나를 골라야 저장됩니다. 고른 이름이 모델로 저장됩니다.
+function admModelChoices(obj){const a=String(obj&&obj.model||'').split(/[,，]+/).map(x=>x.trim()).filter(Boolean);return a.length>1?a:[];}
+function admUpdateModelPick(){
+  const wrap=document.getElementById('inModelPickWrap'),sel=document.getElementById('inModelPick');if(!wrap||!sel)return;
+  const typed=(document.getElementById('inProcItem')||{}).value||'';
+  const obj=(inputPart&&adminMaster[inputPart]&&adminMaster[inputPart].items||[]).find(x=>x.displayName===String(typed).trim());
+  const ch=inputPart==='asm'?admModelChoices(obj):[];
+  const keep=sel.value;
+  sel.innerHTML=ch.length?'<option value="">선택하세요</option>'+ch.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join(''):'';
+  if(ch.includes(keep))sel.value=keep;
+  wrap.classList.toggle('hide',!ch.length);
+}
+document.getElementById('inProcItem').addEventListener('input',admUpdateModelPick);
+document.getElementById('inProcItem').addEventListener('change',admUpdateModelPick);
 function saveAdminProc(){
   const cfgAction={weld:'saveWeld',sc:'saveSc',asm:'saveAsm',dojang:'saveDojang',press:'savePress',sm:'saveSm',sm2:'saveSm2'}[inputPart];
   const defaultPart={weld:'용접파트',sc:'SC파트',asm:'조립파트',dojang:'도장파트',press:'프레스파트',sm:'SM파트',sm2:'SM2파트'}[inputPart];
@@ -351,9 +366,12 @@ function saveAdminProc(){
   if((inputPart==='asm'||inputPart==='sm2'||inputPart==='dojang')&&!asmAdminNames().length){msg.textContent='조원을 1명 이상 입력하세요.';return;}
   const obj=(adminMaster[inputPart].items||[]).find(x=>x.displayName===typed);
   if(!obj){msg.textContent='목록(datalist)에서 정확한 품번/공정을 선택하세요.';return;}
-  jsonp({action:cfgAction,workDate,worker,part:obj.part||defaultPart,itemNo:obj.itemNo,itemName:obj.itemName,model:obj.model,process:obj.process,qty,device:'PC',memo:'',members:(inputPart==='asm'||((inputPart==='sm2'||inputPart==='dojang')&&adminAsmTeamOn))?asmAdminNames().join(', '):''},d=>{
+  const mch=inputPart==='asm'?admModelChoices(obj):[];
+  const saveModel=mch.length?document.getElementById('inModelPick').value:obj.model;
+  if(mch.length&&!saveModel){msg.textContent=obj.itemNo+' 서브공정그룹을 선택하세요. ('+mch.join(' / ')+')';return;}
+  jsonp({action:cfgAction,workDate,worker,part:obj.part||defaultPart,itemNo:obj.itemNo,itemName:obj.itemName,model:saveModel,process:obj.process,qty,device:'PC',memo:'',members:(inputPart==='asm'||((inputPart==='sm2'||inputPart==='dojang')&&adminAsmTeamOn))?asmAdminNames().join(', '):''},d=>{
     msg.textContent=d.ok?'저장 완료':(d.message||'저장 실패');
-    if(d.ok){showAdminSaveToast();document.getElementById('inProcItem').value='';document.getElementById('inProcQty').value='';loadResults(false);}
+    if(d.ok){showAdminSaveToast();document.getElementById('inProcItem').value='';document.getElementById('inProcQty').value='';admUpdateModelPick();loadResults(false);}
   });
 }
 document.getElementById('inWorkDate').value=localDateString();

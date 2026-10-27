@@ -13,6 +13,7 @@
 .pendBadge{background:#111827;color:#fff;border-radius:999px;padding:5px 12px;font-weight:900;font-size:15px;white-space:nowrap}.pendItem{padding:11px 0;border-bottom:1px solid #eee}.pendTop{display:flex;justify-content:space-between;gap:10px;align-items:center}.pendQty{width:96px!important;flex:none;font-size:22px!important;font-weight:900;text-align:center;padding:9px!important;border:3px solid #1769e0!important}.sendAllBtn{background:#087b25!important;font-size:24px!important;padding:20px!important;font-weight:900;margin-top:14px}.sendAllBtn:disabled{background:#9ca3af!important}.dlgBack{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px}.dlgBack.hide{display:none}.dlgBox{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:18px;max-height:85vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.4)}.dlgTitle{font-size:22px;font-weight:900;color:#b45309;margin-bottom:10px}.dlgBody{font-size:16px;line-height:1.45}.dupRow{background:#fff7ed;border:2px solid #fb923c;border-radius:10px;padding:9px;margin:8px 0;font-size:15px}.dlgBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.dlgBtns button{margin-top:0}
 .asmTeamBtns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
 #smModels,#sm2Models,#dojangModels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#smModels button,#sm2Models button,#dojangModels button{width:100%;min-width:0;padding:10px 4px;font-size:15px;line-height:1.2;word-break:keep-all;overflow-wrap:anywhere}#smModels button[onclick*=Extra],#sm2Models button[onclick*=Extra]{grid-column:1/-1}
+.modelPickRow{margin:8px 0 4px}.modelPickLabel{font-weight:900;font-size:14px;margin-bottom:6px;color:#b45309}.modelPickBtns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.modelPickBtns button{width:100%;min-width:0;padding:10px 2px;font-size:14px;line-height:1.2;overflow-wrap:anywhere}
 .asmTeamBtns.hide{display:none}.asmTeamBtns button{width:auto;padding:10px 16px}.asmMemberChips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}.asmMember{display:inline-flex;align-items:center;gap:6px;background:#dbeafe;border:1px solid #93c5fd;color:#1e3a8a;border-radius:999px;padding:8px 10px 8px 14px;font-weight:700;font-size:16px}.asmMember button{width:auto;min-height:0;margin:0;padding:0 6px;background:transparent;color:#1e3a8a;border:0;font-size:20px;line-height:1}.sm2Rec{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#fef3c7;border:1px solid #f59e0b;color:#92400e;font-weight:700;font-size:13px}.asmTeamBtns button.rec{outline:3px solid #f59e0b;outline-offset:1px}.asmAddBtn{width:auto!important;padding:9px 14px!important;background:#fff!important;color:#111!important;border:1px solid #cbd5e1!important;border-radius:999px!important;margin:0 8px 8px 0!important}
 .stageChips{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}.stageChip{width:auto!important;padding:14px 22px!important;border-radius:14px!important;border:2px solid #cbd5e1!important;background:#fff!important;color:#111!important;font-weight:800;font-size:20px}.stageChip.selected{background:#16a34a!important;color:#fff!important;border-color:#15803d!important;box-shadow:0 0 0 4px rgba(22,163,74,.18)}.stageHogi{margin-bottom:8px}
 </style>
@@ -447,6 +448,10 @@ function toggleProcessItem(kind,inputKey){
   procData[kind].selected=newObj;
   updateProcessVisuals(kind,true);
 }
+// 서브공정그룹 선택(조립): 마스터 모델 칸에 쉼표로 적힌 선택지 중 하나를 골라야 입력할 수 있고, 고른 이름이 모델로 저장됩니다.
+let modelPick={};
+function modelChoices(r){const a=String(r&&r.model||'').split(/[,，]+/).map(x=>x.trim()).filter(Boolean);return a.length>1?a:[];}
+function pickModelOpt(kind,i,j){const obj=procData[kind].selected;if(!obj||!obj.rows||!obj.rows[i])return;const r=obj.rows[i],ch=modelChoices(r);if(!ch[j])return;modelPick[r.inputKey]=ch[j];updateProcessVisuals0(kind,false);}
 function updateProcessVisuals(kind,withMsg=true){updateProcessVisuals0(kind,withMsg);if(kind==='sm2')sm2SuggestSync(withMsg);}
 function updateProcessVisuals0(kind,withMsg=true){
   const cfg=PROC_CFG[kind];
@@ -464,10 +469,12 @@ function updateProcessVisuals0(kind,withMsg=true){
     if(withMsg)show(cfg.msg,'입력 대기',true);
     return;
   }
-  const rowsHtml=obj.rows.map(r=>{
+  const rowsHtml=obj.rows.map((r,idx)=>{
     const id=cfg.qtyPrefix+'_qty_'+cssSafeKey(r.inputKey);
     const existing=document.getElementById(id)?.value||'';
-    return `<div class="selectedRow"><div class="selectedRowTitle">${esc(r.itemNo)} / ${esc(processLabel(r.process,kind))}</div><div class="selectedRowMeta">${esc(r.itemName||'')} / ${esc(r.model||'')}</div><input class="selectedQtyInput" id="${id}" type="number" min="1" inputmode="numeric" placeholder="수량" value="${esc(existing)}"><button type="button" class="selectedRemove" onclick="removeSelectedProcess('${kind}','${escJs(r.inputKey)}')">선택 해제</button></div>`;
+    const ch=modelChoices(r),pk=modelPick[r.inputKey]||'';
+    const pickHtml=ch.length?`<div class="modelPickRow"><div class="modelPickLabel">서브공정그룹 선택 ${pk?'':'(필수)'}</div><div class="modelPickBtns">${ch.map((c,j)=>`<button type="button" class="tab ${pk===c?'active':''}" onclick="pickModelOpt('${kind}',${idx},${j})">${esc(c)}</button>`).join('')}</div></div>`:'';
+    return `<div class="selectedRow"><div class="selectedRowTitle">${esc(r.itemNo)} / ${esc(processLabel(r.process,kind))}</div><div class="selectedRowMeta">${esc(r.itemName||'')} / ${esc(ch.length?(pk||'그룹 선택 필요'):(r.model||''))}</div>${pickHtml}<input class="selectedQtyInput" id="${id}" type="number" min="1" inputmode="numeric" placeholder="수량" value="${esc(existing)}"><button type="button" class="selectedRemove" onclick="removeSelectedProcess('${kind}','${escJs(r.inputKey)}')">선택 해제</button></div>`;
   }).join('');
   selectedText.innerHTML=`<div class="selectedBig">선택 완료: ${obj.rows.length}개 공정<div class="selectedRows">${rowsHtml}</div></div>`;
   if(withMsg)show(cfg.msg,'공정별 수량 입력 후 [입력 담기]',true);
@@ -614,7 +621,8 @@ function saveProcess(kind){
   for(const r of rows){
     if(!r.saveQty||Number(r.saveQty)<=0)return show(cfg.msg,`${r.itemNo} / ${processLabel(r.process,kind)} 수량을 입력하세요.`,false);
   }
-  const entries=rows.map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:r.model||'',process:r.process||'',qty:Number(r.saveQty),memo:(rows.length>1&&kind!=='sm2')?'공정별 수량 동시입력':'',members:(kind==='asm'||((kind==='sm2'||kind==='dojang')&&asmTeamOn))?asmNorm(asmMembers).join(', '):undefined,addedAt:Date.now()}));
+  for(const r of rows){const ch=modelChoices(r);if(ch.length&&!modelPick[r.inputKey])return show(cfg.msg,`${r.itemNo} 서브공정그룹을 선택하세요. (${ch.join(' / ')})`,false);}
+  const entries=rows.map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:(modelChoices(r).length?modelPick[r.inputKey]:r.model)||'',process:r.process||'',qty:Number(r.saveQty),memo:(rows.length>1&&kind!=='sm2')?'공정별 수량 동시입력':'',members:(kind==='asm'||((kind==='sm2'||kind==='dojang')&&asmTeamOn))?asmNorm(asmMembers).join(', '):undefined,addedAt:Date.now()}));
   queueEntries(entries).then(ok=>{
     if(!ok){show(cfg.msg,'취소했습니다.',false);return;}
     show(cfg.msg,rows.length>1?`대기 목록에 담김 - ${rows.length}개 공정`:'대기 목록에 담김 - 마지막에 [전체 입력 완료]',true);
@@ -800,7 +808,7 @@ function setSaving(id,on){const b=document.getElementById(id);if(!b)return;b.dis
 function resetFinish(clear=true){selectedItem=null;document.getElementById('itemNoInput').value='';document.getElementById('qty').value='';document.getElementById('selectedText').innerHTML='<div class="inputWaiting">입력 대기: 품번을 검색하세요.</div>';document.getElementById('items').innerHTML='품번 또는 품명을 입력하세요.';if(clear)show('msg','입력 대기',true);}
 function resetProcess(kind,clear=true){
   if(kind==='sm'){document.getElementById('smPartSearch').value='';document.getElementById('smPartItems').innerHTML='품번을 입력하세요.';}
-  procData[kind].selected=null;
+  procData[kind].selected=null;modelPick={};
   const cfg=PROC_CFG[kind];
   document.getElementById(cfg.search).value='';
   document.getElementById(cfg.selectedText).innerHTML=`<div class="inputWaiting">입력 대기: ${cfg.label} 품번/공정을 선택하세요.</div>`;
