@@ -420,7 +420,7 @@ function admModelsOf(kind,x){
   const a=mp.items[no]||[],b=(kind==='sm'?mp.items[mg]:null)||[];
   if(kind==='dojang')return a;   // 도장: 매핑에 적은 프레임 품번만 모델 버튼 대상
   if(kind==='sm2')return a;   // SM2: 매핑에 적은 품번만
-  if(kind==='sm'){if(!/앗세이|ASS'?Y/i.test(String(x.process||'')))return [];return [...new Set(a.concat(b))];}   // SM: 매핑 품번 + ERP 등록 공정만
+  if(kind==='sm'){if(!/앗세이|ASS'?Y|서브/i.test(String(x.process||'')))return [];return [...new Set(a.concat(b))];}   // SM: 매핑 품번 + ERP 등록 공정만
   if(a.length||b.length)return a.concat(b);
   const m=String(x.model||'').trim();return m?[mp.alias[m]||m]:[];
 }

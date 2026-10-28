@@ -64,7 +64,7 @@ let smMap={order:[],items:{},alias:{}},smModel='',smModelList=[];
 // SM 기종 버튼: SM_기종매핑에 적은 품번은 지정한 기종에만, 그 밖의 품번은 ERP 모델명(별칭이 있으면 현장 기종 이름)
 function smModelsOf(x){
   const a=smMap.items[String(x.itemNo||'').trim()]||[],b=smMap.items[String(x.managementNo||'').trim()]||[];
-  if(!/앗세이|ASS'?Y/i.test(String(x.process||'')))return [];   // 기종 버튼 대상 공정: ERP 등록 공정(앗세이·수용접(ASS'Y)·수작업)만
+  if(!/앗세이|ASS'?Y|서브/i.test(String(x.process||'')))return [];   // 기종 버튼 대상 공정: ERP 등록 공정(앗세이·수용접(ASS'Y)·수작업·서브)만
   return [...new Set(a.concat(b))];   // SM 기종 버튼: SM_기종매핑에 적은 품번만
 }
 let smExtra=false;
