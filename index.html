@@ -641,9 +641,12 @@ function loadPending(){try{const v=JSON.parse(localStorage.getItem(PEND_KEY)||'[
 function savePending(){try{localStorage.setItem(PEND_KEY,JSON.stringify(pending));}catch(e){}}
 function normDate(v){const m=String(v==null?'':v).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);return m?m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'):String(v==null?'':v).trim();}
 function normHogi(v){const s=String(v==null?'':v).trim().replace(/^0+/,'');return s||'0';}
-function entryKey(e){return e.kind==='je'?(e.hogi?[e.workDate,e.worker,normHogi(e.hogi),e.spec].join('|'):[e.workDate,e.worker,e.itemNo||e.subNo||'',e.process||''].join('|')):[e.workDate,e.worker,e.itemNo,e.process||''].join('|');}
-function rowKey(kind,v){const s=x=>String(x==null?'':x).trim();return kind==='je'?(s(v[13])?[normDate(v[1]),s(v[2]),normHogi(v[13]),s(v[14])].join('|'):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|')):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|');}
-function entryLabel(e){return e.kind==='je'?(e.hogi?`${e.hogi} 호기 / ${e.spec}`:(e.subNo?`${e.range?e.range+' / ':''}SUB ${e.subNo} / ${e.process}`:`${e.spec} / ${e.process||''}`)):`${e.itemNo}${e.process?' / '+processLabel(e.process,e.kind):''}`;}
+function entryKeyBase(e){return e.kind==='je'?(e.hogi?[e.workDate,e.worker,normHogi(e.hogi),e.spec].join('|'):[e.workDate,e.worker,e.itemNo||e.subNo||'',e.process||''].join('|')):[e.workDate,e.worker,e.itemNo,e.process||''].join('|');}
+function rowKeyBase(kind,v){const s=x=>String(x==null?'':x).trim();return kind==='je'?(s(v[13])?[normDate(v[1]),s(v[2]),normHogi(v[13]),s(v[14])].join('|'):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|')):[normDate(v[1]),s(v[2]),s(v[4]),s(v[7])].join('|');}
+// 조립은 같은 품번·공정이라도 모델(기종, 서브공정그룹)이 다르면 별도 실적: 중복 판정에 모델 포함
+function entryKey(e){return entryKeyBase(e)+(e.kind==='asm'?'|'+String(e.model==null?'':e.model).trim():'');}
+function rowKey(kind,v){return rowKeyBase(kind,v)+(kind==='asm'?'|'+String(v[6]==null?'':v[6]).trim():'');}
+function entryLabel(e){if(e.kind==='asm'&&e.model)return `${e.itemNo}${e.process?' / '+processLabel(e.process,e.kind):''} / ${e.model}`;return e.kind==='je'?(e.hogi?`${e.hogi} 호기 / ${e.spec}`:(e.subNo?`${e.range?e.range+' / ':''}SUB ${e.subNo} / ${e.process}`:`${e.spec} / ${e.process||''}`)):`${e.itemNo}${e.process?' / '+processLabel(e.process,e.kind):''}`;}
 function updateTabBadges(){Object.keys(TAB_BASE).forEach(k=>{const el=document.getElementById(TAB_BASE[k][0]);if(!el)return;const c=pending.filter(e=>e.kind===k).length;el.textContent=TAB_BASE[k][1]+(c?' ('+c+')':'');});}
 
 function confirmDlg(title,bodyHtml,yesText,noText){
@@ -679,7 +682,7 @@ function findDupes(list){
 async function queueEntries(list){
   const dups=findDupes(list);
   if(dups.length){
-    const yes=await confirmDlg('⚠ 중복 입력 확인','<div>같은 날짜·작업자·품번·공정의 실적이 이미 있습니다.</div>'+dupHtml(dups)+'<div>그래도 대기 목록에 담을까요?</div>','그래도 담기','취소');
+    const yes=await confirmDlg('⚠ 중복 입력 확인','<div>같은 날짜·작업자·품번·공정'+(list[0].kind==='asm'?'·모델':'')+'의 실적이 이미 있습니다.</div>'+dupHtml(dups)+'<div>그래도 대기 목록에 담을까요?</div>','그래도 담기','취소');
     if(!yes)return false;
   }
   list.forEach(e=>pending.push(e));
