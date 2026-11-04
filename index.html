@@ -88,7 +88,7 @@ function smMatches(item,q){
  return !!m&&(m[1]||'')===smPrefix&&Number(m[2])===Number(n);
 }
 
-const SM_WORKERS=["박정필", "송왕섭", "정효섭", "조귀범", "유성주", "김기환", "임영훈", "김진우", "김갑인", "문영균", "탁명환"];
+const SM_WORKERS=["박정필", "송왕섭", "정효섭", "조귀범", "유성주", "김기환", "임영훈", "김진우", "김갑인", "김동준", "문영균", "탁명환"];   // 작업자명단의 SM / SM2 열에 O 표시가 있으면 아래 applyRosterLists 가 이 목록(SM_WORKERS=SM, SM_SUPPORT_WORKERS=SM2)을 명단으로 바꿉니다. (명단이 비었을 때만 이 값 사용)
 const SM_SUPPORT_WORKERS=["박건우", "진성호", "조민호", "유기태", "길성현", "석동일", "이정훈", "리만훙", "이반뚱", "탄반뚜엔"];
 
 const GAS_URL='https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
@@ -872,9 +872,11 @@ function applyRosterLists(){
   if(r.finish&&r.finish.length)finishWorkers=r.finish.slice();
   if(r.je&&r.je.length)jeWorkers=r.je.slice();
   ['weld','sc','dojang','press','asm'].forEach(k=>{if(r[k]&&r[k].length)procData[k].workers=r[k].slice();});
+  if(r.sm&&r.sm.length)SM_WORKERS.splice(0,SM_WORKERS.length,...r.sm);   // SM: 작업자명단 'SM' 열
+  if(r.sm2&&r.sm2.length)SM_SUPPORT_WORKERS.splice(0,SM_SUPPORT_WORKERS.length,...r.sm2);   // SM 화면의 '지원 (SM2)' 목록: 작업자명단 'SM2' 열
   if(teamKind==='asm'&&rosterData.all&&rosterData.all.length)asmTeams.workers=rosterData.all.slice();
   if(teamKind==='dojang'&&r.dojang&&r.dojang.length)asmTeams.workers=r.dojang.slice();
-  if(mode!=='sm')fillWorkers();
+  fillWorkers();
 }
 function refreshRoster(force){
   if(!force&&Date.now()-lastRosterAt<15000)return;

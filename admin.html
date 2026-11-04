@@ -56,7 +56,7 @@ function smMatches(item,q){
  return !!m&&(m[1]||'')===smPrefix&&Number(m[2])===Number(n);
 }
 
-const SM_WORKERS=["박정필", "송왕섭", "정효섭", "조귀범", "유성주", "김기환", "임영훈", "김진우", "김갑인", "문영균", "탁명환"];
+const SM_WORKERS=["박정필", "송왕섭", "정효섭", "조귀범", "유성주", "김기환", "임영훈", "김진우", "김갑인", "김동준", "문영균", "탁명환"];   // 서버(smMaster)가 작업자 목록을 주면 그 값을 쓰고, 못 받을 때만 이 값 사용
 const SM_SUPPORT_WORKERS=["박건우", "진성호", "조민호", "유기태", "길성현", "석동일", "이정훈", "리만훙", "이반뚱", "탄반뚜엔"];
 
 const GAS_URL='https://script.google.com/macros/s/AKfycbxJH8OukdbBABynJG_Tgoqnmi5z-I2SWas15BWjUAYVWs30sDR8kYcO2vfQ0xxumLXm/exec';
@@ -208,14 +208,14 @@ function ensureAdminMaster(kind){
     if(!d.ok){document.getElementById('inMsg').textContent=d.message||'마스터 조회 실패';return;}
     if(kind==='finish'){adminMaster.finish.items=d.items||[];adminMaster.finish.workers=d.workers||[];}
     else if(kind==='je'){adminMaster.je.specs=d.specs||[];adminMaster.je.subs=d.subs||[];adminMaster.je.subProcesses=d.subProcesses||['메인 플레이트 용접','프레임 가접','컴플 본접'];adminMaster.je.workers=d.workers||[];}
-    else {adminMaster[kind].items=(d.items||[]).concat((kind==='sm2'||kind==='sm')?(d.extraItems||[]).map(x=>Object.assign({},x,{_extra:true})):[]);adminMaster[kind].workers=d.workers||[];adminMaster[kind].modelMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};adminMaster[kind].defaults=d.defaults||{};}
+    else {adminMaster[kind].items=(d.items||[]).concat((kind==='sm2'||kind==='sm')?(d.extraItems||[]).map(x=>Object.assign({},x,{_extra:true})):[]);adminMaster[kind].workers=d.workers||[];adminMaster[kind].supportWorkers=d.supportWorkers||[];adminMaster[kind].modelMap=d.modelMap&&d.modelMap.items?d.modelMap:{order:[],items:{},alias:{}};adminMaster[kind].defaults=d.defaults||{};}
     adminLoaded[kind]=true;
     fillAdminWorkers(kind);
     fillAdminDatalist(kind);
   });
 }
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='inWorker'&&document.getElementById('inJeForm')&&!document.getElementById('inJeForm').classList.contains('hide'))fillAdminJeSpec();});
-function fillAdminWorkers(kind){const sel=document.getElementById('inWorker');const old=sel.value;const list=[...new Set((kind==='sm'?(document.getElementById('smSupport').checked?SM_SUPPORT_WORKERS:SM_WORKERS):adminMaster[kind].workers)||[])].sort();sel.innerHTML='<option value="">작업자 선택</option>'+list.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');if(list.includes(old))sel.value=old;}
+function fillAdminWorkers(kind){const sel=document.getElementById('inWorker');const old=sel.value;let src;if(kind==='sm'){const am=adminMaster.sm||{};src=document.getElementById('smSupport').checked?((am.supportWorkers&&am.supportWorkers.length)?am.supportWorkers:SM_SUPPORT_WORKERS):((am.workers&&am.workers.length)?am.workers:SM_WORKERS);}else src=adminMaster[kind].workers;const list=[...new Set(src||[])].sort();sel.innerHTML='<option value="">작업자 선택</option>'+list.map(w=>`<option value="${esc(w)}">${esc(w)}</option>`).join('');if(list.includes(old))sel.value=old;}
 function fillAdminDatalist(kind){
   renderAdminModels();
   if(kind==='sm'){renderSmAdminSearch();renderSmAdminPartSearch();return;}
