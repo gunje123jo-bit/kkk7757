@@ -284,8 +284,8 @@ function groupProcessList(list,kind,cap){
   list.forEach(x=>{
     const key=[x.itemNo,x.itemName,x.model].join('||');
     if(!map[key])map[key]={itemNo:x.itemNo,itemName:x.itemName,model:x.model,rows:[],seen:{}};
-    const pKey=kind==='sm2'?'RAW:'+String(x.process||'').trim():processKeyForDedup(x.process);
-    if(!map[key].seen[pKey]){map[key].rows.push(x);map[key].seen[pKey]=true;}
+    const pKey=kind==='sm2'?(sm2IsSub(x)?'SUB':'ASSY'):processKeyForDedup(x.process);
+    if(!map[key].seen[pKey]){map[key].rows.push(kind==='sm2'?sm2Merge(x):x);map[key].seen[pKey]=true;}
   });
   return Object.values(map).slice(0,cap||(kind==='sm2'?400:20));
 }
@@ -383,6 +383,9 @@ function renderDojangModels(){
   box.innerHTML=dojangModelList.map((m,i)=>`<button type="button" class="tab ${dojangModel===m?'active':''}" onclick="setDojangModel(${i})">${esc(m)}</button>`).join('');
 }
 let sm2Model='',sm2ModelList=[],sm2Extra=false;
+function sm2IsSub(x){return /서브|사브/.test(String(x.process||''));}
+// 서브 앗세이 LH/RH 등은 버튼 하나("서브")로 통합: 담을 때 원래 공정마다 같은 수량으로 각각 저장
+function sm2Merge(x){if(!sm2IsSub(x))return x;const subs=(procData.sm2.items||[]).filter(y=>sm2Show(y)&&sm2IsSub(y)&&y.itemNo===x.itemNo&&String(y.itemName||'')===String(x.itemName||'')&&String(y.model||'')===String(x.model||''));return Object.assign({},x,{process:'서브',_subs:subs.length?subs:[x]});}
 function sm2Show(x){return /앗세이|[서사]브/.test(String(x.process||''))&&(sm2Extra||!x._extra);}   // 앗세이·서브 공정만 표시   // ST 없는 품번(추가 검색)은 버튼을 켰을 때만 보임
 function toggleSm2Extra(){sm2Extra=!sm2Extra;renderProcessItems('sm2');}
 // 현장 기종(SM2_기종매핑) 기준 기종 목록: 매핑된 품번은 지정한 기종만, 그 밖의 품번은 ERP 모델명(별칭이 있으면 현장 기종 이름)
@@ -440,10 +443,11 @@ function toggleProcessItem(kind,inputKey){
   const arr=procData[kind].items;
   const item=(arr||[]).find(x=>String(x.inputKey)===String(inputKey))||null;
   if(!item)return;
+  const item0=item;
   let obj=procData[kind].selected;
   let rows=(obj&&obj.rows)?obj.rows.slice():[];
   const exists=rows.some(r=>String(r.inputKey)===String(item.inputKey));
-  rows=exists?rows.filter(r=>String(r.inputKey)!==String(item.inputKey)):[...rows,item];
+  rows=exists?rows.filter(r=>String(r.inputKey)!==String(item.inputKey)):[...rows,kind==='sm2'?sm2Merge(item):item];
   const newObj=rows.length?{multi:true,rows,itemNo:rows[0].itemNo,itemName:rows[0].itemName,model:rows[0].model,process:rows.map(r=>processLabel(r.process,kind)).join(', ')}:null;
   procData[kind].selected=newObj;
   updateProcessVisuals(kind,true);
@@ -622,7 +626,7 @@ function saveProcess(kind){
     if(!r.saveQty||Number(r.saveQty)<=0)return show(cfg.msg,`${r.itemNo} / ${processLabel(r.process,kind)} 수량을 입력하세요.`,false);
   }
   for(const r of rows){const ch=modelChoices(r);if(ch.length&&!modelPick[r.inputKey])return show(cfg.msg,`${r.itemNo} 서브공정그룹을 선택하세요. (${ch.join(' / ')})`,false);}
-  const entries=rows.map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:(modelChoices(r).length?modelPick[r.inputKey]:r.model)||'',process:r.process||'',qty:Number(r.saveQty),memo:(rows.length>1&&kind!=='sm2')?'공정별 수량 동시입력':'',members:(kind==='asm'||((kind==='sm2'||kind==='dojang')&&asmTeamOn))?asmNorm(asmMembers).join(', '):undefined,addedAt:Date.now()}));
+  const entries=rows.flatMap(r=>r._subs?r._subs.map(y=>({...y,saveQty:r.saveQty})):[r]).map(r=>({uid:newUid(),kind,workDate,worker,part:r.part||cfg.part,itemNo:String(r.itemNo||'').trim(),itemName:r.itemName||'',model:(modelChoices(r).length?modelPick[r.inputKey]:r.model)||'',process:r.process||'',qty:Number(r.saveQty),memo:(rows.length>1&&kind!=='sm2')?'공정별 수량 동시입력':'',members:(kind==='asm'||((kind==='sm2'||kind==='dojang')&&asmTeamOn))?asmNorm(asmMembers).join(', '):undefined,addedAt:Date.now()}));
   queueEntries(entries).then(ok=>{
     if(!ok){show(cfg.msg,'취소했습니다.',false);return;}
     show(cfg.msg,rows.length>1?`대기 목록에 담김 - ${rows.length}개 공정`:'대기 목록에 담김 - 마지막에 [전체 입력 완료]',true);
