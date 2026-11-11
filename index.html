@@ -383,7 +383,7 @@ function renderDojangModels(){
   box.innerHTML=dojangModelList.map((m,i)=>`<button type="button" class="tab ${dojangModel===m?'active':''}" onclick="setDojangModel(${i})">${esc(m)}</button>`).join('');
 }
 let sm2Model='',sm2ModelList=[],sm2Extra=false;
-function sm2Show(x){return sm2Extra||!x._extra;}   // ST 없는 품번(추가 검색)은 버튼을 켰을 때만 보임
+function sm2Show(x){return /앗세이|[서사]브/.test(String(x.process||''))&&(sm2Extra||!x._extra);}   // 앗세이·서브 공정만 표시   // ST 없는 품번(추가 검색)은 버튼을 켰을 때만 보임
 function toggleSm2Extra(){sm2Extra=!sm2Extra;renderProcessItems('sm2');}
 // 현장 기종(SM2_기종매핑) 기준 기종 목록: 매핑된 품번은 지정한 기종만, 그 밖의 품번은 ERP 모델명(별칭이 있으면 현장 기종 이름)
 function sm2ModelsOf(x){
